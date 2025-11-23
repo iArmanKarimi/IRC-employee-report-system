@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { User } from "../entities/User";
+import { User } from "../models/User";
 
 const router = Router();
 const UserModel = User;

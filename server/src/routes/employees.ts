@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Employee } from "../entities/Employee";
+import { Employee } from "../models/Employee";
 import { auth } from "../middleware/auth";
 
 const router = Router();
