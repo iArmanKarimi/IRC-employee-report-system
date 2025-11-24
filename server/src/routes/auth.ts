@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { User } from "../models/User";
+import { USER_ROLE } from "../types/roles";
 
 const router = Router();
 const UserModel = User;

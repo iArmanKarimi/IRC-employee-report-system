@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import session from "express-session";
+import { USER_ROLE, UserRoleType } from "../types/roles";
 
 // Extend express-session's SessionData interface to include our custom session properties
 // This tells TypeScript what data we store in req.session
 declare module "express-session" {
 	interface SessionData {
 		userId: string;
-		role: 'globalAdmin' | 'provinceAdmin';
+		role: UserRoleType;
 		provinceId?: string;
 	}
 }
@@ -18,7 +19,7 @@ declare global {
 		interface Request {
 			user?: {
 				id: string;
-				role: 'globalAdmin' | 'provinceAdmin';
+				role: UserRoleType;
 				provinceId?: string;
 			}
 		}
@@ -27,7 +28,7 @@ declare global {
 
 // Middleware function to validate user authentication and role authorization
 // requiredRole is mandatory - all protected routes must specify required role
-export function auth(requiredRole: "globalAdmin" | "provinceAdmin") {
+export function auth(requiredRole: UserRoleType) {
 	return (req: Request, res: Response, next: NextFunction) => {
 		// Check if user is authenticated by verifying session has userId and role
 		if (!req.session.userId || !req.session.role) {
@@ -49,4 +50,25 @@ export function auth(requiredRole: "globalAdmin" | "provinceAdmin") {
 		// User is authenticated and authorized, proceed to next middleware/route
 		next();
 	};
+}
+
+// Middleware for routes that allow both roles
+export function requireAnyRole(req: Request, res: Response, next: NextFunction) {
+	if (!req.session.userId || !req.session.role) {
+		return res.status(401).json({ error: "Not authenticated" });
+	}
+
+	req.user = {
+		id: req.session.userId,
+		role: req.session.role,
+		provinceId: req.session.provinceId
+	};
+
+	next();
+}
+
+// Helper function to check if user can access a specific province's resources
+// Returns true if user is globalAdmin or if provinceAdmin matches the resource's province
+export function canAccessProvince(userRole: UserRoleType, userProvinceId: string | undefined, resourceProvinceId: string): boolean {
+	return userRole === USER_ROLE.GLOBAL_ADMIN || (userRole === USER_ROLE.PROVINCE_ADMIN && userProvinceId === resourceProvinceId);
 }

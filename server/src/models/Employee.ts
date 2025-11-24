@@ -5,7 +5,7 @@ import { IAdditionalSpecifications, AdditionalSpecificationsSchema } from './emp
 import { IPerformance, PerformanceSchema } from './employee-sub-schemas/PerformanceSchema';
 
 export interface IEmployee extends Document {
-	province: Schema.Types.ObjectId;
+	provinceId: Schema.Types.ObjectId;
 	basicInfo: IBasicInfo;
 	workPlace: IWorkPlace;
 	additionalSpecifications: IAdditionalSpecifications;
@@ -15,7 +15,7 @@ export interface IEmployee extends Document {
 }
 
 const EmployeeSchema = new Schema({
-	province: { type: Schema.Types.ObjectId, ref: 'Province', required: true },
+	provinceId: { type: Schema.Types.ObjectId, ref: 'Province', required: true },
 	basicInfo: { type: BasicInfoSchema, required: true },
 	workPlace: { type: WorkPlaceSchema, required: true },
 	additionalSpecifications: { type: AdditionalSpecificationsSchema, required: true },
