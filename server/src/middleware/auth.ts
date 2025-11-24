@@ -1,24 +1,52 @@
-// src/middleware/auth.ts
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import session from "express-session";
 
-export function auth(requiredRole?: "globalAdmin" | "provinceAdmin") {
-	return (req: any, res: Response, next: NextFunction) => {
-		const header = req.headers.authorization;
-		if (!header) return res.status(401).json({ error: "No token" });
+// Extend express-session's SessionData interface to include our custom session properties
+// This tells TypeScript what data we store in req.session
+declare module "express-session" {
+	interface SessionData {
+		userId: string;
+		role: 'globalAdmin' | 'provinceAdmin';
+		provinceId?: string;
+	}
+}
 
-		const token = header.split(" ")[1];
-		try {
-			const payload = jwt.verify(token, process.env.JWT_SECRET || "secret") as any;
-			req.user = payload;
-
-			if (requiredRole && payload.role !== requiredRole) {
-				return res.status(403).json({ error: "Forbidden" });
+// Extend Express Request interface to include a user property
+// This allows us to attach user data to req.user for use in route handlers
+declare global {
+	namespace Express {
+		interface Request {
+			user?: {
+				id: string;
+				role: 'globalAdmin' | 'provinceAdmin';
+				provinceId?: string;
 			}
-
-			next();
-		} catch {
-			res.status(401).json({ error: "Invalid token" });
 		}
+	}
+}
+
+// Middleware function to validate user authentication and role authorization
+// requiredRole is mandatory - all protected routes must specify required role
+export function auth(requiredRole: "globalAdmin" | "provinceAdmin") {
+	return (req: Request, res: Response, next: NextFunction) => {
+		// Check if user is authenticated by verifying session has userId and role
+		if (!req.session.userId || !req.session.role) {
+			return res.status(401).json({ error: "Not authenticated" });
+		}
+
+		// Check role authorization first
+		if (req.session.role !== requiredRole) {
+			return res.status(403).json({ error: "Forbidden" });
+		}
+
+		// Attach user data to request object for use in route handlers
+		req.user = {
+			id: req.session.userId,
+			role: req.session.role,
+			provinceId: req.session.provinceId
+		};
+
+		// User is authenticated and authorized, proceed to next middleware/route
+		next();
 	};
 }
