@@ -1,5 +1,11 @@
 {
   "devDependencies": {
     "@types/mongoose": "^5.11.96"
+  },
+  "dependencies": {
+    "express-rate-limit": "^8.2.1"
+  },
+  "_comments": {
+    "express-rate-limit": "TODO: Implement rate limiting middleware for authentication routes to prevent brute force attacks"
   }
 }

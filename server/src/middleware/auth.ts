@@ -69,6 +69,15 @@ export function requireAnyRole(req: Request, res: Response, next: NextFunction) 
 
 // Helper function to check if user can access a specific province's resources
 // Returns true if user is globalAdmin or if provinceAdmin matches the resource's province
-export function canAccessProvince(userRole: UserRoleType, userProvinceId: string | undefined, resourceProvinceId: string): boolean {
-	return userRole === USER_ROLE.GLOBAL_ADMIN || (userRole === USER_ROLE.PROVINCE_ADMIN && userProvinceId === resourceProvinceId);
-}
+export const canAccessProvince = (userRole: UserRoleType, userProvinceId: string | undefined, employeeProvinceId: any): boolean => {
+	if (userRole === USER_ROLE.GLOBAL_ADMIN) {
+		return true;
+	}
+
+	// Normalize employeeProvinceId to string for comparison
+	const employeeProvinceIdString = typeof employeeProvinceId === 'string'
+		? employeeProvinceId
+		: employeeProvinceId?._id?.toString();
+
+	return userProvinceId === employeeProvinceIdString;
+};
