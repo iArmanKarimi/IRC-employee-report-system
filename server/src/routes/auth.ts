@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { User } from "../models/User";
 import { USER_ROLE } from "../types/roles";
@@ -6,7 +6,12 @@ import { USER_ROLE } from "../types/roles";
 const router = Router();
 const UserModel = User;
 
-router.post("/login", async (req: any, res) => {
+type LoginBody = {
+    username: string;
+    password: string;
+};
+
+router.post("/login", async (req: Request<Record<string, never>, any, LoginBody>, res: Response) => {
     try {
         const { username, password } = req.body;
 
@@ -30,14 +35,18 @@ router.post("/login", async (req: any, res) => {
             role: user.role,
             provinceId: user.provinceAdmin?._id
         });
-    } catch (err) {
+    } catch (err: unknown) {
+        console.error("Error during login:", err);
         res.status(500).json({ error: "Login failed" });
     }
 });
 
-router.post("/logout", (req: any, res) => {
-    req.session.destroy((err: any) => {
-        if (err) return res.status(500).json({ error: "Logout failed" });
+router.post("/logout", (req: Request, res: Response) => {
+    req.session.destroy((err: Error | null) => {
+        if (err) {
+            console.error("Error during logout:", err);
+            return res.status(500).json({ error: "Logout failed" });
+        }
         res.clearCookie("connect.sid");
         res.json({ message: "Logged out successfully" });
     });
