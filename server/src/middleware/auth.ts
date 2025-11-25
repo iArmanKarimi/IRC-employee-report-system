@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { USER_ROLE, UserRoleType } from "../types/roles";
 
+export type AuthenticatedUser = {
+	id: string;
+	role: UserRoleType;
+	provinceId?: string;
+};
+
 // Extend express-session's SessionData interface to include our custom session properties
 // This tells TypeScript what data we store in req.session
 declare module "express-session" {
@@ -17,11 +23,7 @@ declare module "express-session" {
 declare global {
 	namespace Express {
 		interface Request {
-			user?: {
-				id: string;
-				role: UserRoleType;
-				provinceId?: string;
-			}
+			user?: AuthenticatedUser;
 		}
 	}
 }
@@ -69,15 +71,30 @@ export function requireAnyRole(req: Request, res: Response, next: NextFunction) 
 
 // Helper function to check if user can access a specific province's resources
 // Returns true if user is globalAdmin or if provinceAdmin matches the resource's province
-export const canAccessProvince = (userRole: UserRoleType, userProvinceId: string | undefined, employeeProvinceId: any): boolean => {
-	if (userRole === USER_ROLE.GLOBAL_ADMIN) {
+const normalizeProvinceId = (province: unknown): string | undefined => {
+	if (typeof province === "string") {
+		return province;
+	}
+	if (typeof province === "object" && province !== null) {
+		const value = (province as { _id?: { toString?: () => string } })._id;
+		if (typeof value === "string") {
+			return value;
+		}
+		return value?.toString?.();
+	}
+	return undefined;
+};
+
+export const canAccessProvince = (
+	user: Pick<AuthenticatedUser, "role" | "provinceId">,
+	employeeProvinceId: unknown
+): boolean => {
+	if (user.role === USER_ROLE.GLOBAL_ADMIN) {
 		return true;
 	}
 
 	// Normalize employeeProvinceId to string for comparison
-	const employeeProvinceIdString = typeof employeeProvinceId === 'string'
-		? employeeProvinceId
-		: employeeProvinceId?._id?.toString();
+	const employeeProvinceIdString = normalizeProvinceId(employeeProvinceId);
 
-	return userProvinceId === employeeProvinceIdString;
+	return user.provinceId === employeeProvinceIdString;
 };

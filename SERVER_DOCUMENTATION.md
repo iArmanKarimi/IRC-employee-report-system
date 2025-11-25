@@ -19,7 +19,7 @@
 - Middleware helpers (`src/middleware/auth.ts`):
   - `auth(requiredRole)` – enforce an exact role on a route.
   - `requireAnyRole` – ensure the user is logged in (shared routes).
-  - `canAccessProvince(role, userProvinceId, targetProvinceId)` – gate province admins while letting global admins through.
+  - `canAccessProvince(user, targetProvinceId)` – gate province admins while letting global admins through.
 
 ---
 
