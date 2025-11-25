@@ -1,0 +1,18 @@
+{
+	"globalAdmin": {
+		"username": "username",
+		"password": "change-me-in-production"
+	},
+	"provinceAdmins": [
+		{
+			"username": "username1",
+			"password": "change-me-in-production",
+			"provinceName": "Province Name 1"
+		},
+		{
+			"username": "username2",
+			"password": "change-me-in-production",
+			"provinceName": "Province Name 2"
+		}
+	]
+}
