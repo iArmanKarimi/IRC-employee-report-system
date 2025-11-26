@@ -13,21 +13,21 @@ This project uses a simple feature branch workflow to keep `main` stable and all
 ### `feature/*`
 - **Purpose**: New features or enhancements
 - **Examples**: 
-  - `feature/rate-limiting`
-  - `feature/input-validation`
-  - `feature/user-dashboard`
+	- `feature/rate-limiting`
+	- `feature/input-validation`
+	- `feature/user-dashboard`
 
 ### `bugfix/*`
 - **Purpose**: Bug fixes
 - **Examples**:
-  - `bugfix/auth-session-timeout`
-  - `bugfix/employee-deletion-error`
+	- `bugfix/auth-session-timeout`
+	- `bugfix/employee-deletion-error`
 
 ### `refactor/*`
 - **Purpose**: Code improvements without changing functionality
 - **Examples**:
-  - `refactor/error-handling`
-  - `refactor/api-response-format`
+	- `refactor/error-handling`
+	- `refactor/api-response-format`
 
 ## Common Workflow
 
@@ -84,11 +84,11 @@ git push origin --delete feature/your-feature-name  # remote
 
 1. **Keep branches small**: One feature per branch
 2. **Update frequently**: Rebase or merge `main` into your branch regularly
-   ```bash
-   git checkout feature/your-feature
-   git fetch origin
-   git rebase origin/main
-   ```
+	 ```bash
+	 git checkout feature/your-feature
+	 git fetch origin
+	 git rebase origin/main
+	 ```
 3. **Use descriptive names**: `feature/rate-limiting` not `feature/stuff`
 4. **Commit often**: Small, logical commits are easier to review
 5. **Test before merging**: Make sure your branch works before merging to `main`

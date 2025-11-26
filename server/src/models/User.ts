@@ -5,25 +5,25 @@ type UserRole = "globalAdmin" | "provinceAdmin";
 const UserRoleValues: UserRole[] = ["globalAdmin", "provinceAdmin"];
 
 export interface IUser extends Document {
-  username: string;
-  passwordHash: string;
-  role: UserRole;
-  provinceId?: Schema.Types.ObjectId;
+	username: string;
+	passwordHash: string;
+	role: UserRole;
+	provinceId?: Schema.Types.ObjectId;
 }
 
 const UserSchema = new Schema<IUser>({
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  passwordHash: { type: String, required: true },
-  role: {
-    type: String,
-    enum: UserRoleValues,
-    required: true,
-  },
-  provinceId: { type: Schema.Types.ObjectId, ref: "Province" },
+	username: {
+		type: String,
+		unique: true,
+		required: true,
+	},
+	passwordHash: { type: String, required: true },
+	role: {
+		type: String,
+		enum: UserRoleValues,
+		required: true,
+	},
+	provinceId: { type: Schema.Types.ObjectId, ref: "Province" },
 });
 
 // Indexes for better query performance

@@ -1,36 +1,36 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "seed:admins": "ts-node src/scripts/seed-admins.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@types/express-session": "^1.18.2",
-    "bcrypt": "^6.0.0",
-    "connect-mongo": "^5.1.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "express-session": "^1.18.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.3.3"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.5",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.10.1",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
-  }
+	"name": "server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon --exec ts-node src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
+		"seed:admins": "ts-node src/scripts/seed-admins.ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@types/express-session": "^1.18.2",
+		"bcrypt": "^6.0.0",
+		"connect-mongo": "^5.1.0",
+		"cors": "^2.8.5",
+		"dotenv": "^17.2.3",
+		"express": "^5.1.0",
+		"express-session": "^1.18.2",
+		"jsonwebtoken": "^9.0.2",
+		"mongoose": "^8.3.3"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "^6.0.0",
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.5",
+		"@types/jsonwebtoken": "^9.0.10",
+		"@types/node": "^24.10.1",
+		"nodemon": "^3.1.11",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3"
+	}
 }

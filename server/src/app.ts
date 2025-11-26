@@ -15,17 +15,17 @@ app.use(express.json());
 
 // Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || "your-secret-key",
-  resave: false,
-  saveUninitialized: false,
-  store: new MongoStore({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/ircdb'
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  }
+	secret: process.env.SESSION_SECRET || "your-secret-key",
+	resave: false,
+	saveUninitialized: false,
+	store: new MongoStore({
+		mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/ircdb'
+	}),
+	cookie: {
+		secure: process.env.NODE_ENV === 'production',
+		httpOnly: true,
+		maxAge: 24 * 60 * 60 * 1000
+	}
 }));
 
 app.use('/auth', authRoutes)

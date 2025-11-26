@@ -17,9 +17,9 @@
 - Login (`POST /auth/login`) stores `{ userId, role, provinceId? }` in the session.
 - Cookies: HttpOnly, 24 h lifetime, `secure` flag in production. Client must send `credentials: "include"`.
 - Middleware helpers (`src/middleware/auth.ts`):
-  - `auth(requiredRole)` – enforce an exact role on a route.
-  - `requireAnyRole` – ensure the user is logged in (shared routes).
-  - `canAccessProvince(user, targetProvinceId)` – gate province admins while letting global admins through.
+	- `auth(requiredRole)` – enforce an exact role on a route.
+	- `requireAnyRole` – ensure the user is logged in (shared routes).
+	- `canAccessProvince(user, targetProvinceId)` – gate province admins while letting global admins through.
 
 ---
 
@@ -28,7 +28,7 @@
 - `User`: `username`, `passwordHash`, `role`, optional `provinceAdmin` reference.
 - `Province`: `name`, `admin`, `employees[]`.
 - `Employee`: `provinceId`, nested `basicInfo`, `workPlace`, `additionalSpecifications`, `performances[]`.
-  - Sub-schemas kept under `models/employee-sub-schemas/` for validation reuse.
+	- Sub-schemas kept under `models/employee-sub-schemas/` for validation reuse.
 
 ---
 
@@ -84,9 +84,9 @@ Sessioned requests (example):
 ```bash
 # login
 curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{"username":"admin","password":"secret"}'
+	-H "Content-Type: application/json" \
+	-c cookies.txt \
+	-d '{"username":"admin","password":"secret"}'
 
 # reuse cookie
 curl http://localhost:3000/employees/ -b cookies.txt
