@@ -87,7 +87,15 @@ async function createGlobalAdmin(credentials: AdminCredentials): Promise<void> {
 	const { username, password } = credentials;
 	const existingUser = await User.findOne({ username });
 	if (existingUser) {
-		console.log(`  ⚠️  User "${username}" already exists, skipping...`);
+		// Sync password from config if it changed
+		const samePassword = await bcrypt.compare(password, existingUser.passwordHash);
+		if (!samePassword) {
+			existingUser.passwordHash = await hashPassword(password);
+			await existingUser.save();
+			console.log(`  ✅ Updated password for global admin: ${username} from config`);
+		} else {
+			console.log(`  ℹ️  Password for global admin "${username}" already matches config`);
+		}
 		return;
 	}
 
@@ -141,17 +149,35 @@ async function createProvinceAdmin(credentials: AdminCredentials & { provinceNam
 	const { username, password, provinceName } = credentials;
 
 	const existingUser = await User.findOne({ username });
-	if (existingUser) {
-		console.log(`  ⚠️  User "${username}" already exists, skipping...`);
-		return;
-	}
+	let user: InstanceType<typeof User>;
 
-	const passwordHash = await hashPassword(password);
-	const user = new User({
-		username,
-		passwordHash,
-		role: USER_ROLE.PROVINCE_ADMIN,
-	});
+	if (existingUser) {
+		// Ensure role is correct
+		if (existingUser.role !== USER_ROLE.PROVINCE_ADMIN) {
+			existingUser.role = USER_ROLE.PROVINCE_ADMIN;
+		}
+
+		// Sync password from config if it changed
+		const samePassword = await bcrypt.compare(password, existingUser.passwordHash);
+		if (!samePassword) {
+			existingUser.passwordHash = await hashPassword(password);
+			console.log(`  ✅ Updated password for province admin: ${username} from config`);
+		} else {
+			console.log(`  ℹ️  Password for province admin "${username}" already matches config`);
+		}
+
+		user = existingUser;
+		await user.save();
+	} else {
+		const passwordHash = await hashPassword(password);
+		user = new User({
+			username,
+			passwordHash,
+			role: USER_ROLE.PROVINCE_ADMIN,
+		});
+		await user.save();
+		console.log(`  ✅ Created province admin user: ${username}`);
+	}
 
 	// Link to province if provided
 	if (isValidString(provinceName)) {

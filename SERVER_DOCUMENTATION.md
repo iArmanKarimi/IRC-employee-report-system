@@ -17,9 +17,19 @@
 - Login (`POST /auth/login`) stores `{ userId, role, provinceId? }` in the session.
 - Cookies: HttpOnly, 24 h lifetime, `secure` flag in production. Client must send `credentials: "include"`.
 - Middleware helpers (`src/middleware/auth.ts`):
-	- `auth(requiredRole)` – enforce an exact role on a route.
-	- `requireAnyRole` – ensure the user is logged in (shared routes).
-	- `canAccessProvince(user, targetProvinceId)` – gate province admins while letting global admins through.
+  - `auth(requiredRole)` – enforce an exact role on a route.
+  - `requireAnyRole` – ensure the user is logged in (shared routes).
+  - `canAccessProvince(user, targetProvinceId)` – gate province admins while letting global admins through.
+- Role constants live in `src/types/roles.ts` and should be imported instead of hard-coding strings:
+
+```startLine:endLine:server/src/types/roles.ts
+export const USER_ROLE = {
+	GLOBAL_ADMIN: "globalAdmin",
+	PROVINCE_ADMIN: "provinceAdmin"
+} as const;
+```
+
+- `Express.Request` is augmented in `src/types/express.d.ts` so route handlers can safely access `req.user`. If `req.user` is undefined, throw or return early – see `ensureUser()` inside `routes/employees.ts`.
 
 ---
 
@@ -28,7 +38,7 @@
 - `User`: `username`, `passwordHash`, `role`, optional `provinceAdmin` reference.
 - `Province`: `name`, `admin`, `employees[]`.
 - `Employee`: `provinceId`, nested `basicInfo`, `workPlace`, `additionalSpecifications`, `performances[]`.
-	- Sub-schemas kept under `models/employee-sub-schemas/` for validation reuse.
+  - Sub-schemas kept under `models/employee-sub-schemas/` for validation reuse.
 
 ---
 
@@ -94,7 +104,14 @@ curl http://localhost:3000/employees/ -b cookies.txt
 
 ---
 
-## 7. Gotchas
+## 7. Admin Seeding Workflow
+
+- Use `admins.example.json` as a template for `server/admins.json`; define one `globalAdmin` and any number of `provinceAdmins` (each may include `provinceName` to auto-link).
+- Run `npm run seed:admins` (after `npm install`) to invoke `src/scripts/seed-admins.ts`. The script connects to Mongo, validates credentials, hashes passwords, and links province admins to existing `Province` documents.
+- Re-running the script is idempotent for usernames (existing users are skipped) but will re-link provinces if you provide a different admin.
+- Expect console output per admin plus a final ✅/❌ summary; failures exit with code `1`.
+
+## 8. Gotchas
 
 - Always send requests with cookies (`credentials: "include"` or `curl -b/-c`) or you’ll get `401 Not authenticated`.
 - Province admins can only operate on their `provinceId`; failed guard returns `403`.
