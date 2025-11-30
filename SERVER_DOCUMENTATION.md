@@ -1,4 +1,4 @@
-# IRC Employee Report System – Server Quick Guide
+# IRC Staff System – Server Quick Guide
 
 **Version 2.0 · Updated Nov 2025**
 

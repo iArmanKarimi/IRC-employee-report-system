@@ -1,4 +1,7 @@
 {
+	"name": "IRC-StaffSystem",
+	"version": "1.0.0",
+	"description": "Web-based Report System for Iranian Red Crescent Society",
 	"devDependencies": {
 		"@types/mongoose": "^5.11.96"
 	},
