@@ -1,11 +1,9 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { Employee } from "../models/Employee";
 import { auth, requireAnyRole, canAccessProvince, AuthenticatedUser } from "../middleware/auth";
 import { USER_ROLE } from "../types/roles";
-import mongoose from "mongoose";
-import { Province } from "../models/Province";
 import { HttpError } from "../utils/errors";
-
+import { validateAndResolveProvinceId } from "../utils/provinceValidation";
 
 const router = Router();
 
@@ -17,7 +15,7 @@ const ensureUser = (req: Request): AuthenticatedUser => {
 	if (!req.user) {
 		throw new HttpError(401, "User context missing");
 	}
-	return req.user as AuthenticatedUser;
+	return req.user;
 };
 
 // Helper function to fetch employee and check province access
@@ -42,79 +40,44 @@ const getEmployeeOrThrow = async (req: Request<EmployeeParams>): Promise<Employe
 };
 
 // Global admin only: see all employees
-router.get("/", auth(USER_ROLE.GLOBAL_ADMIN), async (_req: Request, res: Response) => {
+router.get("/", auth(USER_ROLE.GLOBAL_ADMIN), async (_req: Request, res: Response, next: NextFunction) => {
 	try {
 		const employees = await Employee.find().populate('provinceId');
 		res.json(employees);
 	} catch (err: unknown) {
-		console.error("Error fetching employees (global admin route):", err);
-		res.status(500).json({ error: "Failed to fetch employees" });
+		next(err);
 	}
 });
 
 // Province admin only: see their province employees
-router.get("/my-province", auth(USER_ROLE.PROVINCE_ADMIN), async (req: Request, res: Response) => {
+router.get("/my-province", auth(USER_ROLE.PROVINCE_ADMIN), async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const user = ensureUser(req);
 		const employees = await Employee.find({ provinceId: user.provinceId }).populate('provinceId');
 		res.json(employees);
 	} catch (err: unknown) {
-		if (err instanceof HttpError) {
-			return res.status(err.statusCode).json({ error: err.message });
-		}
-		console.error("Error fetching employees (province admin route):", err);
-		res.status(500).json({ error: "Failed to fetch employees" });
+		next(err);
 	}
 });
 
 // Get single employee - Global admin can view any employee, province admin can view their province employees
-router.get("/:id", requireAnyRole, async (req: Request<EmployeeParams>, res: Response) => {
+router.get("/:id", requireAnyRole, async (req: Request<EmployeeParams>, res: Response, next: NextFunction) => {
 	try {
 		const employee = await getEmployeeOrThrow(req);
 		res.json(employee);
 	} catch (err: unknown) {
-		if (err instanceof HttpError) {
-			return res.status(err.statusCode).json({ error: err.message });
-		}
-		console.error("Error fetching employee by ID:", err);
-		res.status(500).json({ error: "Failed to fetch employee" });
+		next(err);
 	}
 });
 
 // Create employee - Global admin can create for any province, province admin for their own (server-enforced)
-router.post("/", requireAnyRole, async (req: Request<Record<string, never>, any, ProvinceScopedBody>, res: Response) => {
+router.post("/", requireAnyRole, async (req: Request<Record<string, never>, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
 	try {
 		const user = ensureUser(req);
-		let provinceId = typeof req.body.provinceId === "string" ? req.body.provinceId : undefined;
-
-		if (user.role === USER_ROLE.PROVINCE_ADMIN) {
-			if (!user.provinceId) {
-				return res.status(400).json({ error: "Province context missing for province admin" });
-			}
-			if (provinceId && provinceId !== user.provinceId) {
-				console.warn(`Province admin ${user.id} attempted to create employee in province ${provinceId}`);
-			}
-			provinceId = user.provinceId;
-		}
-
-		if (!provinceId) {
-			return res.status(400).json({ error: "provinceId is required" });
-		}
-
-		// Province admins can only create in their own province (enforced above for province admins)
-		if (!canAccessProvince(user, provinceId)) {
-			return res.status(403).json({ error: "Can only create employees in your own province" });
-		}
-
-		// Validate provinceId format
-		if (!mongoose.Types.ObjectId.isValid(provinceId)) {
-			return res.status(400).json({ error: "Invalid provinceId format" });
-		}
-
-		const province = await Province.findById(provinceId);
-		if (!province) {
-			return res.status(400).json({ error: "Province not found" });
-		}
+		const requestedProvinceId = typeof req.body.provinceId === "string" ? req.body.provinceId : undefined;
+		
+		// Validate and resolve provinceId (handles province admin restrictions)
+		const provinceId = await validateAndResolveProvinceId(user, requestedProvinceId);
 
 		const employee = new Employee({
 			...req.body,
@@ -123,77 +86,48 @@ router.post("/", requireAnyRole, async (req: Request<Record<string, never>, any,
 		await employee.save();
 		res.status(201).json(employee);
 	} catch (err: unknown) {
-		if (err instanceof HttpError) {
-			return res.status(err.statusCode).json({ error: err.message });
-		}
-		console.error("Error creating employee:", err);
-		res.status(400).json({ error: "Invalid employee data" });
+		next(err);
 	}
 });
 
 // Update employee - Global admin can update any employee, province admin can update their own province employees
-router.put("/:id", requireAnyRole, async (req: Request<EmployeeParams, any, ProvinceScopedBody>, res: Response) => {
+router.put("/:id", requireAnyRole, async (req: Request<EmployeeParams, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
 	try {
 		const user = ensureUser(req);
 		await getEmployeeOrThrow(req);
 
+		// If provinceId is being updated, validate it
 		if (req.body.provinceId !== undefined || user.role === USER_ROLE.PROVINCE_ADMIN) {
-			let nextProvinceId: string | undefined = typeof req.body.provinceId === "string" ? req.body.provinceId : undefined;
-
-			if (user.role === USER_ROLE.PROVINCE_ADMIN) {
-				if (!user.provinceId) {
-					return res.status(400).json({ error: "Province context missing for province admin" });
-				}
-				if (nextProvinceId && nextProvinceId !== user.provinceId) {
-					console.warn(`Province admin ${user.id} attempted to reassign employee to province ${nextProvinceId}`);
-				}
-				nextProvinceId = user.provinceId;
-				req.body.provinceId = user.provinceId;
-			}
-
-			if (!nextProvinceId) {
-				return res.status(400).json({ error: "provinceId is required when updating province assignment" });
-			}
-
-			if (typeof nextProvinceId !== "string" || !mongoose.Types.ObjectId.isValid(nextProvinceId)) {
-				return res.status(400).json({ error: "Invalid provinceId format" });
-			}
-
-			if (!canAccessProvince(user, nextProvinceId)) {
-				return res.status(403).json({ error: "Cannot assign employee to another province" });
-			}
-
-			const nextProvince = await Province.findById(nextProvinceId);
-			if (!nextProvince) {
-				return res.status(400).json({ error: "Province not found" });
-			}
+			const requestedProvinceId = typeof req.body.provinceId === "string" ? req.body.provinceId : undefined;
+			const validatedProvinceId = await validateAndResolveProvinceId(user, requestedProvinceId);
+			req.body.provinceId = validatedProvinceId;
 		}
 
 		const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('provinceId');
+		
+		if (!updated) {
+			throw new HttpError(404, "Employee not found");
+		}
+		
 		res.json(updated);
 	} catch (err: unknown) {
-		if (err instanceof HttpError) {
-			return res.status(err.statusCode).json({ error: err.message });
-		}
-		console.error("Error updating employee:", err);
-		res.status(400).json({ error: "Invalid employee data" });
+		next(err);
 	}
 });
 
 // Delete employee - Global admin can delete any employee, province admin can delete their own province employees
-router.delete("/:id", requireAnyRole, async (req: Request<EmployeeParams>, res: Response) => {
+router.delete("/:id", requireAnyRole, async (req: Request<EmployeeParams>, res: Response, next: NextFunction) => {
 	try {
 		ensureUser(req);
 		await getEmployeeOrThrow(req);
 
-		await Employee.findByIdAndDelete(req.params.id);
+		const deleted = await Employee.findByIdAndDelete(req.params.id);
+		if (!deleted) {
+			throw new HttpError(404, "Employee not found");
+		}
 		res.json({ message: "Employee deleted" });
 	} catch (err: unknown) {
-		if (err instanceof HttpError) {
-			return res.status(err.statusCode).json({ error: err.message });
-		}
-		console.error("Error deleting employee:", err);
-		res.status(500).json({ error: "Failed to delete employee" });
+		next(err);
 	}
 });
 
