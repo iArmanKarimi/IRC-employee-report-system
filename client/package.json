@@ -14,9 +14,11 @@
 		"@emotion/styled": "^11.14.1",
 		"@mui/material": "^7.3.5",
 		"@mui/x-data-grid": "^8.18.0",
+		"axios": "^1.13.2",
 		"dayjs": "^1.11.19",
 		"react": "^19.2.0",
-		"react-dom": "^19.2.0"
+		"react-dom": "^19.2.0",
+		"react-router-dom": "^7.10.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
