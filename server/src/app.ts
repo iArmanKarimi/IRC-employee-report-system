@@ -1,50 +1,71 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import authRoutes from "./routes/auth";
 import provinceRoutes from "./routes/provinces";
 import employeeRoutes from './routes/employees';
+import apiDocsRoutes from './routes/api-docs';
 import { errorHandler } from "./middleware/errorHandler";
-import { COOKIE_NAME } from "./const";
+import { requestLogger } from "./middleware/logger";
+import { getConfig } from "./config";
 
-dotenv.config();
-
+const config = getConfig();
 export const app = express();
 
-// Validate session secret in production
-const sessionSecret = process.env.SESSION_SECRET;
-if (process.env.NODE_ENV === 'production' && (!sessionSecret || sessionSecret === "your-secret-key")) {
-	throw new Error("SESSION_SECRET must be set to a secure value in production");
-}
-
-app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));
+// Middleware setup
+app.use(cors({
+	origin: config.cors.origin,
+	credentials: config.cors.credentials
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use(requestLogger);
 
 // Session middleware
 const sessionConfig: session.SessionOptions = {
-	name: COOKIE_NAME,
-	secret: sessionSecret || "your-secret-key",
+	name: "irc.sid",
+	secret: config.session.secret,
 	resave: false,
 	saveUninitialized: false,
 	store: new MongoStore({
-		mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/ircdb'
+		mongoUrl: config.mongodb.uri
 	}),
 	cookie: {
-		secure: process.env.NODE_ENV === 'production',
+		secure: config.nodeEnv === 'production',
 		httpOnly: true,
-		maxAge: 24 * 60 * 60 * 1000
+		maxAge: config.session.maxAge
 	}
 };
 
 app.use(session(sessionConfig));
 
-app.use('/auth', authRoutes)
-app.use('/provinces', provinceRoutes)
-app.use('/provinces/:provinceId/employees', employeeRoutes)
-// health check
-app.get("/health", (_, res) => res.json({ ok: true }));
+// API Documentation routes (no auth required)
+app.use('/api-docs', apiDocsRoutes);
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/provinces', provinceRoutes);
+app.use('/provinces/:provinceId/employees', employeeRoutes);
+
+// Health check endpoint
+app.get("/health", (_req, res) => {
+	res.json({
+		ok: true,
+		timestamp: new Date().toISOString(),
+		environment: config.nodeEnv
+	});
+});
+
+// 404 handler
+app.use((_req, res) => {
+	res.status(404).json({
+		success: false,
+		error: "Route not found"
+	});
+});
 
 // Error handler middleware (must be last)
 app.use(errorHandler);
