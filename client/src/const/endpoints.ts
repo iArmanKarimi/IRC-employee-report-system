@@ -1,15 +1,18 @@
-const ENDPOINTS = {
-	// GET
+export const ROUTES = {
 	ROOT: "/",
-	// POST
-	LOGIN: "/auth/login",
-	LOGOUT: "/auth/logout",
-	// POST, GET
-	EMPLOYEES_GLOBAL: "/employees/",
-	// GET
-	EMPLOYEES_PROVINCE: "/employees/my-province",
-	// PUT, DELETE, GET
-	EMPLOYEES_GET_ONE: "/employees/:id",
+	PROVINCES: "/provinces",
+	PROVINCE_EMPLOYEES: "/provinces/:provinceId/employees",
+	PROVINCE_EMPLOYEE_DETAIL: "/provinces/:provinceId/employees/:employeeId",
+	PROVINCE_EMPLOYEE_NEW: "/provinces/:provinceId/employees/new"
 } as const;
 
-export default ENDPOINTS;
+export const API_ENDPOINTS = {
+	LOGIN: "/auth/login",
+	LOGOUT: "/auth/logout",
+	PROVINCES: "/provinces",
+	provinceById: (provinceId: string) => `/provinces/${provinceId}`,
+	provinceEmployees: (provinceId: string) => `/provinces/${provinceId}/employees`,
+	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`
+} as const;
+
+export default { ROUTES, API_ENDPOINTS };
