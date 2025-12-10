@@ -11,6 +11,18 @@ export type ApiResponse<T = unknown> = {
 	data?: T;
 	error?: string;
 	message?: string;
+	_links?: Record<string, string>;
+};
+
+export type Pagination = {
+	total: number;
+	page: number;
+	limit: number;
+	pages: number;
+};
+
+export type PaginatedResponse<T = unknown> = ApiResponse<T[]> & {
+	pagination: Pagination;
 };
 
 export type LoginRequest = {
@@ -45,18 +57,30 @@ export const authApi = {
 };
 
 export const provinceApi = {
-	list: () => api.get<Province[]>(API_ENDPOINTS.PROVINCES).then(unwrap),
-	get: (provinceId: string) => api.get<Province>(API_ENDPOINTS.provinceById(provinceId)).then(unwrap),
-	listEmployees: (provinceId: string) =>
-		api.get<Employee[]>(API_ENDPOINTS.provinceEmployees(provinceId)).then(unwrap),
+	list: () => api.get<ApiResponse<Province[]>>(API_ENDPOINTS.PROVINCES).then(unwrap),
+	get: (provinceId: string) => api.get<ApiResponse<Province>>(API_ENDPOINTS.provinceById(provinceId)).then(unwrap),
+	listEmployees: (provinceId: string, page?: number, limit?: number) =>
+		api
+			.get<PaginatedResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), {
+				params: { page, limit }
+			})
+			.then(unwrap),
 	createEmployee: (provinceId: string, payload: Partial<Employee>) =>
-		api.post<Employee>(API_ENDPOINTS.provinceEmployees(provinceId), payload).then(unwrap),
+		api
+			.post<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), payload)
+			.then(unwrap),
 	getEmployee: (provinceId: string, employeeId: string) =>
-		api.get<Employee>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId)).then(unwrap),
+		api
+			.get<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId))
+			.then(unwrap),
 	updateEmployee: (provinceId: string, employeeId: string, payload: Partial<Employee>) =>
-		api.put<Employee>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId), payload).then(unwrap),
+		api
+			.put<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId), payload)
+			.then(unwrap),
 	deleteEmployee: (provinceId: string, employeeId: string) =>
-		api.delete<{ message: string }>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId)).then(unwrap)
+		api
+			.delete<ApiResponse<{ message: string }>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId))
+			.then(unwrap)
 };
 
 export default api;
