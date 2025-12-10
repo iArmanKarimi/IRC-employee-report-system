@@ -200,3 +200,14 @@ If updating existing routes:
 - Logger uses async console output (non-blocking)
 - Rate limiting uses in-memory store (can be replaced with Redis)
 - Session store uses MongoDB for persistence
+
+
+## Latest Improvements (December 2025)
+
+See \IMPROVEMENTS.md\ for comprehensive documentation of:
+- **Standardized Responses** - All routes use \sendSuccess()\ helper
+- **Input Sanitization** - Middleware prevents NoSQL injection attacks
+- **Audit Logging** - Track all mutations for compliance
+- **Pagination** - Efficient data handling with HATEOAS links
+- **Performance Monitoring** - Detect slow queries automatically
+- **Centralized Logging** - All logging uses structured logger
