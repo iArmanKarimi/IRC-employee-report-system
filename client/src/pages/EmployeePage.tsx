@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { provinceApi, Employee } from "../api/api";
+import { provinceApi, type Employee } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 
 export default function EmployeePage() {

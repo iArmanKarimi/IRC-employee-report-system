@@ -1,6 +1,6 @@
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authApi, LoginResponse } from "../api/api";
+import { authApi, type LoginResponse } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 
 export default function LoginFormPage() {

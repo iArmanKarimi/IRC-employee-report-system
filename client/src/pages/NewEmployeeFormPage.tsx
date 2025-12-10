@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { provinceApi } from "../api/api";
 import { ROUTES } from "../const/endpoints";

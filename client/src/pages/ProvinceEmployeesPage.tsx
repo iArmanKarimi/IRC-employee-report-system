@@ -2,16 +2,32 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
 	provinceApi,
-	Employee,
-	PaginatedResponse,
-	Pagination,
+	type Employee,
+	type PaginatedResponse,
+	type Pagination,
 } from "../api/api";
 import { ROUTES } from "../const/endpoints";
+import styles from "./ProvinceEmployeesPage.module.css";
+
+type BasicName = { firstName?: string; lastName?: string; fullName?: string };
 
 type EmployeesState = {
 	data: Employee[];
 	pagination: Pagination | null;
 	_links?: Record<string, string>;
+};
+
+const formatEmployeeName = (emp: Employee): string => {
+	const info = emp.basicInfo as BasicName | undefined;
+	const full = info?.fullName?.trim();
+	if (full) return full;
+
+	const first = info?.firstName?.trim();
+	const last = info?.lastName?.trim();
+	const nameParts = [first, last].filter(Boolean);
+	if (nameParts.length) return nameParts.join(" ");
+
+	return emp._id;
 };
 
 export default function ProvinceEmployeesPage() {
@@ -63,96 +79,77 @@ export default function ProvinceEmployeesPage() {
 	}, [provinceId, page, limit]);
 
 	if (loading) {
-		return <div>Loading employees...</div>;
+		return (
+			<div className={styles.container}>
+				<div className={styles.statusCard}>Loading employees...</div>
+			</div>
+		);
 	}
 
 	if (error) {
-		return <div>{error}</div>;
+		return (
+			<div className={styles.container}>
+				<div className={styles.statusCard}>{error}</div>
+			</div>
+		);
 	}
 
 	return (
-		<div style={{ padding: "1rem" }}>
-			<h1>Employees</h1>
+		<div className={styles.container}>
+			<div className={styles.header}>
+				<div>
+					<h1 className={styles.title}>Employees</h1>
+					<p className={styles.subtitle}>Province {provinceId ?? "N/A"}</p>
+				</div>
+				{state.pagination ? (
+					<span className={styles.badge}>{state.pagination.total} total</span>
+				) : null}
+			</div>
+
 			{state.data.length === 0 ? (
-				<div>No employees found.</div>
+				<div className={styles.statusCard}>No employees found.</div>
 			) : (
-				<table style={{ width: "100%", borderCollapse: "collapse" }}>
-					<thead>
-						<tr>
-							<th
-								style={{
-									textAlign: "left",
-									borderBottom: "1px solid #ccc",
-									padding: "0.5rem",
-								}}
-							>
-								Name
-							</th>
-							<th
-								style={{
-									textAlign: "left",
-									borderBottom: "1px solid #ccc",
-									padding: "0.5rem",
-								}}
-							>
-								Province
-							</th>
-							<th
-								style={{
-									textAlign: "left",
-									borderBottom: "1px solid #ccc",
-									padding: "0.5rem",
-								}}
-							>
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{state.data.map((emp) => (
-							<tr key={emp._id}>
-								<td
-									style={{ padding: "0.5rem", borderBottom: "1px solid #eee" }}
-								>
-									{[
-										emp["basicInfo.firstName"],
-										emp["basicInfo.lastName"],
-										emp["basicInfo.fullName"],
-									].find(Boolean) ?? emp._id}
-								</td>
-								<td
-									style={{ padding: "0.5rem", borderBottom: "1px solid #eee" }}
-								>
-									{String(emp.provinceId)}
-								</td>
-								<td
-									style={{ padding: "0.5rem", borderBottom: "1px solid #eee" }}
-								>
-									<Link
-										to={ROUTES.PROVINCE_EMPLOYEE_DETAIL.replace(
-											":provinceId",
-											provinceId ?? ""
-										).replace(":employeeId", emp._id)}
-									>
-										View
-									</Link>
-								</td>
+				<div className={styles.tableWrapper}>
+					<table className={styles.table}>
+						<thead>
+							<tr>
+								<th className={styles.th}>Name</th>
+								<th className={styles.th}>Province</th>
+								<th className={styles.th}>Actions</th>
 							</tr>
-						))}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{state.data.map((emp, index) => (
+								<tr
+									key={emp._id}
+									className={index % 2 === 1 ? styles.rowStriped : undefined}
+								>
+									<td className={styles.td}>{formatEmployeeName(emp)}</td>
+									<td className={styles.td}>{String(emp.provinceId)}</td>
+									<td className={styles.td}>
+										<Link
+											className={styles.actionLink}
+											to={ROUTES.PROVINCE_EMPLOYEE_DETAIL.replace(
+												":provinceId",
+												provinceId ?? ""
+											).replace(":employeeId", emp._id)}
+										>
+											View
+										</Link>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			)}
 
 			{state.pagination && (
-				<div
-					style={{
-						marginTop: "1rem",
-						display: "flex",
-						gap: "0.5rem",
-						alignItems: "center",
-					}}
-				>
+				<div className={styles.pagination}>
 					<button
+						className={`${styles.button} ${
+							canGoPrev ? "" : styles.buttonDisabled
+						}`.trim()}
 						onClick={() => setPage((p) => Math.max(1, p - 1))}
 						disabled={!canGoPrev}
 					>
@@ -162,7 +159,13 @@ export default function ProvinceEmployeesPage() {
 						Page {state.pagination.page} of {state.pagination.pages} (total{" "}
 						{state.pagination.total})
 					</span>
-					<button onClick={() => setPage((p) => p + 1)} disabled={!canGoNext}>
+					<button
+						className={`${styles.button} ${
+							canGoNext ? "" : styles.buttonDisabled
+						}`.trim()}
+						onClick={() => setPage((p) => p + 1)}
+						disabled={!canGoNext}
+					>
 						Next
 					</button>
 				</div>
