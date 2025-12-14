@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { provinceApi, Province } from "../api/api";
+import { provinceApi, type Province } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 
 export default function GlobalAdminDashboardPage() {
