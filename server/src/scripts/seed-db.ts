@@ -19,6 +19,16 @@ interface AdminConfig {
 	}>;
 }
 
+interface SeedConfig {
+	admins: AdminConfig;
+}
+
+
+// Helper functions from seed-admins.ts
+function isValidString(value: string | undefined | null): boolean {
+	return value !== undefined && value !== null && value.trim() !== '';
+}
+
 interface AdminCredentials {
 	username: string;
 	password: string;
@@ -33,16 +43,6 @@ interface SeedStats {
 	errors: string[];
 }
 
-/**
- * Validates that a string is not empty or whitespace-only
- */
-function isValidString(value: string | undefined | null): boolean {
-	return value !== undefined && value !== null && value.trim() !== '';
-}
-
-/**
- * Validates admin credentials
- */
 function validateCredentials(credentials: AdminCredentials, context: string): string | null {
 	if (!isValidString(credentials.username)) {
 		return `${context}: username is required`;
@@ -53,40 +53,10 @@ function validateCredentials(credentials: AdminCredentials, context: string): st
 	return null;
 }
 
-/**
- * Reads and parses the admin configuration file
- */
-function loadConfig(): AdminConfig {
-	const configPath = path.join(__dirname, '../../admins.json');
-
-	if (!fs.existsSync(configPath)) {
-		console.error(`Error: admins.json not found at ${configPath}`);
-		console.error('Please create admins.json based on admins.example.json');
-		process.exit(1);
-	}
-
-	const configContent = fs.readFileSync(configPath, 'utf-8');
-	try {
-		return JSON.parse(configContent);
-	} catch (parseError) {
-		console.error('❌ Error parsing admins.json: Invalid JSON format');
-		if (parseError instanceof Error) {
-			console.error('Error details:', parseError.message);
-		}
-		process.exit(1);
-	}
-}
-
-/**
- * Creates a password hash using bcrypt
- */
 async function hashPassword(password: string): Promise<string> {
 	return bcrypt.hash(password, 10);
 }
 
-/**
- * Creates a global admin user
- */
 async function createGlobalAdmin(credentials: AdminCredentials, stats: SeedStats): Promise<void> {
 	const validationError = validateCredentials(credentials, 'Global admin');
 	if (validationError) {
@@ -101,7 +71,6 @@ async function createGlobalAdmin(credentials: AdminCredentials, stats: SeedStats
 	try {
 		const existingUser = await User.findOne({ username });
 		if (existingUser) {
-			// Sync password from config if it changed
 			const samePassword = await bcrypt.compare(password, existingUser.passwordHash);
 			if (!samePassword) {
 				existingUser.passwordHash = await hashPassword(password);
@@ -135,9 +104,6 @@ async function createGlobalAdmin(credentials: AdminCredentials, stats: SeedStats
 	}
 }
 
-/**
- * Links a province admin user to a province
- */
 async function linkProvinceToAdmin(user: InstanceType<typeof User>, provinceName: string, stats: SeedStats): Promise<boolean> {
 	try {
 		const province = await Province.findOne({ name: provinceName });
@@ -147,7 +113,6 @@ async function linkProvinceToAdmin(user: InstanceType<typeof User>, provinceName
 			return false;
 		}
 
-		// Check if province already has an admin
 		if (province.admin) {
 			const existingAdmin = await User.findById(province.admin);
 			if (existingAdmin) {
@@ -175,9 +140,6 @@ async function linkProvinceToAdmin(user: InstanceType<typeof User>, provinceName
 	}
 }
 
-/**
- * Creates a province admin user
- */
 async function createProvinceAdmin(credentials: AdminCredentials & { provinceName?: string }, stats: SeedStats): Promise<void> {
 	const validationError = validateCredentials(credentials, `Province admin "${credentials.username}"`);
 	if (validationError) {
@@ -194,12 +156,10 @@ async function createProvinceAdmin(credentials: AdminCredentials & { provinceNam
 		let user: InstanceType<typeof User>;
 
 		if (existingUser) {
-			// Ensure role is correct
 			if (existingUser.role !== USER_ROLE.PROVINCE_ADMIN) {
 				existingUser.role = USER_ROLE.PROVINCE_ADMIN;
 			}
 
-			// Sync password from config if it changed
 			const samePassword = await bcrypt.compare(password, existingUser.passwordHash);
 			if (!samePassword) {
 				existingUser.passwordHash = await hashPassword(password);
@@ -226,7 +186,6 @@ async function createProvinceAdmin(credentials: AdminCredentials & { provinceNam
 			stats.provinceAdminsCreated++;
 		}
 
-		// Link to province if provided
 		if (isValidString(provinceName)) {
 			const linked = await linkProvinceToAdmin(user, provinceName!, stats);
 			if (linked) {
@@ -249,10 +208,49 @@ async function createProvinceAdmin(credentials: AdminCredentials & { provinceNam
 	}
 }
 
-/**
- * Main function to seed admins from configuration
- */
-async function seedAdmins() {
+// Seed provinces by extracting unique province names from provinceAdmins
+async function seedProvincesFromAdmins(provinceAdmins: { provinceName?: string }[]) {
+	const uniqueProvinces = Array.from(new Set(
+		provinceAdmins
+			.map(a => a.provinceName)
+			.filter((name): name is string => !!name)
+	));
+	for (const name of uniqueProvinces) {
+		let existing = await Province.findOne({ name });
+		if (!existing) {
+			existing = new Province({ name });
+			await existing.save();
+			logger.info('Province created', { name });
+			console.log(`  ✅ Created province: ${name}`);
+		} else {
+			console.log(`  ℹ️  Province already exists: ${name}`);
+		}
+	}
+}
+
+// ...existing admin seeding logic, but call seedProvinces before seeding admins
+
+
+async function seedDB() {
+	const configPath = path.join(__dirname, '../../seed-config.json');
+	if (!fs.existsSync(configPath)) {
+		console.error(`Error: seed-config.json not found at ${configPath}`);
+		process.exit(1);
+	}
+	const configContent = fs.readFileSync(configPath, 'utf-8');
+	const config: SeedConfig = JSON.parse(configContent);
+
+	await connectDB();
+	logger.info('Database connected');
+	console.log('✅ Connected to database\n');
+
+	// Seed provinces based on provinceAdmins
+	if (config.admins && config.admins.provinceAdmins && config.admins.provinceAdmins.length > 0) {
+		console.log('Seeding provinces from provinceAdmins...');
+		await seedProvincesFromAdmins(config.admins.provinceAdmins);
+	}
+
+	// Seed admins
 	const stats: SeedStats = {
 		globalAdminCreated: false,
 		globalAdminUpdated: false,
@@ -262,70 +260,53 @@ async function seedAdmins() {
 		errors: []
 	};
 
-	try {
-		await connectDB();
-		logger.info("Database connected");
-		console.log('✅ Connected to database\n');
+	// Create global admin
+	console.log('Creating global admin...');
+	if (config.admins && config.admins.globalAdmin) {
+		await createGlobalAdmin(config.admins.globalAdmin, stats);
+	} else {
+		console.log('  ⚠️  No global admin configured, skipping...');
+	}
 
-		const config = loadConfig();
-
-		// Create global admin
-		console.log('Creating global admin...');
-		if (config.globalAdmin) {
-			await createGlobalAdmin(config.globalAdmin, stats);
-		} else {
-			console.log('  ⚠️  No global admin configured, skipping...');
+	// Create province admins
+	console.log('\nCreating province admins...');
+	if (!config.admins || !config.admins.provinceAdmins || config.admins.provinceAdmins.length === 0) {
+		console.log('  ⚠️  No province admins configured, skipping...');
+	} else {
+		for (const admin of config.admins.provinceAdmins) {
+			await createProvinceAdmin(admin, stats);
 		}
+	}
 
-		// Create province admins
-		console.log('\nCreating province admins...');
-		if (!config.provinceAdmins || config.provinceAdmins.length === 0) {
-			console.log('  ⚠️  No province admins configured, skipping...');
-		} else {
-			for (const admin of config.provinceAdmins) {
-				await createProvinceAdmin(admin, stats);
-			}
-		}
+	// Print summary
+	console.log('\n' + '='.repeat(50));
+	console.log('SEED SUMMARY');
+	console.log('='.repeat(50));
 
-		// Print summary
-		console.log('\n' + '='.repeat(50));
-		console.log('SEED SUMMARY');
-		console.log('='.repeat(50));
+	if (stats.globalAdminCreated) {
+		console.log('✅ Global Admin: Created');
+	} else if (stats.globalAdminUpdated) {
+		console.log('✅ Global Admin: Updated');
+	} else {
+		console.log('ℹ️  Global Admin: No changes');
+	}
 
-		if (stats.globalAdminCreated) {
-			console.log('✅ Global Admin: Created');
-		} else if (stats.globalAdminUpdated) {
-			console.log('✅ Global Admin: Updated');
-		} else {
-			console.log('ℹ️  Global Admin: No changes');
-		}
+	console.log(`Province Admins:`);
+	console.log(`  Created: ${stats.provinceAdminsCreated}`);
+	console.log(`  Updated: ${stats.provinceAdminsUpdated}`);
+	console.log(`  Linked:  ${stats.provinceAdminsLinked}`);
 
-		console.log(`Province Admins:`);
-		console.log(`  Created: ${stats.provinceAdminsCreated}`);
-		console.log(`  Updated: ${stats.provinceAdminsUpdated}`);
-		console.log(`  Linked:  ${stats.provinceAdminsLinked}`);
-
-		if (stats.errors.length > 0) {
-			console.log(`\nErrors (${stats.errors.length}):`);
-			stats.errors.forEach(err => console.log(`  • ${err}`));
-			logger.warn("Seed completed with errors", { errorCount: stats.errors.length });
-			console.log('\n⚠️  Admin seeding completed with errors');
-			process.exit(1);
-		} else {
-			logger.info("Admin seeding completed successfully");
-			console.log('\n✅ Admin seeding completed successfully!');
-			process.exit(0);
-		}
-	} catch (err) {
-		const errMsg = 'Error during admin seeding';
-		console.error(`\n❌ ${errMsg}`);
-		logger.error(errMsg, err);
-		if (err instanceof Error) {
-			console.error('Error details:', err.message);
-		}
+	if (stats.errors.length > 0) {
+		console.log(`\nErrors (${stats.errors.length}):`);
+		stats.errors.forEach(err => console.log(`  • ${err}`));
+		logger.warn("Seed completed with errors", { errorCount: stats.errors.length });
+		console.log('\n⚠️  Seeding completed with errors');
 		process.exit(1);
+	} else {
+		logger.info("Seeding completed successfully");
+		console.log('\n✅ Seeding completed successfully!');
+		process.exit(0);
 	}
 }
 
-// Run the seed script
-seedAdmins();
+seedDB();
