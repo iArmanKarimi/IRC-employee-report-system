@@ -46,17 +46,23 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction): 
 	try {
 		// Sanitize body
 		if (req.body && typeof req.body === "object") {
-			req.body = sanitizeValue(req.body);
+			const sanitizedBody = sanitizeValue(req.body);
+			Object.keys(req.body).forEach(key => { delete req.body[key]; });
+			Object.assign(req.body, sanitizedBody);
 		}
 
 		// Sanitize query parameters
 		if (req.query && typeof req.query === "object") {
-			req.query = sanitizeValue(req.query) as Record<string, string | string[]>;
+			const sanitizedQuery = sanitizeValue(req.query) as Record<string, string | string[]>;
+			Object.keys(req.query).forEach(key => { delete req.query[key]; });
+			Object.assign(req.query, sanitizedQuery);
 		}
 
 		// Sanitize URL parameters
 		if (req.params && typeof req.params === "object") {
-			req.params = sanitizeValue(req.params) as Record<string, string>;
+			const sanitizedParams = sanitizeValue(req.params) as Record<string, string>;
+			Object.keys(req.params).forEach(key => { delete req.params[key]; });
+			Object.assign(req.params, sanitizedParams);
 		}
 
 		next();
