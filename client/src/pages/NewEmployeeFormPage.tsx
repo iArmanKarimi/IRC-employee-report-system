@@ -1,37 +1,97 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Paper from "@mui/material/Paper";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import SaveIcon from "@mui/icons-material/Save";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { provinceApi } from "../api/api";
 import { ROUTES } from "../const/endpoints";
+import NavBar from "../components/NavBar";
+import type {
+	CreateEmployeeInput,
+	IBasicInfo,
+	IWorkPlace,
+	IAdditionalSpecifications,
+} from "../types/models";
 
-type BasicInfoForm = {
-	firstName: string;
-	lastName: string;
-	nationalID: string;
-	male: boolean;
-	married: boolean;
-	childrenCount: number;
+type EmployeeFormData = {
+	basicInfo: IBasicInfo;
+	workPlace: IWorkPlace;
+	additionalSpecifications: IAdditionalSpecifications;
 };
 
 export default function NewEmployeeFormPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const navigate = useNavigate();
-	const [form, setForm] = useState<BasicInfoForm>({
-		firstName: "",
-		lastName: "",
-		nationalID: "",
-		male: true,
-		married: false,
-		childrenCount: 0,
+	const [form, setForm] = useState<EmployeeFormData>({
+		basicInfo: {
+			firstName: "",
+			lastName: "",
+			nationalID: "",
+			male: true,
+			married: false,
+			childrenCount: 0,
+		},
+		workPlace: {
+			provinceName: "",
+			branch: "",
+			rank: "",
+			licensedWorkplace: "",
+			travelAssignment: false,
+		},
+		additionalSpecifications: {
+			educationalDegree: "",
+			dateOfBirth: "",
+			contactNumber: "",
+			jobStartDate: "",
+			jobEndDate: undefined,
+			status: "active",
+		},
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const update = (
-		key: keyof BasicInfoForm,
+	const updateBasicInfo = (
+		key: keyof IBasicInfo,
 		value: string | number | boolean
 	) => {
-		setForm((prev) => ({ ...prev, [key]: value }));
+		setForm((prev) => ({
+			...prev,
+			basicInfo: { ...prev.basicInfo, [key]: value },
+		}));
+	};
+
+	const updateWorkPlace = (key: keyof IWorkPlace, value: string | boolean) => {
+		setForm((prev) => ({
+			...prev,
+			workPlace: { ...prev.workPlace, [key]: value },
+		}));
+	};
+
+	const updateAdditionalSpecs = (
+		key: keyof IAdditionalSpecifications,
+		value: string
+	) => {
+		setForm((prev) => ({
+			...prev,
+			additionalSpecifications: {
+				...prev.additionalSpecifications,
+				[key]: value,
+			},
+		}));
 	};
 
 	const handleSubmit = async (e: FormEvent) => {
@@ -43,20 +103,14 @@ export default function NewEmployeeFormPage() {
 		setLoading(true);
 		setError(null);
 		try {
-			await provinceApi.createEmployee(provinceId, {
+			const payload: CreateEmployeeInput = {
 				provinceId,
-				basicInfo: {
-					firstName: form.firstName,
-					lastName: form.lastName,
-					nationalID: form.nationalID,
-					male: form.male,
-					married: form.married,
-					childrenCount: form.childrenCount,
-				},
-				workPlace: {},
-				additionalSpecifications: {},
+				basicInfo: form.basicInfo,
+				workPlace: form.workPlace,
+				additionalSpecifications: form.additionalSpecifications,
 				performances: [],
-			});
+			};
+			await provinceApi.createEmployee(provinceId, payload);
 			navigate(ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId), {
 				replace: true,
 			});
@@ -68,85 +122,265 @@ export default function NewEmployeeFormPage() {
 	};
 
 	return (
-		<div style={{ padding: "1rem", maxWidth: 480 }}>
-			<h1>New Employee</h1>
-			<form
-				onSubmit={handleSubmit}
-				style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-			>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>First Name</span>
-					<input
-						required
-						value={form.firstName}
-						onChange={(e) => update("firstName", e.target.value)}
-					/>
-				</label>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>Last Name</span>
-					<input
-						required
-						value={form.lastName}
-						onChange={(e) => update("lastName", e.target.value)}
-					/>
-				</label>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>National ID</span>
-					<input
-						required
-						value={form.nationalID}
-						onChange={(e) => update("nationalID", e.target.value)}
-					/>
-				</label>
-				<label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-					<input
-						type="checkbox"
-						checked={form.male}
-						onChange={(e) => update("male", e.target.checked)}
-					/>
-					<span>Male</span>
-				</label>
-				<label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-					<input
-						type="checkbox"
-						checked={form.married}
-						onChange={(e) => update("married", e.target.checked)}
-					/>
-					<span>Married</span>
-				</label>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>Children Count</span>
-					<input
-						type="number"
-						min={0}
-						value={form.childrenCount}
-						onChange={(e) => update("childrenCount", Number(e.target.value))}
-					/>
-				</label>
-				<button type="submit" disabled={loading}>
-					{loading ? "Creating..." : "Create"}
-				</button>
-				{error && <div style={{ color: "red" }}>{error}</div>}
-			</form>
+		<>
+			<NavBar title="New Employee" />
+			<Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+				<Paper elevation={2} sx={{ p: 4 }}>
+					<Typography variant="h4" component="h1" gutterBottom>
+						New Employee
+					</Typography>
+					<Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+						Create a new employee record
+					</Typography>
 
-			<div style={{ marginTop: "1rem" }}>
-				<Link
-					to={ROUTES.PROVINCE_EMPLOYEES.replace(
-						":provinceId",
-						provinceId || ""
-					)}
-				>
-					Back to employees
-				</Link>
-			</div>
-		</div>
+					<form onSubmit={handleSubmit}>
+						<Stack spacing={4}>
+							{/* Basic Info Section */}
+							<Box>
+								<Typography variant="h6" gutterBottom>
+									Basic Information
+								</Typography>
+								<Stack spacing={2}>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="First Name"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.basicInfo.firstName}
+											onChange={(e) =>
+												updateBasicInfo("firstName", e.target.value)
+											}
+										/>
+										<TextField
+											label="Last Name"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.basicInfo.lastName}
+											onChange={(e) =>
+												updateBasicInfo("lastName", e.target.value)
+											}
+										/>
+									</Box>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="National ID"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.basicInfo.nationalID}
+											onChange={(e) =>
+												updateBasicInfo("nationalID", e.target.value)
+											}
+										/>
+										<TextField
+											label="Children Count"
+											type="number"
+											inputProps={{ min: 0 }}
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.basicInfo.childrenCount}
+											onChange={(e) =>
+												updateBasicInfo("childrenCount", Number(e.target.value))
+											}
+										/>
+									</Box>
+									<Box sx={{ display: "flex", gap: 2 }}>
+										<FormControlLabel
+											control={
+												<Checkbox
+													checked={form.basicInfo.male}
+													onChange={(e) =>
+														updateBasicInfo("male", e.target.checked)
+													}
+												/>
+											}
+											label="Male"
+										/>
+										<FormControlLabel
+											control={
+												<Checkbox
+													checked={form.basicInfo.married}
+													onChange={(e) =>
+														updateBasicInfo("married", e.target.checked)
+													}
+												/>
+											}
+											label="Married"
+										/>
+									</Box>
+								</Stack>
+							</Box>
+
+							{/* WorkPlace Section */}
+							<Box>
+								<Typography variant="h6" gutterBottom>
+									WorkPlace Information
+								</Typography>
+								<Stack spacing={2}>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="Province Name"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.workPlace.provinceName}
+											onChange={(e) =>
+												updateWorkPlace("provinceName", e.target.value)
+											}
+										/>
+										<TextField
+											label="Branch"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.workPlace.branch}
+											onChange={(e) =>
+												updateWorkPlace("branch", e.target.value)
+											}
+										/>
+									</Box>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="Rank"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.workPlace.rank}
+											onChange={(e) => updateWorkPlace("rank", e.target.value)}
+										/>
+										<TextField
+											label="Licensed Workplace"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.workPlace.licensedWorkplace}
+											onChange={(e) =>
+												updateWorkPlace("licensedWorkplace", e.target.value)
+											}
+										/>
+									</Box>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={form.workPlace.travelAssignment}
+												onChange={(e) =>
+													updateWorkPlace("travelAssignment", e.target.checked)
+												}
+											/>
+										}
+										label="Travel Assignment"
+									/>
+								</Stack>
+							</Box>
+
+							{/* Additional Specifications Section */}
+							<Box>
+								<Typography variant="h6" gutterBottom>
+									Additional Specifications
+								</Typography>
+								<Stack spacing={2}>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="Educational Degree"
+											required
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.additionalSpecifications.educationalDegree}
+											onChange={(e) =>
+												updateAdditionalSpecs(
+													"educationalDegree",
+													e.target.value
+												)
+											}
+										/>
+										<TextField
+											label="Date of Birth"
+											type="date"
+											required
+											InputLabelProps={{ shrink: true }}
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.additionalSpecifications.dateOfBirth}
+											onChange={(e) =>
+												updateAdditionalSpecs("dateOfBirth", e.target.value)
+											}
+										/>
+									</Box>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="Contact Number"
+											required
+											inputProps={{ pattern: "\\d{10}" }}
+											helperText="10 digits required"
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.additionalSpecifications.contactNumber}
+											onChange={(e) =>
+												updateAdditionalSpecs("contactNumber", e.target.value)
+											}
+										/>
+										<TextField
+											label="Job Start Date"
+											type="date"
+											required
+											InputLabelProps={{ shrink: true }}
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.additionalSpecifications.jobStartDate}
+											onChange={(e) =>
+												updateAdditionalSpecs("jobStartDate", e.target.value)
+											}
+										/>
+									</Box>
+									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+										<TextField
+											label="Job End Date"
+											type="date"
+											InputLabelProps={{ shrink: true }}
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											value={form.additionalSpecifications.jobEndDate || ""}
+											onChange={(e) =>
+												updateAdditionalSpecs("jobEndDate", e.target.value)
+											}
+										/>
+										<FormControl
+											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+											required
+										>
+											<InputLabel>Status</InputLabel>
+											<Select
+												value={form.additionalSpecifications.status}
+												label="Status"
+												onChange={(e) =>
+													updateAdditionalSpecs("status", e.target.value)
+												}
+											>
+												<MenuItem value="active">Active</MenuItem>
+												<MenuItem value="inactive">Inactive</MenuItem>
+												<MenuItem value="on_leave">On Leave</MenuItem>
+											</Select>
+										</FormControl>
+									</Box>
+								</Stack>
+							</Box>
+
+							<Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+								<Button
+									component={Link}
+									to={ROUTES.PROVINCE_EMPLOYEES.replace(
+										":provinceId",
+										provinceId || ""
+									)}
+									variant="outlined"
+									startIcon={<ArrowBackIcon />}
+								>
+									Cancel
+								</Button>
+								<Button
+									type="submit"
+									variant="contained"
+									disabled={loading}
+									startIcon={<SaveIcon />}
+								>
+									{loading ? "Creating..." : "Create Employee"}
+								</Button>
+							</Box>
+
+							{error && <Alert severity="error">{error}</Alert>}
+						</Stack>
+					</form>
+				</Paper>
+			</Container>
+		</>
 	);
 }
