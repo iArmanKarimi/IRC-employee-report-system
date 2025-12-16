@@ -16,6 +16,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -486,22 +490,38 @@ export default function EmployeePage() {
 									No performance records yet.
 								</Typography>
 							) : (
-								<Stack spacing={2}>
+								<Stack spacing={1}>
 									{employee.performances.map((perf, index) => (
-										<Card key={index} variant="outlined">
-											<CardContent>
+										<Accordion key={index} defaultExpanded={index === 0}>
+											<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 												<Box
 													sx={{
 														display: "flex",
-														justifyContent: "space-between",
 														alignItems: "center",
-														mb: 1,
+														gap: 2,
+														width: "100%",
 													}}
 												>
-													<Typography variant="subtitle1" fontWeight="bold">
-														{perf.month}
+													<Typography fontWeight="bold">
+														{perf.month
+															? `Performance: ${perf.month}`
+															: `Performance #${index + 1}`}
 													</Typography>
-													<Box>
+													<Typography variant="body2" color="text.secondary">
+														{perf.dailyPerformance !== undefined &&
+															`(Performance: ${perf.dailyPerformance})`}
+													</Typography>
+												</Box>
+											</AccordionSummary>
+											<AccordionDetails>
+												<Stack spacing={2}>
+													<Box
+														sx={{
+															display: "flex",
+															justifyContent: "flex-end",
+															gap: 1,
+														}}
+													>
 														<IconButton
 															size="small"
 															color="primary"
@@ -519,48 +539,53 @@ export default function EmployeePage() {
 															<DeleteOutlineIcon fontSize="small" />
 														</IconButton>
 													</Box>
-												</Box>
-												<Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-													<InfoField
-														label="Daily Performance"
-														value={perf.dailyPerformance}
-													/>
-													<InfoField
-														label="Shift Count/Location"
-														value={perf.shiftCountPerLocation}
-													/>
-													<InfoField
-														label="Shift Duration"
-														value={`${perf.shiftDuration} hours`}
-													/>
-													<InfoField label="Overtime" value={perf.overtime} />
-													<InfoField
-														label="Daily Leave"
-														value={perf.dailyLeave}
-													/>
-													<InfoField
-														label="Sick Leave"
-														value={perf.sickLeave}
-													/>
-													<InfoField label="Absence" value={perf.absence} />
-													<InfoField
-														label="Volunteer Shifts"
-														value={perf.volunteerShiftCount}
-													/>
-													<InfoField
-														label="Truck Driver"
-														value={perf.truckDriver ? "Yes" : "No"}
-													/>
-												</Box>
-												{perf.notes && (
-													<Box sx={{ mt: 2 }}>
-														<Typography variant="body2" color="text.secondary">
-															<strong>Notes:</strong> {perf.notes}
-														</Typography>
+													<Box
+														sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}
+													>
+														<InfoField
+															label="Daily Performance"
+															value={perf.dailyPerformance}
+														/>
+														<InfoField
+															label="Shift Count/Location"
+															value={perf.shiftCountPerLocation}
+														/>
+														<InfoField
+															label="Shift Duration"
+															value={`${perf.shiftDuration} hours`}
+														/>
+														<InfoField label="Overtime" value={perf.overtime} />
+														<InfoField
+															label="Daily Leave"
+															value={perf.dailyLeave}
+														/>
+														<InfoField
+															label="Sick Leave"
+															value={perf.sickLeave}
+														/>
+														<InfoField label="Absence" value={perf.absence} />
+														<InfoField
+															label="Volunteer Shifts"
+															value={perf.volunteerShiftCount}
+														/>
+														<InfoField
+															label="Truck Driver"
+															value={perf.truckDriver ? "Yes" : "No"}
+														/>
 													</Box>
-												)}
-											</CardContent>
-										</Card>
+													{perf.notes && (
+														<Box sx={{ mt: 1 }}>
+															<Typography
+																variant="body2"
+																color="text.secondary"
+															>
+																<strong>Notes:</strong> {perf.notes}
+															</Typography>
+														</Box>
+													)}
+												</Stack>
+											</AccordionDetails>
+										</Accordion>
 									))}
 								</Stack>
 							)}
