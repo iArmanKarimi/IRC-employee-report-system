@@ -27,6 +27,12 @@ function isValidString(value: string | undefined | null): boolean {
     return value !== undefined && value !== null && value.trim() !== '';
 }
 
+function normalizeProvinceName(name: string): string {
+    return name.trim();
+    // If you want case-insensitive uniqueness:
+    // return name.trim().toLowerCase();
+}
+
 async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
 }
@@ -102,12 +108,27 @@ async function createOrUpdateProvinceAdmin(
 }
 
 // ------------------------------------------------------------
-// CREATE PROVINCES *AFTER* ADMINS EXIST
+// CREATE PROVINCES *AFTER* ADMINS EXIST (DEDUPED)
 // ------------------------------------------------------------
-async function createProvincesWithAdmins(provinceAdmins: Array<{ username: string; provinceName: string }>) {
-    for (const entry of provinceAdmins) {
-        const { username, provinceName } = entry;
+async function createProvincesWithAdmins(
+    provinceAdmins: Array<{ username: string; provinceName: string }>
+) {
+    // Deduplicate by normalized province name
+    const provinceMap = new Map<string, { provinceName: string; username: string }>();
 
+    for (const entry of provinceAdmins) {
+        if (!entry.provinceName) continue;
+
+        const normalizedName = normalizeProvinceName(entry.provinceName);
+
+        // Keep the LAST admin for each province
+        provinceMap.set(normalizedName, {
+            provinceName: normalizedName,
+            username: entry.username,
+        });
+    }
+
+    for (const { provinceName, username } of provinceMap.values()) {
         const admin = await User.findOne({ username });
         if (!admin) {
             console.log(`  ❌ Cannot create province "${provinceName}" — admin "${username}" not found`);
@@ -117,7 +138,6 @@ async function createProvincesWithAdmins(provinceAdmins: Array<{ username: strin
         let province = await Province.findOne({ name: provinceName });
 
         if (province) {
-            // Update admin if needed
             if (!province.admin || province.admin.toString() !== admin._id.toString()) {
                 province.admin = admin._id;
                 await province.save();
@@ -126,16 +146,14 @@ async function createProvincesWithAdmins(provinceAdmins: Array<{ username: strin
                 console.log(`  ℹ️ Province "${provinceName}" already linked to ${username}`);
             }
         } else {
-            // Create province WITH admin (required)
             province = new Province({
                 name: provinceName,
-                admin: admin._id
+                admin: admin._id,
             });
             await province.save();
             console.log(`  ✅ Created province "${provinceName}" with admin ${username}`);
         }
 
-        // Update admin → province link
         admin.provinceId = province._id;
         await admin.save();
     }
@@ -169,7 +187,7 @@ async function seedDB() {
         await createOrUpdateProvinceAdmin(admin.username, admin.password);
     }
 
-    // 3. Provinces WITH admins assigned
+    // 3. Provinces WITH admins assigned (deduped)
     console.log('\nCreating provinces with assigned admins...');
     await createProvincesWithAdmins(provinceAdmins);
 
