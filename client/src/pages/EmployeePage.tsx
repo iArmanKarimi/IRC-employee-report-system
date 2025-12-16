@@ -18,7 +18,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { provinceApi, type Employee } from "../api/api";
+import EditIcon from "@mui/icons-material/Edit";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import {
+	provinceApi,
+	type Employee,
+	type UpdateEmployeeInput,
+} from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 
@@ -31,8 +40,13 @@ export default function EmployeePage() {
 	const [employee, setEmployee] = useState<Employee | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [deleting, setDeleting] = useState(false);
+	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [editFormData, setEditFormData] = useState<UpdateEmployeeInput | null>(
+		null
+	);
 
 	useEffect(() => {
 		if (!provinceId || !employeeId) {
@@ -76,6 +90,50 @@ export default function EmployeePage() {
 			setDeleteDialogOpen(false);
 		} finally {
 			setDeleting(false);
+		}
+	};
+
+	const handleEditOpen = () => {
+		if (employee) {
+			setEditFormData(JSON.parse(JSON.stringify({
+				basicInfo: employee.basicInfo,
+				workPlace: employee.workPlace,
+				additionalSpecifications: employee.additionalSpecifications,
+			})));
+			setEditDialogOpen(true);
+		}
+	};
+
+	const handleEditChange = (field: string, value: any) => {
+		if (!editFormData) return;
+		
+		const [section, key] = field.split('.');
+		setEditFormData({
+			...editFormData,
+			[section]: {
+				...(editFormData as any)[section],
+				[key]: value,
+			},
+		});
+	};
+
+	const handleSaveEdit = async () => {
+		if (!provinceId || !employeeId || !editFormData) return;
+
+		setSaving(true);
+		setError(null);
+		try {
+			const res = await provinceApi.updateEmployee(provinceId, employeeId, editFormData);
+			if (!res.success || !res.data) {
+				setError(res.error || "Failed to update employee");
+				return;
+			}
+			setEmployee(res.data);
+			setEditDialogOpen(false);
+		} catch (err) {
+			setError("Failed to update employee");
+		} finally {
+			setSaving(false);
 		}
 	};
 
@@ -138,14 +196,24 @@ export default function EmployeePage() {
 					<Typography variant="h4" component="h1">
 						Employee Details
 					</Typography>
-					<Button
-						variant="contained"
-						color="error"
-						startIcon={<DeleteIcon />}
-						onClick={() => setDeleteDialogOpen(true)}
-					>
-						Delete Employee
-					</Button>
+					<Box sx={{ display: "flex", gap: 2 }}>
+						<Button
+							variant="contained"
+							color="primary"
+							startIcon={<EditIcon />}
+							onClick={handleEditOpen}
+						>
+							Edit Employee
+						</Button>
+						<Button
+							variant="contained"
+							color="error"
+							startIcon={<DeleteIcon />}
+							onClick={() => setDeleteDialogOpen(true)}
+						>
+							Delete Employee
+						</Button>
+					</Box>
 				</Box>
 
 				{error && (
@@ -363,36 +431,293 @@ export default function EmployeePage() {
 					</Button>
 				</Box>
 
-				{/* Delete Confirmation Dialog */}
-				<Dialog
-					open={deleteDialogOpen}
-					onClose={() => !deleting && setDeleteDialogOpen(false)}
-				>
-					<DialogTitle>Confirm Delete</DialogTitle>
-					<DialogContent>
-						<DialogContentText>
-							Are you sure you want to delete this employee? This action cannot
-							be undone.
-						</DialogContentText>
-					</DialogContent>
-					<DialogActions>
-						<Button
-							onClick={() => setDeleteDialogOpen(false)}
-							disabled={deleting}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleDelete}
-							color="error"
-							variant="contained"
-							disabled={deleting}
-						>
-							{deleting ? "Deleting..." : "Delete"}
-						</Button>
-					</DialogActions>
-				</Dialog>
-			</Container>
+			{/* Edit Dialog */}
+			<Dialog
+				open={editDialogOpen}
+				onClose={() => !saving && setEditDialogOpen(false)}
+				maxWidth="sm"
+				fullWidth
+			>
+				<DialogTitle>Edit Employee</DialogTitle>
+				<DialogContent sx={{ pt: 3 }}>
+					{editFormData && (
+						<Stack spacing={2}>
+							{/* Basic Info */}
+							<Box>
+								<Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+									Basic Information
+								</Typography>
+								<TextField
+									fullWidth
+									label="First Name"
+									value={editFormData.basicInfo?.firstName || ""}
+									onChange={(e) =>
+										handleEditChange("basicInfo.firstName", e.target.value)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Last Name"
+									value={editFormData.basicInfo?.lastName || ""}
+									onChange={(e) =>
+										handleEditChange("basicInfo.lastName", e.target.value)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="National ID"
+									value={editFormData.basicInfo?.nationalID || ""}
+									onChange={(e) =>
+										handleEditChange("basicInfo.nationalID", e.target.value)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Gender"
+									select
+									value={editFormData.basicInfo?.male ? "male" : "female"}
+									onChange={(e) =>
+										handleEditChange(
+											"basicInfo.male",
+											e.target.value === "male"
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								>
+									<MenuItem value="male">Male</MenuItem>
+									<MenuItem value="female">Female</MenuItem>
+								</TextField>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={editFormData.basicInfo?.married || false}
+											onChange={(e) =>
+												handleEditChange("basicInfo.married", e.target.checked)
+											}
+										/>
+									}
+									label="Married"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Children Count"
+									type="number"
+									value={editFormData.basicInfo?.childrenCount || 0}
+									onChange={(e) =>
+										handleEditChange(
+											"basicInfo.childrenCount",
+											parseInt(e.target.value)
+										)
+									}
+									size="small"
+								/>
+							</Box>
+
+							{/* WorkPlace Info */}
+							<Box>
+								<Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+									WorkPlace Information
+								</Typography>
+								<TextField
+									fullWidth
+									label="Branch"
+									value={editFormData.workPlace?.branch || ""}
+									onChange={(e) =>
+										handleEditChange("workPlace.branch", e.target.value)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Rank"
+									value={editFormData.workPlace?.rank || ""}
+									onChange={(e) =>
+										handleEditChange("workPlace.rank", e.target.value)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Licensed Workplace"
+									value={editFormData.workPlace?.licensedWorkplace || ""}
+									onChange={(e) =>
+										handleEditChange(
+											"workPlace.licensedWorkplace",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={editFormData.workPlace?.travelAssignment || false}
+											onChange={(e) =>
+												handleEditChange(
+													"workPlace.travelAssignment",
+													e.target.checked
+												)
+											}
+										/>
+									}
+									label="Travel Assignment"
+								/>
+							</Box>
+
+							{/* Additional Specifications */}
+							<Box>
+								<Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+									Additional Specifications
+								</Typography>
+								<TextField
+									fullWidth
+									label="Educational Degree"
+									value={editFormData.additionalSpecifications?.educationalDegree || ""}
+									onChange={(e) =>
+										handleEditChange(
+											"additionalSpecifications.educationalDegree",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Date of Birth"
+									type="date"
+									value={
+										editFormData.additionalSpecifications?.dateOfBirth
+											? new Date(editFormData.additionalSpecifications.dateOfBirth)
+													.toISOString()
+													.split("T")[0]
+											: ""
+									}
+									onChange={(e) =>
+										handleEditChange(
+											"additionalSpecifications.dateOfBirth",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+									InputLabelProps={{ shrink: true }}
+								/>
+								<TextField
+									fullWidth
+									label="Contact Number"
+									value={editFormData.additionalSpecifications?.contactNumber || ""}
+									onChange={(e) =>
+										handleEditChange(
+											"additionalSpecifications.contactNumber",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								/>
+								<TextField
+									fullWidth
+									label="Job Start Date"
+									type="date"
+									value={
+										editFormData.additionalSpecifications?.jobStartDate
+											? new Date(editFormData.additionalSpecifications.jobStartDate)
+													.toISOString()
+													.split("T")[0]
+											: ""
+									}
+									onChange={(e) =>
+										handleEditChange(
+											"additionalSpecifications.jobStartDate",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+									InputLabelProps={{ shrink: true }}
+								/>
+								<TextField
+									fullWidth
+									label="Status"
+									select
+									value={editFormData.additionalSpecifications?.status || "active"}
+									onChange={(e) =>
+										handleEditChange(
+											"additionalSpecifications.status",
+											e.target.value
+										)
+									}
+									size="small"
+									sx={{ mb: 1 }}
+								>
+									<MenuItem value="active">Active</MenuItem>
+									<MenuItem value="inactive">Inactive</MenuItem>
+									<MenuItem value="on_leave">On Leave</MenuItem>
+								</TextField>
+							</Box>
+						</Stack>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button
+						onClick={() => setEditDialogOpen(false)}
+						disabled={saving}
+					>
+						Cancel
+					</Button>
+					<Button
+						onClick={handleSaveEdit}
+						color="primary"
+						variant="contained"
+						disabled={saving}
+					>
+						{saving ? "Saving..." : "Save Changes"}
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			{/* Delete Confirmation Dialog */}
+			<Dialog
+				open={deleteDialogOpen}
+				onClose={() => !deleting && setDeleteDialogOpen(false)}
+			>
+				<DialogTitle>Confirm Delete</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						Are you sure you want to delete this employee? This action cannot
+						be undone.
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button
+						onClick={() => setDeleteDialogOpen(false)}
+						disabled={deleting}
+					>
+						Cancel
+					</Button>
+					<Button
+						onClick={handleDelete}
+						color="error"
+						variant="contained"
+						disabled={deleting}
+					>
+						{deleting ? "Deleting..." : "Delete"}
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</Container>
 		</>
 	);
 }

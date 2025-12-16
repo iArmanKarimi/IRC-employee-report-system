@@ -39,6 +39,7 @@ export type LoginResponse = {
 // Export types from models
 export type Province = IProvince;
 export type Employee = IEmployee;
+export type { UpdateEmployeeInput, CreateEmployeeInput };
 
 const unwrap = <T>(response: { data: T }): T => response.data;
 
