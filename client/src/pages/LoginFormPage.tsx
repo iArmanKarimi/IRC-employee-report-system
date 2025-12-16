@@ -1,5 +1,14 @@
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import Container from "@mui/material/Container";
+import LoginIcon from "@mui/icons-material/Login";
 import { authApi, type LoginResponse } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 
@@ -29,11 +38,11 @@ export default function LoginFormPage() {
 	};
 
 	const navigateAfterLogin = (data: LoginResponse) => {
-		if (data.role === "GLOBAL_ADMIN") {
+		if (data.role === "globalAdmin") {
 			navigate(ROUTES.PROVINCES, { replace: true });
 			return;
 		}
-		if (data.role === "PROVINCE_ADMIN" && data.provinceId) {
+		if (data.role === "provinceAdmin" && data.provinceId) {
 			navigate(
 				ROUTES.PROVINCE_EMPLOYEES.replace(
 					":provinceId",
@@ -48,39 +57,69 @@ export default function LoginFormPage() {
 	};
 
 	return (
-		<div style={{ padding: "1rem", maxWidth: 360, margin: "0 auto" }}>
-			<h1>Login</h1>
-			<form
-				onSubmit={handleSubmit}
-				style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+		<Container maxWidth="sm">
+			<Box
+				sx={{
+					minHeight: "100vh",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
 			>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>Username</span>
-					<input
-						type="text"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						required
-					/>
-				</label>
-				<label
-					style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
-				>
-					<span>Password</span>
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
-				</label>
-				<button type="submit" disabled={loading}>
-					{loading ? "Logging in..." : "Login"}
-				</button>
-				{error && <div style={{ color: "red" }}>{error}</div>}
-			</form>
-		</div>
+				<Card sx={{ width: "100%", maxWidth: 400 }}>
+					<CardContent sx={{ p: 4 }}>
+						<Typography variant="h4" component="h1" gutterBottom align="center">
+							Login
+						</Typography>
+						<Typography
+							variant="body2"
+							color="text.secondary"
+							align="center"
+							sx={{ mb: 3 }}
+						>
+							IRC Staff Management System
+						</Typography>
+
+						<form onSubmit={handleSubmit}>
+							<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+								<TextField
+									label="Username"
+									type="text"
+									value={username}
+									onChange={(e) => setUsername(e.target.value)}
+									required
+									fullWidth
+									autoFocus
+								/>
+								<TextField
+									label="Password"
+									type="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									required
+									fullWidth
+								/>
+								<Button
+									type="submit"
+									variant="contained"
+									size="large"
+									fullWidth
+									disabled={loading}
+									startIcon={<LoginIcon />}
+									sx={{ mt: 1 }}
+								>
+									{loading ? "Logging in..." : "Login"}
+								</Button>
+								{error && (
+									<Alert severity="error" sx={{ mt: 1 }}>
+										{error}
+									</Alert>
+								)}
+							</Box>
+						</form>
+					</CardContent>
+				</Card>
+			</Box>
+		</Container>
 	);
 }

@@ -3,9 +3,10 @@ import axios from "axios";
 import api from "../api/api";
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS, ROUTES } from "../const/endpoints";
+import type { ReactElement } from "react";
 
 type ProtectedRouteProps = {
-	children: JSX.Element;
+	children: ReactElement;
 };
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {

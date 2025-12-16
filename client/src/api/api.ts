@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_ENDPOINTS } from "../const/endpoints";
+import type { IEmployee, IProvince, CreateEmployeeInput, UpdateEmployeeInput, UserRoleType } from "../types/models";
 
 const api = axios.create({
 	baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000",
@@ -31,22 +32,13 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-	role: "GLOBAL_ADMIN" | "PROVINCE_ADMIN";
+	role: UserRoleType;
 	provinceId?: string | null;
 };
 
-// Province and employee shapes are intentionally loose until the UI solidifies
-export type Province = {
-	_id: string;
-	name?: string;
-	admin?: unknown;
-};
-
-export type Employee = {
-	_id: string;
-	provinceId: string;
-	[name: string]: unknown;
-};
+// Export types from models
+export type Province = IProvince;
+export type Employee = IEmployee;
 
 const unwrap = <T>(response: { data: T }): T => response.data;
 
@@ -65,7 +57,7 @@ export const provinceApi = {
 				params: { page, limit }
 			})
 			.then(unwrap),
-	createEmployee: (provinceId: string, payload: Partial<Employee>) =>
+	createEmployee: (provinceId: string, payload: CreateEmployeeInput) =>
 		api
 			.post<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), payload)
 			.then(unwrap),
@@ -73,7 +65,7 @@ export const provinceApi = {
 		api
 			.get<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId))
 			.then(unwrap),
-	updateEmployee: (provinceId: string, employeeId: string, payload: Partial<Employee>) =>
+	updateEmployee: (provinceId: string, employeeId: string, payload: UpdateEmployeeInput) =>
 		api
 			.put<ApiResponse<Employee>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId), payload)
 			.then(unwrap),

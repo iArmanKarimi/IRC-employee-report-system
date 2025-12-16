@@ -12,7 +12,9 @@
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
+		"@mui/icons-material": "^7.3.6",
 		"@mui/material": "^7.3.5",
+		"@mui/system": "^7.3.6",
 		"@mui/x-data-grid": "^8.18.0",
 		"axios": "^1.13.2",
 		"dayjs": "^1.11.19",
