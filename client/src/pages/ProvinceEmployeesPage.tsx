@@ -57,6 +57,7 @@ export default function ProvinceEmployeesPage() {
 	const [limit] = useState(20);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [provinceName, setProvinceName] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!provinceId) {
@@ -76,6 +77,18 @@ export default function ProvinceEmployeesPage() {
 					pagination: response.pagination,
 					_links: response._links,
 				});
+				// Extract province name from first employee if available
+				if (response.data && response.data.length > 0) {
+					const firstEmployee = response.data[0];
+					if (
+						typeof firstEmployee.provinceId === "object" &&
+						firstEmployee.provinceId?.name
+					) {
+						setProvinceName(firstEmployee.provinceId.name);
+					} else if (firstEmployee.workPlace?.provinceName) {
+						setProvinceName(firstEmployee.workPlace.provinceName);
+					}
+				}
 			} catch (err) {
 				setError("Failed to load employees");
 			} finally {
@@ -125,7 +138,7 @@ export default function ProvinceEmployeesPage() {
 							Employees
 						</Typography>
 						<Typography variant="body2" color="text.secondary">
-							Province {provinceId ?? "N/A"}
+							{provinceName || "Loading province..."}
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
@@ -155,7 +168,7 @@ export default function ProvinceEmployeesPage() {
 							<TableHead>
 								<TableRow>
 									<TableCell>Name</TableCell>
-									<TableCell>Province ID</TableCell>
+
 									<TableCell align="right">Actions</TableCell>
 								</TableRow>
 							</TableHead>
@@ -168,7 +181,7 @@ export default function ProvinceEmployeesPage() {
 										<TableCell component="th" scope="row">
 											{formatEmployeeName(emp)}
 										</TableCell>
-										<TableCell>{String(emp.provinceId)}</TableCell>
+
 										<TableCell align="right">
 											<Button
 												component={Link}
