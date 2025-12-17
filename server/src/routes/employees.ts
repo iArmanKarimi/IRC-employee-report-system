@@ -53,6 +53,14 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 		const user = ensureUser(req);
 		const { provinceId } = req.params;
 
+		// Debug logging
+		logger.debug("Employee list access check", {
+			userRole: user.role,
+			userProvinceId: user.provinceId,
+			requestedProvinceId: provinceId,
+			match: user.provinceId === provinceId
+		});
+
 		// Check if user can access this province
 		if (!canAccessProvince(user, provinceId)) {
 			throw new HttpError(403, "Cannot access employees from another province");

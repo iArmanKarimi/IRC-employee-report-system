@@ -24,7 +24,9 @@ export function useProvinces(): UseProvincesResult {
 			const response = await provinceApi.list();
 			setProvinces(response.data ?? []);
 		} catch (err) {
-			setError("Failed to load provinces");
+			console.error("Error fetching provinces:", err);
+			const errorMessage = err instanceof Error ? err.message : "Failed to load provinces";
+			setError(errorMessage);
 			setProvinces([]);
 		} finally {
 			setLoading(false);
@@ -33,6 +35,7 @@ export function useProvinces(): UseProvincesResult {
 
 	useEffect(() => {
 		fetchProvinces();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return { provinces, loading, error, refetch: fetchProvinces };

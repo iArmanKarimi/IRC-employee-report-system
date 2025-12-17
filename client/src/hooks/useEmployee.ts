@@ -40,7 +40,9 @@ export function useEmployee(
 			}
 			setEmployee(res.data);
 		} catch (err) {
-			setError("Failed to load employee");
+			console.error("Error fetching employee:", err);
+			const errorMessage = err instanceof Error ? err.message : "Failed to load employee";
+			setError(errorMessage);
 			setEmployee(null);
 		} finally {
 			setLoading(false);
@@ -49,6 +51,7 @@ export function useEmployee(
 
 	useEffect(() => {
 		fetchEmployee();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [provinceId, employeeId]);
 
 	return { employee, loading, error, refetch: fetchEmployee };

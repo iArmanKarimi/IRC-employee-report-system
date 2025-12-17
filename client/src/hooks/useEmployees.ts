@@ -46,7 +46,9 @@ export function useEmployees(
 			setEmployees(response.data ?? []);
 			setPagination(response.pagination);
 		} catch (err) {
-			setError("Failed to load employees");
+			console.error("Error fetching employees:", err);
+			const errorMessage = err instanceof Error ? err.message : "Failed to load employees";
+			setError(errorMessage);
 			setEmployees([]);
 			setPagination(null);
 		} finally {
@@ -56,6 +58,7 @@ export function useEmployees(
 
 	useEffect(() => {
 		fetchEmployees();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [provinceId, page, limit]);
 
 	return { employees, pagination, loading, error, refetch: fetchEmployees };
