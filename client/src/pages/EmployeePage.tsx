@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -8,35 +8,21 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import AddIcon from "@mui/icons-material/Add";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {
-	provinceApi,
-	type Employee,
-	type UpdateEmployeeInput,
-} from "../api/api";
+import { provinceApi, type UpdateEmployeeInput } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
+import { LoadingView } from "../components/states/LoadingView";
+import { ErrorView } from "../components/states/ErrorView";
+import { EditEmployeeDialog } from "../components/dialogs/EditEmployeeDialog";
+import { PerformanceManager } from "../components/PerformanceManager";
+import { ConfirmDialog } from "../components/dialogs/ConfirmDialog";
+import { useEmployee } from "../hooks/useEmployee";
+import { useApiMutation } from "../hooks/useApiMutation";
 import type { IPerformance } from "../types/models";
 
 export default function EmployeePage() {
@@ -45,145 +31,107 @@ export default function EmployeePage() {
 		employeeId: string;
 	}>();
 	const navigate = useNavigate();
-	const [employee, setEmployee] = useState<Employee | null>(null);
-	const [loading, setLoading] = useState(true);
+	const { employee, loading, error, refetch } = useEmployee(
+		provinceId,
+		employeeId
+	);
+	const { mutate: deleteEmployee, loading: deleting } = useApiMutation(
+		async () => {
+			if (!provinceId || !employeeId) throw new Error("Missing identifiers");
+			return await provinceApi.deleteEmployee(provinceId, employeeId);
+		}
+	);
+
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
-	const [performanceDialogOpen, setPerformanceDialogOpen] = useState(false);
-	const [deleting, setDeleting] = useState(false);
 	const [saving, setSaving] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [editFormData, setEditFormData] = useState<UpdateEmployeeInput | null>(
-		null
-	);
-	const [performanceFormData, setPerformanceFormData] =
-		useState<IPerformance | null>(null);
-	const [editingPerformanceIndex, setEditingPerformanceIndex] = useState<
-		number | null
-	>(null);
-
-	useEffect(() => {
-		if (!provinceId || !employeeId) {
-			setError("Missing identifiers");
-			setLoading(false);
-			return;
-		}
-
-		const fetchEmployee = async () => {
-			setLoading(true);
-			setError(null);
-			try {
-				const res = await provinceApi.getEmployee(provinceId, employeeId);
-				if (!res.success || !res.data) {
-					setError(res.error || "Employee not found");
-					return;
-				}
-				setEmployee(res.data);
-			} catch (err) {
-				setError("Failed to load employee");
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchEmployee();
-	}, [provinceId, employeeId]);
-
-	const handleDelete = async () => {
-		if (!provinceId || !employeeId) return;
-
-		setDeleting(true);
-		setError(null);
-		try {
-			await provinceApi.deleteEmployee(provinceId, employeeId);
-			navigate(ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId), {
-				replace: true,
-			});
-		} catch (err) {
-			setError("Failed to delete employee");
-			setDeleteDialogOpen(false);
-		} finally {
-			setDeleting(false);
-		}
-	};
+	const [saveError, setSaveError] = useState<string | null>(null);
 
 	const handleEditOpen = () => {
-		if (employee) {
-			setEditFormData(
-				JSON.parse(
-					JSON.stringify({
-						basicInfo: employee.basicInfo,
-						workPlace: employee.workPlace,
-						additionalSpecifications: employee.additionalSpecifications,
-					})
-				)
-			);
-			setEditDialogOpen(true);
+		setEditDialogOpen(true);
+	};
+
+	const handleDelete = async () => {
+		const result = await deleteEmployee();
+		if (result) {
+			navigate(ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId!), {
+				replace: true,
+			});
 		}
+		setDeleteDialogOpen(false);
 	};
 
-	const handleEditChange = (field: string, value: any) => {
-		if (!editFormData) return;
-
-		const [section, key] = field.split(".");
-		setEditFormData({
-			...editFormData,
-			[section]: {
-				...(editFormData as any)[section],
-				[key]: value,
-			},
-		});
-	};
-
-	const handleSaveEdit = async () => {
-		if (!provinceId || !employeeId || !editFormData) return;
+	const handleSaveEdit = async (data: UpdateEmployeeInput) => {
+		if (!provinceId || !employeeId) return;
 
 		setSaving(true);
-		setError(null);
+		setSaveError(null);
 		try {
 			const res = await provinceApi.updateEmployee(
 				provinceId,
 				employeeId,
-				editFormData
+				data
 			);
 			if (!res.success || !res.data) {
-				setError(res.error || "Failed to update employee");
+				setSaveError(res.error || "Failed to update employee");
 				return;
 			}
-			setEmployee(res.data);
+			await refetch();
 			setEditDialogOpen(false);
 		} catch (err) {
-			setError("Failed to update employee");
+			setSaveError("Failed to update employee");
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	const handleAddPerformance = () => {
-		const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-		setPerformanceFormData({
-			dailyPerformance: 0,
-			shiftCountPerLocation: 0,
-			shiftDuration: 8,
-			overtime: 0,
-			dailyLeave: 0,
-			sickLeave: 0,
-			absence: 0,
-			volunteerShiftCount: 0,
-			truckDriver: false,
-			month: currentMonth,
-			notes: "",
-		});
-		setEditingPerformanceIndex(null);
-		setPerformanceDialogOpen(true);
+	const handleAddPerformance = async (performance: IPerformance) => {
+		if (!provinceId || !employeeId || !employee) return;
+
+		const updatedPerformances = [...employee.performances, performance];
+		setSaving(true);
+		setSaveError(null);
+		try {
+			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
+				performances: updatedPerformances,
+			});
+			if (!res.success || !res.data) {
+				setSaveError(res.error || "Failed to add performance record");
+				return;
+			}
+			await refetch();
+		} catch (err) {
+			setSaveError("Failed to add performance record");
+		} finally {
+			setSaving(false);
+		}
 	};
 
-	const handleEditPerformance = (index: number) => {
-		setPerformanceFormData(
-			JSON.parse(JSON.stringify(employee!.performances[index]))
+	const handleEditPerformance = async (
+		index: number,
+		performance: IPerformance
+	) => {
+		if (!provinceId || !employeeId || !employee) return;
+
+		const updatedPerformances = employee.performances.map((perf, i) =>
+			i === index ? performance : perf
 		);
-		setEditingPerformanceIndex(index);
-		setPerformanceDialogOpen(true);
+		setSaving(true);
+		setSaveError(null);
+		try {
+			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
+				performances: updatedPerformances,
+			});
+			if (!res.success || !res.data) {
+				setSaveError(res.error || "Failed to update performance record");
+				return;
+			}
+			await refetch();
+		} catch (err) {
+			setSaveError("Failed to update performance record");
+		} finally {
+			setSaving(false);
+		}
 	};
 
 	const handleDeletePerformance = async (index: number) => {
@@ -193,106 +141,35 @@ export default function EmployeePage() {
 			(_, i) => i !== index
 		);
 		setSaving(true);
-		setError(null);
+		setSaveError(null);
 		try {
 			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
 				performances: updatedPerformances,
 			});
 			if (!res.success || !res.data) {
-				setError(res.error || "Failed to delete performance record");
+				setSaveError(res.error || "Failed to delete performance record");
 				return;
 			}
-			setEmployee(res.data);
+			await refetch();
 		} catch (err) {
-			setError("Failed to delete performance record");
-		} finally {
-			setSaving(false);
-		}
-	};
-
-	const handlePerformanceChange = (field: keyof IPerformance, value: any) => {
-		if (!performanceFormData) return;
-		setPerformanceFormData({
-			...performanceFormData,
-			[field]: value,
-		});
-	};
-
-	const handleSavePerformance = async () => {
-		if (!provinceId || !employeeId || !employee || !performanceFormData) return;
-
-		let updatedPerformances: IPerformance[];
-		if (editingPerformanceIndex !== null) {
-			// Edit existing performance
-			updatedPerformances = employee.performances.map((perf, i) =>
-				i === editingPerformanceIndex ? performanceFormData : perf
-			);
-		} else {
-			// Add new performance
-			updatedPerformances = [...employee.performances, performanceFormData];
-		}
-
-		setSaving(true);
-		setError(null);
-		try {
-			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
-				performances: updatedPerformances,
-			});
-			if (!res.success || !res.data) {
-				setError(res.error || "Failed to save performance record");
-				return;
-			}
-			setEmployee(res.data);
-			setPerformanceDialogOpen(false);
-		} catch (err) {
-			setError("Failed to save performance record");
+			setSaveError("Failed to delete performance record");
 		} finally {
 			setSaving(false);
 		}
 	};
 
 	if (loading) {
-		return (
-			<>
-				<NavBar title="Employee Details" />
-				<Container sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-					<CircularProgress />
-				</Container>
-			</>
-		);
+		return <LoadingView title="Employee Details" />;
 	}
 
 	if (error && !employee) {
 		return (
-			<>
-				<NavBar title="Employee Details" />
-				<Container sx={{ mt: 4 }}>
-					<Alert severity="error">{error}</Alert>
-					<Button
-						component={Link}
-						to={ROUTES.PROVINCE_EMPLOYEES.replace(
-							":provinceId",
-							provinceId || ""
-						)}
-						startIcon={<ArrowBackIcon />}
-						sx={{ mt: 2 }}
-					>
-						Back to Employees
-					</Button>
-				</Container>
-			</>
+			<ErrorView title="Employee Details" message={error} onRetry={refetch} />
 		);
 	}
 
 	if (!employee) {
-		return (
-			<>
-				<NavBar title="Employee Details" />
-				<Container sx={{ mt: 4 }}>
-					<Alert severity="info">Employee not found.</Alert>
-				</Container>
-			</>
-		);
+		return <ErrorView title="Employee Details" message="Employee not found" />;
 	}
 
 	return (
@@ -330,9 +207,9 @@ export default function EmployeePage() {
 					</Box>
 				</Box>
 
-				{error && (
+				{saveError && (
 					<Alert severity="error" sx={{ mb: 3 }}>
-						{error}
+						{saveError}
 					</Alert>
 				)}
 
@@ -462,135 +339,13 @@ export default function EmployeePage() {
 					</Card>
 
 					{/* Performance Records */}
-					<Card>
-						<CardContent>
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-between",
-									alignItems: "center",
-									mb: 2,
-								}}
-							>
-								<Typography variant="h6">
-									Performance Records ({employee.performances.length})
-								</Typography>
-								<Button
-									variant="contained"
-									size="small"
-									startIcon={<AddIcon />}
-									onClick={handleAddPerformance}
-								>
-									Add Performance
-								</Button>
-							</Box>
-							<Divider sx={{ mb: 2 }} />
-							{employee.performances.length === 0 ? (
-								<Typography color="text.secondary">
-									No performance records yet.
-								</Typography>
-							) : (
-								<Stack spacing={1}>
-									{employee.performances.map((perf, index) => (
-										<Accordion key={index} defaultExpanded={index === 0}>
-											<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-												<Box
-													sx={{
-														display: "flex",
-														alignItems: "center",
-														gap: 2,
-														width: "100%",
-													}}
-												>
-													<Typography fontWeight="bold">
-														{perf.month
-															? `Performance: ${perf.month}`
-															: `Performance #${index + 1}`}
-													</Typography>
-													<Typography variant="body2" color="text.secondary">
-														{perf.dailyPerformance !== undefined &&
-															`(Performance: ${perf.dailyPerformance})`}
-													</Typography>
-												</Box>
-											</AccordionSummary>
-											<AccordionDetails>
-												<Stack spacing={2}>
-													<Box
-														sx={{
-															display: "flex",
-															justifyContent: "flex-end",
-															gap: 1,
-														}}
-													>
-														<IconButton
-															size="small"
-															color="primary"
-															onClick={() => handleEditPerformance(index)}
-															title="Edit"
-														>
-															<EditIcon fontSize="small" />
-														</IconButton>
-														<IconButton
-															size="small"
-															color="error"
-															onClick={() => handleDeletePerformance(index)}
-															title="Delete"
-														>
-															<DeleteOutlineIcon fontSize="small" />
-														</IconButton>
-													</Box>
-													<Box
-														sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}
-													>
-														<InfoField
-															label="Daily Performance"
-															value={perf.dailyPerformance}
-														/>
-														<InfoField
-															label="Shift Count/Location"
-															value={perf.shiftCountPerLocation}
-														/>
-														<InfoField
-															label="Shift Duration"
-															value={`${perf.shiftDuration} hours`}
-														/>
-														<InfoField label="Overtime" value={perf.overtime} />
-														<InfoField
-															label="Daily Leave"
-															value={perf.dailyLeave}
-														/>
-														<InfoField
-															label="Sick Leave"
-															value={perf.sickLeave}
-														/>
-														<InfoField label="Absence" value={perf.absence} />
-														<InfoField
-															label="Volunteer Shifts"
-															value={perf.volunteerShiftCount}
-														/>
-														<InfoField
-															label="Truck Driver"
-															value={perf.truckDriver ? "Yes" : "No"}
-														/>
-													</Box>
-													{perf.notes && (
-														<Box sx={{ mt: 1 }}>
-															<Typography
-																variant="body2"
-																color="text.secondary"
-															>
-																<strong>Notes:</strong> {perf.notes}
-															</Typography>
-														</Box>
-													)}
-												</Stack>
-											</AccordionDetails>
-										</Accordion>
-									))}
-								</Stack>
-							)}
-						</CardContent>
-					</Card>
+					<PerformanceManager
+						performances={employee.performances}
+						saving={saving}
+						onAdd={handleAddPerformance}
+						onEdit={handleEditPerformance}
+						onDelete={handleDeletePerformance}
+					/>
 				</Stack>
 
 				<Box sx={{ mt: 3 }}>
@@ -606,506 +361,51 @@ export default function EmployeePage() {
 					</Button>
 				</Box>
 
-				{/* Edit Dialog */}
-				<Dialog
+				<EditEmployeeDialog
 					open={editDialogOpen}
-					onClose={() => !saving && setEditDialogOpen(false)}
-					maxWidth="sm"
-					fullWidth
-				>
-					<DialogTitle>Edit Employee</DialogTitle>
-					<DialogContent sx={{ pt: 3 }}>
-						{editFormData && (
-							<Stack spacing={2}>
-								{/* Basic Info */}
-								<Box>
-									<Typography
-										variant="subtitle2"
-										sx={{ mb: 1, fontWeight: 600 }}
-									>
-										Basic Information
-									</Typography>
-									<TextField
-										fullWidth
-										label="First Name"
-										value={editFormData.basicInfo?.firstName || ""}
-										onChange={(e) =>
-											handleEditChange("basicInfo.firstName", e.target.value)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Last Name"
-										value={editFormData.basicInfo?.lastName || ""}
-										onChange={(e) =>
-											handleEditChange("basicInfo.lastName", e.target.value)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="National ID"
-										value={editFormData.basicInfo?.nationalID || ""}
-										onChange={(e) =>
-											handleEditChange("basicInfo.nationalID", e.target.value)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Gender"
-										select
-										value={editFormData.basicInfo?.male ? "male" : "female"}
-										onChange={(e) =>
-											handleEditChange(
-												"basicInfo.male",
-												e.target.value === "male"
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									>
-										<MenuItem value="male">Male</MenuItem>
-										<MenuItem value="female">Female</MenuItem>
-									</TextField>
-									<FormControlLabel
-										control={
-											<Checkbox
-												checked={editFormData.basicInfo?.married || false}
-												onChange={(e) =>
-													handleEditChange(
-														"basicInfo.married",
-														e.target.checked
-													)
-												}
-											/>
-										}
-										label="Married"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Children Count"
-										type="number"
-										value={editFormData.basicInfo?.childrenCount || 0}
-										onChange={(e) =>
-											handleEditChange(
-												"basicInfo.childrenCount",
-												parseInt(e.target.value)
-											)
-										}
-										size="small"
-									/>
-								</Box>
+					employee={employee}
+					saving={saving}
+					onClose={() => setEditDialogOpen(false)}
+					onSave={handleSaveEdit}
+				/>
 
-								{/* WorkPlace Info */}
-								<Box>
-									<Typography
-										variant="subtitle2"
-										sx={{ mb: 1, fontWeight: 600 }}
-									>
-										WorkPlace Information
-									</Typography>
-									<TextField
-										fullWidth
-										label="Branch"
-										value={editFormData.workPlace?.branch || ""}
-										onChange={(e) =>
-											handleEditChange("workPlace.branch", e.target.value)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Rank"
-										value={editFormData.workPlace?.rank || ""}
-										onChange={(e) =>
-											handleEditChange("workPlace.rank", e.target.value)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Licensed Workplace"
-										value={editFormData.workPlace?.licensedWorkplace || ""}
-										onChange={(e) =>
-											handleEditChange(
-												"workPlace.licensedWorkplace",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<FormControlLabel
-										control={
-											<Checkbox
-												checked={
-													editFormData.workPlace?.travelAssignment || false
-												}
-												onChange={(e) =>
-													handleEditChange(
-														"workPlace.travelAssignment",
-														e.target.checked
-													)
-												}
-											/>
-										}
-										label="Travel Assignment"
-									/>
-								</Box>
-
-								{/* Additional Specifications */}
-								<Box>
-									<Typography
-										variant="subtitle2"
-										sx={{ mb: 1, fontWeight: 600 }}
-									>
-										Additional Specifications
-									</Typography>
-									<TextField
-										fullWidth
-										label="Educational Degree"
-										value={
-											editFormData.additionalSpecifications
-												?.educationalDegree || ""
-										}
-										onChange={(e) =>
-											handleEditChange(
-												"additionalSpecifications.educationalDegree",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Date of Birth"
-										type="date"
-										value={
-											editFormData.additionalSpecifications?.dateOfBirth
-												? new Date(
-														editFormData.additionalSpecifications.dateOfBirth
-												  )
-														.toISOString()
-														.split("T")[0]
-												: ""
-										}
-										onChange={(e) =>
-											handleEditChange(
-												"additionalSpecifications.dateOfBirth",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-										InputLabelProps={{ shrink: true }}
-									/>
-									<TextField
-										fullWidth
-										label="Contact Number"
-										value={
-											editFormData.additionalSpecifications?.contactNumber || ""
-										}
-										onChange={(e) =>
-											handleEditChange(
-												"additionalSpecifications.contactNumber",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									/>
-									<TextField
-										fullWidth
-										label="Job Start Date"
-										type="date"
-										value={
-											editFormData.additionalSpecifications?.jobStartDate
-												? new Date(
-														editFormData.additionalSpecifications.jobStartDate
-												  )
-														.toISOString()
-														.split("T")[0]
-												: ""
-										}
-										onChange={(e) =>
-											handleEditChange(
-												"additionalSpecifications.jobStartDate",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-										InputLabelProps={{ shrink: true }}
-									/>
-									<TextField
-										fullWidth
-										label="Status"
-										select
-										value={
-											editFormData.additionalSpecifications?.status || "active"
-										}
-										onChange={(e) =>
-											handleEditChange(
-												"additionalSpecifications.status",
-												e.target.value
-											)
-										}
-										size="small"
-										sx={{ mb: 1 }}
-									>
-										<MenuItem value="active">Active</MenuItem>
-										<MenuItem value="inactive">Inactive</MenuItem>
-										<MenuItem value="on_leave">On Leave</MenuItem>
-									</TextField>
-								</Box>
-							</Stack>
-						)}
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={() => setEditDialogOpen(false)} disabled={saving}>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleSaveEdit}
-							color="primary"
-							variant="contained"
-							disabled={saving}
-						>
-							{saving ? "Saving..." : "Save Changes"}
-						</Button>
-					</DialogActions>
-				</Dialog>
-				{/* Performance Dialog */}
-				<Dialog
-					open={performanceDialogOpen}
-					onClose={() => !saving && setPerformanceDialogOpen(false)}
-					maxWidth="sm"
-					fullWidth
-				>
-					<DialogTitle>
-						{editingPerformanceIndex !== null ? "Edit" : "Add"} Performance
-						Record
-					</DialogTitle>
-					<DialogContent sx={{ pt: 3 }}>
-						{performanceFormData && (
-							<Stack spacing={2}>
-								<TextField
-									fullWidth
-									label="Month (YYYY-MM)"
-									type="month"
-									value={performanceFormData.month || ""}
-									onChange={(e) =>
-										handlePerformanceChange("month", e.target.value)
-									}
-									InputLabelProps={{ shrink: true }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Daily Performance"
-									type="number"
-									value={performanceFormData.dailyPerformance}
-									onChange={(e) =>
-										handlePerformanceChange(
-											"dailyPerformance",
-											Number(e.target.value)
-										)
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Shift Count per Location"
-									type="number"
-									value={performanceFormData.shiftCountPerLocation}
-									onChange={(e) =>
-										handlePerformanceChange(
-											"shiftCountPerLocation",
-											Number(e.target.value)
-										)
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Shift Duration (hours)"
-									select
-									value={performanceFormData.shiftDuration}
-									onChange={(e) =>
-										handlePerformanceChange(
-											"shiftDuration",
-											Number(e.target.value)
-										)
-									}
-									size="small"
-								>
-									<MenuItem value={8}>8 hours</MenuItem>
-									<MenuItem value={16}>16 hours</MenuItem>
-									<MenuItem value={24}>24 hours</MenuItem>
-								</TextField>
-								<TextField
-									fullWidth
-									label="Overtime"
-									type="number"
-									value={performanceFormData.overtime}
-									onChange={(e) =>
-										handlePerformanceChange("overtime", Number(e.target.value))
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Daily Leave"
-									type="number"
-									value={performanceFormData.dailyLeave}
-									onChange={(e) =>
-										handlePerformanceChange(
-											"dailyLeave",
-											Number(e.target.value)
-										)
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Sick Leave"
-									type="number"
-									value={performanceFormData.sickLeave}
-									onChange={(e) =>
-										handlePerformanceChange("sickLeave", Number(e.target.value))
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Absence"
-									type="number"
-									value={performanceFormData.absence}
-									onChange={(e) =>
-										handlePerformanceChange("absence", Number(e.target.value))
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<TextField
-									fullWidth
-									label="Volunteer Shift Count"
-									type="number"
-									value={performanceFormData.volunteerShiftCount}
-									onChange={(e) =>
-										handlePerformanceChange(
-											"volunteerShiftCount",
-											Number(e.target.value)
-										)
-									}
-									inputProps={{ min: 0 }}
-									size="small"
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={performanceFormData.truckDriver || false}
-											onChange={(e) =>
-												handlePerformanceChange("truckDriver", e.target.checked)
-											}
-										/>
-									}
-									label="Truck Driver"
-								/>
-								<TextField
-									fullWidth
-									label="Notes"
-									multiline
-									rows={3}
-									value={performanceFormData.notes || ""}
-									onChange={(e) =>
-										handlePerformanceChange("notes", e.target.value)
-									}
-									size="small"
-								/>
-							</Stack>
-						)}
-					</DialogContent>
-					<DialogActions>
-						<Button
-							onClick={() => setPerformanceDialogOpen(false)}
-							disabled={saving}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleSavePerformance}
-							color="primary"
-							variant="contained"
-							disabled={saving}
-						>
-							{saving ? "Saving..." : "Save"}
-						</Button>
-					</DialogActions>
-				</Dialog>
-				{/* Delete Confirmation Dialog */}
-				<Dialog
+				<ConfirmDialog
 					open={deleteDialogOpen}
-					onClose={() => !deleting && setDeleteDialogOpen(false)}
-				>
-					<DialogTitle>Confirm Delete</DialogTitle>
-					<DialogContent>
-						<DialogContentText>
-							Are you sure you want to delete this employee? This action cannot
-							be undone.
-						</DialogContentText>
-					</DialogContent>
-					<DialogActions>
-						<Button
-							onClick={() => setDeleteDialogOpen(false)}
-							disabled={deleting}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleDelete}
-							color="error"
-							variant="contained"
-							disabled={deleting}
-						>
-							{deleting ? "Deleting..." : "Delete"}
-						</Button>
-					</DialogActions>
-				</Dialog>
+					title="Confirm Delete"
+					message="Are you sure you want to delete this employee? This action cannot be undone."
+					loading={deleting}
+					onClose={() => setDeleteDialogOpen(false)}
+					onConfirm={handleDelete}
+				/>
 			</Container>
 		</>
 	);
 }
 
-function InfoField({
-	label,
-	value,
-}: {
-	label: string;
-	value?: string | number;
-}) {
+// Helper component for displaying employee info fields
+function InfoField({ label, value }: { label: string; value: any }) {
+	const displayValue = () => {
+		if (value === null || value === undefined || value === "") {
+			return "N/A";
+		}
+		if (typeof value === "boolean") {
+			return value ? "Yes" : "No";
+		}
+		if (value instanceof Date) {
+			return value.toLocaleDateString();
+		}
+		if (Array.isArray(value)) {
+			return value.join(", ") || "N/A";
+		}
+		return String(value);
+	};
+
 	return (
-		<Box sx={{ minWidth: 150 }}>
-			<Typography variant="caption" color="text.secondary">
-				{label}
+		<Box sx={{ display: "flex", justifyContent: "space-between" }}>
+			<Typography variant="body2" color="text.secondary">
+				{label}:
 			</Typography>
-			<Typography variant="body1" fontWeight="500">
-				{value}
-			</Typography>
+			<Typography variant="body2">{displayValue()}</Typography>
 		</Box>
 	);
 }
