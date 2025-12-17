@@ -45,7 +45,8 @@ const sessionConfig: session.SessionOptions = {
 	cookie: {
 		secure: config.nodeEnv === 'production',
 		httpOnly: true,
-		maxAge: config.session.maxAge
+		maxAge: config.session.maxAge,
+		sameSite: config.nodeEnv === 'production' ? 'lax' : 'lax'
 	}
 };
 

@@ -11,12 +11,20 @@ export const auditLog = (req: Request, res: Response, next: NextFunction): void 
 		return next();
 	}
 
+	const userFromSession = req.session?.userId
+		? {
+			id: req.session.userId,
+			role: req.session.role,
+			provinceId: req.session.provinceId
+		}
+		: undefined;
+
 	const auditData = {
 		method: req.method,
 		path: req.path,
-		userId: req.user?.id || "anonymous",
-		userRole: req.user?.role || "unauthenticated",
-		userProvince: req.user?.provinceId,
+		userId: req.user?.id || userFromSession?.id || "anonymous",
+		userRole: req.user?.role || userFromSession?.role || "unauthenticated",
+		userProvince: req.user?.provinceId || userFromSession?.provinceId,
 		ip: req.ip,
 		timestamp: new Date().toISOString()
 	};
