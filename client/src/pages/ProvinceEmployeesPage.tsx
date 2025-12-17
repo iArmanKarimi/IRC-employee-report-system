@@ -17,6 +17,7 @@ import Alert from "@mui/material/Alert";
 import Pagination from "@mui/material/Pagination";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
 	provinceApi,
 	type Employee,
@@ -125,6 +126,18 @@ export default function ProvinceEmployeesPage() {
 		<>
 			<NavBar title="Province Employees" />
 			<Container sx={{ mt: 4 }}>
+				<Box sx={{ mb: 2 }}>
+					<Button
+						component={Link}
+						to={ROUTES.PROVINCES}
+						startIcon={<ArrowBackIcon />}
+						variant="text"
+						color="primary"
+					>
+						Back to All Provinces
+					</Button>
+				</Box>
+
 				<Box
 					sx={{
 						display: "flex",
