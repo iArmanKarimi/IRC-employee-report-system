@@ -16,6 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { provinceApi, type UpdateEmployeeInput } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
+import Breadcrumbs from "../components/Breadcrumbs";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EditEmployeeDialog } from "../components/dialogs/EditEmployeeDialog";
@@ -23,6 +24,7 @@ import { PerformanceManager } from "../components/PerformanceManager";
 import { ConfirmDialog } from "../components/dialogs/ConfirmDialog";
 import { useEmployee } from "../hooks/useEmployee";
 import { useApiMutation } from "../hooks/useApiMutation";
+import { formatEmployeeName } from "../utils/formatters";
 import type { IPerformance } from "../types/models";
 
 export default function EmployeePage() {
@@ -171,8 +173,20 @@ export default function EmployeePage() {
 
 	return (
 		<>
-			<NavBar title="Employee Details" />
+			<NavBar
+				title="Employee Details"
+				backTo={
+					provinceId
+						? ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId)
+						: ROUTES.PROVINCES
+				}
+				backLabel="Back to Employees"
+			/>
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+				<Breadcrumbs
+					provinceName={employee.workPlace?.provinceName}
+					employeeName={formatEmployeeName(employee)}
+				/>
 				<Box
 					sx={{
 						display: "flex",

@@ -20,6 +20,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { provinceApi } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
+import Breadcrumbs from "../components/Breadcrumbs";
 import PerformanceAccordion from "../components/PerformanceAccordion";
 import type {
 	CreateEmployeeInput,
@@ -149,8 +150,17 @@ export default function NewEmployeeFormPage() {
 
 	return (
 		<>
-			<NavBar title="New Employee" />
+			<NavBar
+				title="New Employee"
+				backTo={
+					provinceId
+						? ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId)
+						: ROUTES.PROVINCES
+				}
+				backLabel="Back to Employees"
+			/>
 			<Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+				<Breadcrumbs />
 				<Paper elevation={2} sx={{ p: 4 }}>
 					<Typography variant="h4" component="h1" gutterBottom>
 						New Employee

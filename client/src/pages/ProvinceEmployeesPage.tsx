@@ -15,9 +15,9 @@ import Chip from "@mui/material/Chip";
 import Pagination from "@mui/material/Pagination";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
+import Breadcrumbs from "../components/Breadcrumbs";
 import { useEmployees } from "../hooks/useEmployees";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
@@ -55,19 +55,13 @@ export default function ProvinceEmployeesPage() {
 
 	return (
 		<>
-			<NavBar title="Province Employees" />
+			<NavBar
+				title="Province Employees"
+				backTo={ROUTES.PROVINCES}
+				backLabel="Back to Provinces"
+			/>
 			<Container sx={{ mt: 4 }}>
-				<Box sx={{ mb: 2 }}>
-					<Button
-						component={Link}
-						to={ROUTES.PROVINCES}
-						startIcon={<ArrowBackIcon />}
-						variant="text"
-						color="primary"
-					>
-						Back to All Provinces
-					</Button>
-				</Box>
+				<Breadcrumbs provinceName={provinceName || undefined} />
 
 				<Box
 					sx={{

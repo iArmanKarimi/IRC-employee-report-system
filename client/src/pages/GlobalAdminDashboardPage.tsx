@@ -10,7 +10,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import PeopleIcon from "@mui/icons-material/People";
-import type { Province } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import { useProvinces } from "../hooks/useProvinces";

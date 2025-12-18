@@ -2,6 +2,9 @@ import { Navigate } from "react-router-dom";
 import axios from "axios";
 import api from "../api/api";
 import { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { API_ENDPOINTS, ROUTES } from "../const/endpoints";
 import type { ReactElement } from "react";
 
@@ -37,7 +40,23 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 	}, []);
 
 	if (loading) {
-		return <div>Loading...</div>;
+		return (
+			<Box
+				sx={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
+					minHeight: "100vh",
+					gap: 2,
+				}}
+			>
+				<CircularProgress size={48} />
+				<Typography variant="body2" color="text.secondary">
+					Verifying authorization...
+				</Typography>
+			</Box>
+		);
 	}
 
 	if (!authorized) {
