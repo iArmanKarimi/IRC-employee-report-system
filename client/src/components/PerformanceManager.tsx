@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 import { PerformanceCard } from "./PerformanceCard";
 import { PerformanceDialog } from "./dialogs/PerformanceDialog";
+import { ConfirmDialog } from "./dialogs/ConfirmDialog";
 import type { IPerformance } from "../types/models";
 
 type PerformanceManagerProps = {
@@ -30,6 +31,8 @@ export function PerformanceManager({
 	const [performanceData, setPerformanceData] = useState<IPerformance | null>(
 		null
 	);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
 
 	const handleAddClick = () => {
 		const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -65,8 +68,17 @@ export function PerformanceManager({
 		setDialogOpen(false);
 	};
 
-	const handleDelete = async (index: number) => {
-		await onDelete(index);
+	const handleDeleteClick = (index: number) => {
+		setDeletingIndex(index);
+		setDeleteDialogOpen(true);
+	};
+
+	const handleDeleteConfirm = async () => {
+		if (deletingIndex !== null) {
+			await onDelete(deletingIndex);
+			setDeleteDialogOpen(false);
+			setDeletingIndex(null);
+		}
 	};
 
 	return (
@@ -102,7 +114,7 @@ export function PerformanceManager({
 									key={index}
 									performance={perf}
 									onEdit={() => handleEditClick(index)}
-									onDelete={() => handleDelete(index)}
+									onDelete={() => handleDeleteClick(index)}
 								/>
 							))}
 						</Stack>
@@ -120,6 +132,15 @@ export function PerformanceManager({
 					onSave={handleSave}
 				/>
 			)}
+
+			<ConfirmDialog
+				open={deleteDialogOpen}
+				title="Confirm Delete"
+				message="Are you sure you want to delete this performance record? This action cannot be undone."
+				loading={saving}
+				onClose={() => setDeleteDialogOpen(false)}
+				onConfirm={handleDeleteConfirm}
+			/>
 		</>
 	);
 }
