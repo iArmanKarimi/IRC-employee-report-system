@@ -73,22 +73,29 @@ export default function EmployeePage() {
 				data
 			);
 			if (!res.success || !res.data) {
-				setSaveError(res.error || "Failed to update employee");
+				setSaveError(
+					res.error ||
+						"Failed to update employee. Please check your input and try again."
+				);
 				return;
 			}
 			await refetch();
 			setEditDialogOpen(false);
 		} catch (err) {
-			setSaveError("Failed to update employee");
+			setSaveError(
+				"Failed to update employee. Please check your input and try again."
+			);
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	const handleAddPerformance = async (performance: IPerformance) => {
-		if (!provinceId || !employeeId || !employee) return;
-
-		const updatedPerformances = [...employee.performances, performance];
+	// Helper to update performance records
+	async function updatePerformanceRecords(
+		updatedPerformances: IPerformance[],
+		errorMsg: string
+	) {
+		if (!provinceId || !employeeId) return;
 		setSaving(true);
 		setSaveError(null);
 		try {
@@ -96,66 +103,56 @@ export default function EmployeePage() {
 				performances: updatedPerformances,
 			});
 			if (!res.success || !res.data) {
-				setSaveError(res.error || "Failed to add performance record");
+				setSaveError(
+					res.error ||
+						errorMsg +
+							". Please try again or contact support if the issue persists."
+				);
 				return;
 			}
 			await refetch();
 		} catch (err) {
-			setSaveError("Failed to add performance record");
+			setSaveError(
+				errorMsg +
+					". Please try again or contact support if the issue persists."
+			);
 		} finally {
 			setSaving(false);
 		}
+	}
+
+	const handleAddPerformance = async (performance: IPerformance) => {
+		if (!employee) return;
+		const updatedPerformances = [...employee.performances, performance];
+		await updatePerformanceRecords(
+			updatedPerformances,
+			"Failed to add performance record. Please try again or contact support if the issue persists."
+		);
 	};
 
 	const handleEditPerformance = async (
 		index: number,
 		performance: IPerformance
 	) => {
-		if (!provinceId || !employeeId || !employee) return;
-
+		if (!employee) return;
 		const updatedPerformances = employee.performances.map((perf, i) =>
 			i === index ? performance : perf
 		);
-		setSaving(true);
-		setSaveError(null);
-		try {
-			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
-				performances: updatedPerformances,
-			});
-			if (!res.success || !res.data) {
-				setSaveError(res.error || "Failed to update performance record");
-				return;
-			}
-			await refetch();
-		} catch (err) {
-			setSaveError("Failed to update performance record");
-		} finally {
-			setSaving(false);
-		}
+		await updatePerformanceRecords(
+			updatedPerformances,
+			"Failed to update performance record. Please try again or contact support if the issue persists."
+		);
 	};
 
 	const handleDeletePerformance = async (index: number) => {
-		if (!provinceId || !employeeId || !employee) return;
-
+		if (!employee) return;
 		const updatedPerformances = employee.performances.filter(
 			(_, i) => i !== index
 		);
-		setSaving(true);
-		setSaveError(null);
-		try {
-			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
-				performances: updatedPerformances,
-			});
-			if (!res.success || !res.data) {
-				setSaveError(res.error || "Failed to delete performance record");
-				return;
-			}
-			await refetch();
-		} catch (err) {
-			setSaveError("Failed to delete performance record");
-		} finally {
-			setSaving(false);
-		}
+		await updatePerformanceRecords(
+			updatedPerformances,
+			"Failed to delete performance record. Please try again or contact support if the issue persists."
+		);
 	};
 
 	if (loading) {
@@ -193,6 +190,7 @@ export default function EmployeePage() {
 							color="primary"
 							startIcon={<EditIcon />}
 							onClick={handleEditOpen}
+							aria-label="Edit Employee"
 						>
 							Edit Employee
 						</Button>
@@ -201,6 +199,7 @@ export default function EmployeePage() {
 							color="error"
 							startIcon={<DeleteIcon />}
 							onClick={() => setDeleteDialogOpen(true)}
+							aria-label="Delete Employee"
 						>
 							Delete Employee
 						</Button>
@@ -351,11 +350,15 @@ export default function EmployeePage() {
 				<Box sx={{ mt: 3 }}>
 					<Button
 						component={Link}
-						to={ROUTES.PROVINCE_EMPLOYEES.replace(
-							":provinceId",
-							provinceId || ""
-						)}
+						to={
+							provinceId
+								? ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId)
+								: "/"
+						}
 						startIcon={<ArrowBackIcon />}
+						disabled={!provinceId}
+						aria-disabled={!provinceId}
+						aria-label={provinceId ? "Back to Employees" : "Back unavailable"}
 					>
 						Back to Employees
 					</Button>
@@ -383,7 +386,14 @@ export default function EmployeePage() {
 }
 
 // Helper component for displaying employee info fields
-function InfoField({ label, value }: { label: string; value: any }) {
+type InfoFieldValue =
+	| string
+	| number
+	| boolean
+	| null
+	| undefined
+	| (string | number)[];
+function InfoField({ label, value }: { label: string; value: InfoFieldValue }) {
 	const displayValue = () => {
 		if (value === null || value === undefined || value === "") {
 			return "N/A";
