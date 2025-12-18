@@ -9,11 +9,13 @@ import { ROUTES } from "../const/endpoints";
 type BreadcrumbsProps = {
 	provinceName?: string;
 	employeeName?: string;
+	showProvincesLink?: boolean;
 };
 
 export default function Breadcrumbs({
 	provinceName,
 	employeeName,
+	showProvincesLink = false,
 }: BreadcrumbsProps) {
 	const { provinceId, employeeId } = useParams<{
 		provinceId: string;
@@ -23,8 +25,8 @@ export default function Breadcrumbs({
 
 	const breadcrumbItems = [];
 
-	// Home/Provinces
-	if (location.pathname !== ROUTES.PROVINCES) {
+	// Home/Provinces - Only show if explicitly allowed (for global admins)
+	if (showProvincesLink && location.pathname !== ROUTES.PROVINCES) {
 		breadcrumbItems.push({
 			label: "Provinces",
 			icon: <HomeIcon sx={{ mr: 0.5, fontSize: 20 }} />,

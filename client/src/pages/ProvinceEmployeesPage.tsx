@@ -19,6 +19,7 @@ import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { useEmployees } from "../hooks/useEmployees";
+import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
@@ -28,6 +29,7 @@ export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const [page, setPage] = useState(1);
 	const limit = 20;
+	const { isGlobalAdmin } = useIsGlobalAdmin();
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
 		page,
@@ -57,11 +59,14 @@ export default function ProvinceEmployeesPage() {
 		<>
 			<NavBar
 				title="Province Employees"
-				backTo={ROUTES.PROVINCES}
+				backTo={isGlobalAdmin ? ROUTES.PROVINCES : undefined}
 				backLabel="Back to Provinces"
 			/>
 			<Container sx={{ mt: 4 }}>
-				<Breadcrumbs provinceName={provinceName || undefined} />
+				<Breadcrumbs
+					provinceName={provinceName || undefined}
+					showProvincesLink={isGlobalAdmin}
+				/>
 
 				<Box
 					sx={{

@@ -22,6 +22,7 @@ import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import PerformanceAccordion from "../components/PerformanceAccordion";
+import { useIsGlobalAdmin } from "../hooks/useAuth";
 import type {
 	CreateEmployeeInput,
 	IBasicInfo,
@@ -40,6 +41,7 @@ type EmployeeFormData = {
 export default function NewEmployeeFormPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const navigate = useNavigate();
+	const { isGlobalAdmin } = useIsGlobalAdmin();
 	const [form, setForm] = useState<EmployeeFormData>({
 		basicInfo: {
 			firstName: "",
@@ -155,12 +157,12 @@ export default function NewEmployeeFormPage() {
 				backTo={
 					provinceId
 						? ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId)
-						: ROUTES.PROVINCES
+						: undefined
 				}
 				backLabel="Back to Employees"
 			/>
 			<Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-				<Breadcrumbs />
+				<Breadcrumbs showProvincesLink={isGlobalAdmin} />
 				<Paper elevation={2} sx={{ p: 4 }}>
 					<Typography variant="h4" component="h1" gutterBottom>
 						New Employee

@@ -24,6 +24,7 @@ import { PerformanceManager } from "../components/PerformanceManager";
 import { ConfirmDialog } from "../components/dialogs/ConfirmDialog";
 import { useEmployee } from "../hooks/useEmployee";
 import { useApiMutation } from "../hooks/useApiMutation";
+import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { formatEmployeeName } from "../utils/formatters";
 import type { IPerformance } from "../types/models";
 
@@ -33,6 +34,7 @@ export default function EmployeePage() {
 		employeeId: string;
 	}>();
 	const navigate = useNavigate();
+	const { isGlobalAdmin } = useIsGlobalAdmin();
 	const { employee, loading, error, refetch } = useEmployee(
 		provinceId,
 		employeeId
@@ -186,6 +188,7 @@ export default function EmployeePage() {
 				<Breadcrumbs
 					provinceName={employee.workPlace?.provinceName}
 					employeeName={formatEmployeeName(employee)}
+					showProvincesLink={isGlobalAdmin}
 				/>
 				<Box
 					sx={{
