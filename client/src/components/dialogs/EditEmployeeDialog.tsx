@@ -209,7 +209,8 @@ export function EditEmployeeDialog({
 						}
 						fullWidth
 						required
-						helperText="Must be 10 digits"
+						inputProps={{ pattern: "\\d{11}" }}
+						helperText="Must be 11 digits"
 					/>
 					<TextField
 						label="Job Start Date"
