@@ -67,6 +67,7 @@ export function PersianDatePicker({
 	const [persianValue, setPersianValue] = useState<string>("");
 	const [calYear, setCalYear] = useState<number>(1403);
 	const [calMonth, setCalMonth] = useState<number>(1);
+	const [viewMode, setViewMode] = useState<"day" | "year">("day");
 
 	// Sync inputValue with value prop
 	useEffect(() => {
@@ -132,10 +133,12 @@ export function PersianDatePicker({
 
 	const handleCalendarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
+		setViewMode("day");
 	};
 
 	const handleClose = () => {
 		setAnchorEl(null);
+		setViewMode("day");
 	};
 
 	const handleDateSelect = (year: number, month: number, day: number) => {
@@ -144,14 +147,27 @@ export function PersianDatePicker({
 		).padStart(2, "0")}`;
 		try {
 			const gregorian = persianToGregorian(persianStr);
+			// Update local state immediately
+			setInputValue(gregorian);
 			setPersianValue(persianStr);
 			setCalYear(year);
 			setCalMonth(month);
+			// Notify parent
 			onChange(gregorian);
 			setAnchorEl(null);
+			setViewMode("day");
 		} catch {
 			// Invalid date
 		}
+	};
+
+	const handleYearSelect = (year: number) => {
+		setCalYear(year);
+		setViewMode("day");
+	};
+
+	const toggleYearView = () => {
+		setViewMode(viewMode === "day" ? "year" : "day");
 	};
 
 	const open = Boolean(anchorEl);
@@ -257,57 +273,109 @@ export function PersianDatePicker({
 			>
 				<Box sx={{ p: 2, minWidth: 320 }}>
 					<Stack spacing={2}>
-						<Stack
-							direction="row"
-							justifyContent="space-between"
-							alignItems="center"
-						>
-							<Button size="small" onClick={handlePrevMonth}>
-								←
-							</Button>
-							<Typography variant="h6" align="center" sx={{ flex: 1 }}>
-								{persianMonths[calMonth - 1]} {calYear}
-							</Typography>
-							<Button size="small" onClick={handleNextMonth}>
-								→
-							</Button>
-						</Stack>
-						<Box
-							sx={{
-								display: "grid",
-								gridTemplateColumns: "repeat(7, 1fr)",
-								gap: 1,
-							}}
-						>
-							{["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
-								<Typography
-									key={day}
-									variant="caption"
-									align="center"
-									sx={{ fontWeight: "bold" }}
+						{viewMode === "day" ? (
+							<>
+								<Stack
+									direction="row"
+									justifyContent="space-between"
+									alignItems="center"
 								>
-									{day}
-								</Typography>
-							))}
-							{days.map((day, idx) => (
-								<Button
-									key={idx}
-									onClick={() =>
-										day && handleDateSelect(calYear, calMonth, day)
-									}
-									disabled={!day}
-									variant={day === selectedDay ? "contained" : "outlined"}
-									size="small"
+									<Button size="small" onClick={handlePrevMonth}>
+										←
+									</Button>
+									<Button
+										variant="text"
+										onClick={toggleYearView}
+										sx={{ flex: 1, textTransform: "none" }}
+									>
+										<Typography variant="h6" align="center">
+											{persianMonths[calMonth - 1]} {calYear}
+										</Typography>
+									</Button>
+									<Button size="small" onClick={handleNextMonth}>
+										→
+									</Button>
+								</Stack>
+								<Box
 									sx={{
-										width: "100%",
-										padding: 0.5,
-										minHeight: 32,
+										display: "grid",
+										gridTemplateColumns: "repeat(7, 1fr)",
+										gap: 1,
 									}}
 								>
-									{day}
-								</Button>
-							))}
-						</Box>
+									{["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
+										<Typography
+											key={day}
+											variant="caption"
+											align="center"
+											sx={{ fontWeight: "bold" }}
+										>
+											{day}
+										</Typography>
+									))}
+									{days.map((day, idx) => (
+										<Button
+											key={idx}
+											onClick={() =>
+												day && handleDateSelect(calYear, calMonth, day)
+											}
+											disabled={!day}
+											variant={day === selectedDay ? "contained" : "outlined"}
+											size="small"
+											sx={{
+												width: "100%",
+												padding: 0.5,
+												minHeight: 32,
+											}}
+										>
+											{day}
+										</Button>
+									))}
+								</Box>
+							</>
+						) : (
+							<>
+								<Stack
+									direction="row"
+									justifyContent="space-between"
+									alignItems="center"
+								>
+									<Button size="small" onClick={() => setCalYear(calYear - 12)}>
+										←
+									</Button>
+									<Typography variant="h6" align="center" sx={{ flex: 1 }}>
+										{calYear - 5} - {calYear + 6}
+									</Typography>
+									<Button size="small" onClick={() => setCalYear(calYear + 12)}>
+										→
+									</Button>
+								</Stack>
+								<Box
+									sx={{
+										display: "grid",
+										gridTemplateColumns: "repeat(3, 1fr)",
+										gap: 1,
+									}}
+								>
+									{Array.from({ length: 12 }, (_, i) => calYear - 5 + i).map(
+										(year) => (
+											<Button
+												key={year}
+												onClick={() => handleYearSelect(year)}
+												variant={year === calYear ? "contained" : "outlined"}
+												size="small"
+												sx={{
+													padding: 1,
+													minHeight: 40,
+												}}
+											>
+												{year}
+											</Button>
+										)
+									)}
+								</Box>
+							</>
+						)}
 					</Stack>
 				</Box>
 			</Popover>
