@@ -46,6 +46,7 @@ export function PerformanceManager({
 			absence: 0,
 			volunteerShiftCount: 0,
 			truckDriver: false,
+			travelAssignment: 0,
 			month: currentMonth,
 			notes: "",
 		});

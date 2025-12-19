@@ -22,6 +22,7 @@ import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import PerformanceAccordion from "../components/PerformanceAccordion";
+import { PersianDatePicker } from "../components/PersianDatePicker";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import type {
 	CreateEmployeeInput,
@@ -303,15 +304,14 @@ export default function NewEmployeeFormPage() {
 												)
 											}
 										/>
-										<TextField
+										<PersianDatePicker
 											label="Date of Birth"
-											type="date"
 											required
 											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.dateOfBirth}
-											onChange={(e) =>
-												updateAdditionalSpecs("dateOfBirth", e.target.value)
+											onChange={(value) =>
+												updateAdditionalSpecs("dateOfBirth", value)
 											}
 										/>
 									</Box>
@@ -327,27 +327,25 @@ export default function NewEmployeeFormPage() {
 												updateAdditionalSpecs("contactNumber", e.target.value)
 											}
 										/>
-										<TextField
+										<PersianDatePicker
 											label="Job Start Date"
-											type="date"
 											required
 											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.jobStartDate}
-											onChange={(e) =>
-												updateAdditionalSpecs("jobStartDate", e.target.value)
+											onChange={(value) =>
+												updateAdditionalSpecs("jobStartDate", value)
 											}
 										/>
 									</Box>
 									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-										<TextField
+										<PersianDatePicker
 											label="Job End Date"
-											type="date"
 											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.jobEndDate || ""}
-											onChange={(e) =>
-												updateAdditionalSpecs("jobEndDate", e.target.value)
+											onChange={(value) =>
+												updateAdditionalSpecs("jobEndDate", value)
 											}
 										/>
 										<FormControl

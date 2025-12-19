@@ -5,6 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { FormDialog } from "./FormDialog";
+import { PersianDatePicker } from "../PersianDatePicker";
 import type { IEmployee, UpdateEmployeeInput } from "../../types/models";
 
 interface EditEmployeeDialogProps {
@@ -178,9 +179,8 @@ export function EditEmployeeDialog({
 						fullWidth
 						required
 					/>
-					<TextField
+					<PersianDatePicker
 						label="Date of Birth"
-						type="date"
 						value={
 							formData.additionalSpecifications?.dateOfBirth
 								? new Date(formData.additionalSpecifications.dateOfBirth)
@@ -188,11 +188,8 @@ export function EditEmployeeDialog({
 										.split("T")[0]
 								: ""
 						}
-						onChange={(e) =>
-							handleFieldChange(
-								"additionalSpecifications.dateOfBirth",
-								new Date(e.target.value)
-							)
+						onChange={(value) =>
+							handleFieldChange("additionalSpecifications.dateOfBirth", value)
 						}
 						fullWidth
 						InputLabelProps={{ shrink: true }}
@@ -211,9 +208,8 @@ export function EditEmployeeDialog({
 						required
 						helperText="Must be 10 digits"
 					/>
-					<TextField
+					<PersianDatePicker
 						label="Job Start Date"
-						type="date"
 						value={
 							formData.additionalSpecifications?.jobStartDate
 								? new Date(formData.additionalSpecifications.jobStartDate)
@@ -221,19 +217,15 @@ export function EditEmployeeDialog({
 										.split("T")[0]
 								: ""
 						}
-						onChange={(e) =>
-							handleFieldChange(
-								"additionalSpecifications.jobStartDate",
-								new Date(e.target.value)
-							)
+						onChange={(value) =>
+							handleFieldChange("additionalSpecifications.jobStartDate", value)
 						}
 						fullWidth
 						InputLabelProps={{ shrink: true }}
 						required
 					/>
-					<TextField
+					<PersianDatePicker
 						label="Job End Date"
-						type="date"
 						value={
 							formData.additionalSpecifications?.jobEndDate
 								? new Date(formData.additionalSpecifications.jobEndDate)
@@ -241,10 +233,10 @@ export function EditEmployeeDialog({
 										.split("T")[0]
 								: ""
 						}
-						onChange={(e) =>
+						onChange={(value) =>
 							handleFieldChange(
 								"additionalSpecifications.jobEndDate",
-								e.target.value ? new Date(e.target.value) : undefined
+								value ? value : undefined
 							)
 						}
 						fullWidth
