@@ -7,7 +7,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { j2g } from "jalaali-js";
+import * as jalaali from "jalaali-js";
 
 interface PersianDatePickerProps {
 	label: string;
@@ -77,7 +77,7 @@ export function PersianDatePicker({
 
 	const firstDayOfMonth = (year: number, month: number): number => {
 		// Convert Persian date to Gregorian to get the day of week
-		const gregorian = j2g(year, month, 1);
+		const gregorian = jalaali.j2g(year, month, 1);
 		const date = new Date(gregorian[0], gregorian[1] - 1, gregorian[2]);
 		const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
 		// Convert to Persian week (0 = Saturday, 1 = Sunday, 2 = Monday, etc.)
