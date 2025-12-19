@@ -63,25 +63,24 @@ export function PersianDatePicker({
 	helperText,
 }: PersianDatePickerProps) {
 	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+	const [inputValue, setInputValue] = useState<string>("");
 	const [persianValue, setPersianValue] = useState<string>("");
 	const [calYear, setCalYear] = useState<number>(1403);
 	const [calMonth, setCalMonth] = useState<number>(1);
 
-	// Always derive gregorianValue from value prop
-	let gregorianValue = "";
-	if (value) {
-		if (typeof value === "string") {
-			gregorianValue = value.replace(/-/g, "/");
-		} else {
-			const isoStr = new Date(value).toISOString().split("T")[0];
-			gregorianValue = isoStr.replace(/-/g, "/");
-		}
-	}
-
-	// Keep persianValue and calendar state in sync with value
+	// Sync inputValue with value prop
 	useEffect(() => {
-		if (gregorianValue) {
-			const persian = gregorianToPersian(gregorianValue);
+		if (value) {
+			let dateStr: string;
+			if (typeof value === "string") {
+				dateStr = value.replace(/-/g, "/");
+			} else {
+				const isoStr = new Date(value).toISOString().split("T")[0];
+				dateStr = isoStr.replace(/-/g, "/");
+			}
+			setInputValue(dateStr);
+
+			const persian = gregorianToPersian(dateStr);
 			setPersianValue(persian);
 			if (persian) {
 				const [py, pm] = persian.split(/[-\/]/).map(Number);
@@ -91,9 +90,10 @@ export function PersianDatePicker({
 				}
 			}
 		} else {
+			setInputValue("");
 			setPersianValue("");
 		}
-	}, [gregorianValue]);
+	}, [value]);
 
 	const handleGregorianChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		let newValue = e.target.value;
@@ -102,9 +102,9 @@ export function PersianDatePicker({
 		newValue = newValue.replace(/[^\d\/]/g, "");
 
 		// Auto-format as user types
-		if (newValue.length === 4 && gregorianValue.length === 3) {
+		if (newValue.length === 4 && inputValue.length === 3) {
 			newValue += "/";
-		} else if (newValue.length === 7 && gregorianValue.length === 6) {
+		} else if (newValue.length === 7 && inputValue.length === 6) {
 			newValue += "/";
 		}
 
@@ -113,12 +113,20 @@ export function PersianDatePicker({
 			newValue = newValue.slice(0, 10);
 		}
 
-		// Only process and notify parent if we have a complete date
+		// Update local input state immediately for responsive typing
+		setInputValue(newValue);
+
+		// Only notify parent if we have a complete valid date
 		if (newValue.length === 10 && newValue.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
-			onChange(newValue);
-		} else {
-			// For incomplete input, just update parent with empty string
-			onChange("");
+			try {
+				// Validate it's a real date
+				const [y, m, d] = newValue.split("/").map(Number);
+				if (y > 1900 && y < 2100 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+					onChange(newValue);
+				}
+			} catch {
+				// Invalid date, don't notify parent
+			}
 		}
 	};
 
@@ -215,7 +223,7 @@ export function PersianDatePicker({
 					label={label}
 					type="text"
 					placeholder="YYYY/MM/DD"
-					value={gregorianValue}
+					value={inputValue}
 					onChange={handleGregorianChange}
 					required={required}
 					fullWidth={fullWidth}
