@@ -1,13 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import IconButton from "@mui/material/IconButton";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import { g2j, j2g, j2d } from "jalaali-js";
+import { Calendar } from "react-modern-calendar-datepicker";
+import "react-modern-calendar-datepicker/lib/DatePicker.css";
 
 interface PersianDatePickerProps {
 	label: string;
@@ -21,34 +19,31 @@ interface PersianDatePickerProps {
 	helperText?: string;
 }
 
-// Convert Gregorian date string (YYYY/MM/DD) to Persian (YYYY/MM/DD)
-function gregorianToPersian(gregorianStr: string): string {
-	if (!gregorianStr) return "";
+// Convert YYYY/MM/DD or YYYY-MM-DD to { year, month, day }
+function dateStringToObject(
+	dateStr: string
+): { year: number; month: number; day: number } | null {
+	if (!dateStr) return null;
 	try {
-		const [gy, gm, gd] = gregorianStr.split(/[-\/]/).map(Number);
-		const [jy, jm, jd] = g2j(gy, gm, gd);
-		return `${jy}/${String(jm).padStart(2, "0")}/${String(jd).padStart(
-			2,
-			"0"
-		)}`;
+		const [y, m, d] = dateStr.replace(/-/g, "/").split("/").map(Number);
+		if (y && m && d) {
+			return { year: y, month: m, day: d };
+		}
 	} catch {
-		return "";
+		// Invalid date
 	}
+	return null;
 }
 
-// Convert Persian date string (YYYY/MM/DD) to Gregorian (YYYY/MM/DD)
-function persianToGregorian(persianStr: string): string {
-	if (!persianStr) return "";
-	try {
-		const [jy, jm, jd] = persianStr.split(/[-\/]/).map(Number);
-		const [gy, gm, gd] = j2g(jy, jm, jd);
-		return `${gy}/${String(gm).padStart(2, "0")}/${String(gd).padStart(
-			2,
-			"0"
-		)}`;
-	} catch {
-		return "";
-	}
+// Convert { year, month, day } to YYYY/MM/DD
+function dateObjectToString(dateObj: {
+	year: number;
+	month: number;
+	day: number;
+}): string {
+	return `${dateObj.year}/${String(dateObj.month).padStart(2, "0")}/${String(
+		dateObj.day
+	).padStart(2, "0")}`;
 }
 
 export function PersianDatePicker({
@@ -64,52 +59,43 @@ export function PersianDatePicker({
 }: PersianDatePickerProps) {
 	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 	const [inputValue, setInputValue] = useState<string>("");
-	const [persianValue, setPersianValue] = useState<string>("");
-	const [calYear, setCalYear] = useState<number>(1403);
-	const [calMonth, setCalMonth] = useState<number>(1);
-	const [viewMode, setViewMode] = useState<"day" | "year">("day");
-	const lastSentValueRef = useRef<string>("");
 
-	// Sync inputValue with value prop only when prop actually changes to something different
-	useEffect(() => {
-		if (value) {
-			let dateStr: string;
-			if (typeof value === "string") {
-				dateStr = value.replace(/-/g, "/");
-			} else {
-				const isoStr = new Date(value).toISOString().split("T")[0];
-				dateStr = isoStr.replace(/-/g, "/");
-			}
-
-			// Always sync from prop, but preserve our input if prop matches what we sent
-			if (lastSentValueRef.current === dateStr) {
-				// This is our own value coming back, keep the input as is
-				return;
-			}
-
-			// Different value from parent, update everything
-			setInputValue(dateStr);
-			const persian = gregorianToPersian(dateStr);
-			setPersianValue(persian);
-			if (persian) {
-				const [py, pm] = persian.split(/[-\/]/).map(Number);
-				if (!isNaN(py) && !isNaN(pm)) {
-					setCalYear(py);
-					setCalMonth(pm);
-				}
-			}
+	// Convert prop value to string format for display
+	let displayValue = "";
+	if (value) {
+		if (typeof value === "string") {
+			displayValue = value.replace(/-/g, "/");
 		} else {
-			// Parent cleared the value
-			if (inputValue !== "" || lastSentValueRef.current !== "") {
-				setInputValue("");
-				setPersianValue("");
-				lastSentValueRef.current = "";
-			}
+			const isoStr = new Date(value).toISOString().split("T")[0];
+			displayValue = isoStr.replace(/-/g, "/");
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [value]); // Intentionally not including inputValue to avoid infinite loops
+	}
 
-	const handleGregorianChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	// Sync internal input when prop changes
+	if (displayValue !== inputValue && displayValue) {
+		setInputValue(displayValue);
+	}
+
+	const handleCalendarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
+
+	const handleDateChange = (
+		dateObj: { year: number; month: number; day: number } | null
+	) => {
+		if (dateObj) {
+			const dateStr = dateObjectToString(dateObj);
+			setInputValue(dateStr);
+			onChange(dateStr);
+			setAnchorEl(null);
+		}
+	};
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		let newValue = e.target.value;
 
 		// Allow only digits and slashes
@@ -127,16 +113,13 @@ export function PersianDatePicker({
 			newValue = newValue.slice(0, 10);
 		}
 
-		// Update local input state immediately for responsive typing
 		setInputValue(newValue);
 
 		// Only notify parent if we have a complete valid date
 		if (newValue.length === 10 && newValue.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
 			try {
-				// Validate it's a real date
 				const [y, m, d] = newValue.split("/").map(Number);
 				if (y > 1900 && y < 2100 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
-					lastSentValueRef.current = newValue;
 					onChange(newValue);
 				}
 			} catch {
@@ -145,134 +128,37 @@ export function PersianDatePicker({
 		}
 	};
 
-	const handleCalendarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		setAnchorEl(event.currentTarget);
-		setViewMode("day");
-	};
-
-	const handleClose = () => {
-		setAnchorEl(null);
-		setViewMode("day");
-	};
-
-	const handleDateSelect = (year: number, month: number, day: number) => {
-		const persianStr = `${year}/${String(month).padStart(2, "0")}/${String(
-			day
-		).padStart(2, "0")}`;
-		try {
-			const gregorian = persianToGregorian(persianStr);
-			// Update local state immediately
-			setInputValue(gregorian);
-			setPersianValue(persianStr);
-			setCalYear(year);
-			setCalMonth(month);
-			// Track what we're sending to prevent useEffect from overwriting
-			lastSentValueRef.current = gregorian;
-			// Notify parent
-			onChange(gregorian);
-			setAnchorEl(null);
-			setViewMode("day");
-		} catch {
-			// Invalid date
-		}
-	};
-
-	const handleYearSelect = (year: number) => {
-		setCalYear(year);
-		setViewMode("day");
-	};
-
-	const toggleYearView = () => {
-		setViewMode(viewMode === "day" ? "year" : "day");
-	};
-
 	const open = Boolean(anchorEl);
-
-	// Generate calendar for current month
-	const getDaysInMonth = (month: number) => {
-		if (month <= 6) return 31;
-		if (month <= 11) return 30;
-		return 29; // Month 12 can be 29 or 30
-	};
-
-	const getFirstDayOfMonth = (year: number, month: number): number => {
-		const firstDay = j2d(year, month, 1);
-		const date = new Date(1970, 0, firstDay);
-		return (date.getDay() + 1) % 7;
-	};
-
-	const daysInMonth = getDaysInMonth(calMonth);
-	const firstDay = getFirstDayOfMonth(calYear, calMonth);
-	const days: (number | null)[] = [];
-	for (let i = 0; i < firstDay; i++) {
-		days.push(null);
-	}
-	for (let i = 1; i <= daysInMonth; i++) {
-		days.push(i);
-	}
-
-	const persianMonths = [
-		"فروردین",
-		"اردیبهشت",
-		"خرداد",
-		"تیر",
-		"مرداد",
-		"شهریور",
-		"مهر",
-		"آبان",
-		"آذر",
-		"دی",
-		"بهمن",
-		"اسفند",
-	];
-
-	const handlePrevMonth = () => {
-		if (calMonth === 1) {
-			setCalYear(calYear - 1);
-			setCalMonth(12);
-		} else {
-			setCalMonth(calMonth - 1);
-		}
-	};
-
-	const handleNextMonth = () => {
-		if (calMonth === 12) {
-			setCalYear(calYear + 1);
-			setCalMonth(1);
-		} else {
-			setCalMonth(calMonth + 1);
-		}
-	};
-
-	const selectedDay = persianValue
-		? parseInt(persianValue.split(/[-\/]/)[2])
-		: null;
+	const selectedDate = dateStringToObject(inputValue);
 
 	return (
 		<Box sx={{ ...sx }}>
-			<Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
-				<TextField
-					label={label}
-					type="text"
-					placeholder="YYYY/MM/DD"
-					value={inputValue}
-					onChange={handleGregorianChange}
-					required={required}
-					fullWidth={fullWidth}
-					InputLabelProps={{ shrink: true, ...InputLabelProps }}
-					error={error}
-					helperText={helperText}
-					sx={{ flex: "1 1 auto" }}
-				/>
-				<IconButton
-					onClick={handleCalendarClick}
-					size="small"
-					sx={{ marginTop: 1 }}
-					title="Open Persian Calendar"
-				>
-					<CalendarTodayIcon />
-				</IconButton>
-			</Stack>
+			<TextField
+				label={label}
+				type="text"
+				placeholder="YYYY/MM/DD"
+				value={inputValue}
+				onChange={handleInputChange}
+				required={required}
+				fullWidth={fullWidth}
+				InputLabelProps={{ shrink: true, ...InputLabelProps }}
+				error={error}
+				helperText={helperText}
+				slotProps={{
+					input: {
+						endAdornment: (
+							<IconButton
+								onClick={handleCalendarClick}
+								size="small"
+								sx={{ mr: -1 }}
+								title="Open Persian Calendar"
+							>
+								<CalendarTodayIcon fontSize="small" />
+							</IconButton>
+						),
+					},
+				}}
+			/>
 
 			<Popover
 				open={open}
@@ -287,112 +173,19 @@ export function PersianDatePicker({
 					horizontal: "left",
 				}}
 			>
-				<Box sx={{ p: 2, minWidth: 320 }}>
-					<Stack spacing={2}>
-						{viewMode === "day" ? (
-							<>
-								<Stack
-									direction="row"
-									justifyContent="space-between"
-									alignItems="center"
-								>
-									<Button size="small" onClick={handlePrevMonth}>
-										←
-									</Button>
-									<Button
-										variant="text"
-										onClick={toggleYearView}
-										sx={{ flex: 1, textTransform: "none" }}
-									>
-										<Typography variant="h6" align="center">
-											{persianMonths[calMonth - 1]} {calYear}
-										</Typography>
-									</Button>
-									<Button size="small" onClick={handleNextMonth}>
-										→
-									</Button>
-								</Stack>
-								<Box
-									sx={{
-										display: "grid",
-										gridTemplateColumns: "repeat(7, 1fr)",
-										gap: 1,
-									}}
-								>
-									{["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
-										<Typography
-											key={day}
-											variant="caption"
-											align="center"
-											sx={{ fontWeight: "bold" }}
-										>
-											{day}
-										</Typography>
-									))}
-									{days.map((day, idx) => (
-										<Button
-											key={idx}
-											onClick={() =>
-												day && handleDateSelect(calYear, calMonth, day)
-											}
-											disabled={!day}
-											variant={day === selectedDay ? "contained" : "outlined"}
-											size="small"
-											sx={{
-												width: "100%",
-												padding: 0.5,
-												minHeight: 32,
-											}}
-										>
-											{day}
-										</Button>
-									))}
-								</Box>
-							</>
-						) : (
-							<>
-								<Stack
-									direction="row"
-									justifyContent="space-between"
-									alignItems="center"
-								>
-									<Button size="small" onClick={() => setCalYear(calYear - 12)}>
-										←
-									</Button>
-									<Typography variant="h6" align="center" sx={{ flex: 1 }}>
-										{calYear - 5} - {calYear + 6}
-									</Typography>
-									<Button size="small" onClick={() => setCalYear(calYear + 12)}>
-										→
-									</Button>
-								</Stack>
-								<Box
-									sx={{
-										display: "grid",
-										gridTemplateColumns: "repeat(3, 1fr)",
-										gap: 1,
-									}}
-								>
-									{Array.from({ length: 12 }, (_, i) => calYear - 5 + i).map(
-										(year) => (
-											<Button
-												key={year}
-												onClick={() => handleYearSelect(year)}
-												variant={year === calYear ? "contained" : "outlined"}
-												size="small"
-												sx={{
-													padding: 1,
-													minHeight: 40,
-												}}
-											>
-												{year}
-											</Button>
-										)
-									)}
-								</Box>
-							</>
-						)}
-					</Stack>
+				<Box sx={{ p: 1 }}>
+					<Calendar
+						value={selectedDate}
+						onChange={handleDateChange}
+						locale="fa"
+						calendarClassName="calendar"
+						calendarTodayClassName="today"
+						calendarRangeStartClassName="range-start"
+						calendarRangeEndClassName="range-end"
+						colorPrimary="#1976d2"
+						colorPrimaryLight="rgba(25, 118, 210, 0.08)"
+						shouldHighlightWeekends
+					/>
 				</Box>
 			</Popover>
 		</Box>
