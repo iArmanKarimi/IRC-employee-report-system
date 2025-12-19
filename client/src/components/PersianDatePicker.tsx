@@ -79,20 +79,20 @@ export function PersianDatePicker({
 		// Using a known reference point: 1/1/1400 was a Saturday (0)
 		// Calculate total days from reference to target date
 		const refYear = 1400;
-		
+
 		let totalDays = 0;
-		
+
 		// Add days for complete years
 		for (let y = refYear; y < year; y++) {
 			const isLeap = ((((y - 1342) % 2820) % 128) % 33) % 4 === 1;
 			totalDays += isLeap ? 366 : 365;
 		}
-		
+
 		// Add days for complete months in target year
 		for (let m = 1; m < month; m++) {
 			totalDays += daysInMonth(year, m);
 		}
-		
+
 		// 1/1/1400 was Saturday (day 0), so add totalDays and mod 7
 		return totalDays % 7;
 	};
