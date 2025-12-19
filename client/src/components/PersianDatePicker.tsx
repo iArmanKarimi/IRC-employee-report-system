@@ -7,7 +7,6 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import * as jalaali from "jalaali-js";
 
 interface PersianDatePickerProps {
 	label: string;
@@ -76,12 +75,26 @@ export function PersianDatePicker({
 	};
 
 	const firstDayOfMonth = (year: number, month: number): number => {
-		// Convert Persian date to Gregorian to get the day of week
-		const gregorian = jalaali.j2g(year, month, 1);
-		const date = new Date(gregorian[0], gregorian[1] - 1, gregorian[2]);
-		const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
-		// Convert to Persian week (0 = Saturday, 1 = Sunday, 2 = Monday, etc.)
-		return (dayOfWeek + 1) % 7;
+		// Simple Persian calendar first day calculation
+		// Using a known reference point: 1/1/1400 was a Saturday (0)
+		// Calculate total days from reference to target date
+		const refYear = 1400;
+		
+		let totalDays = 0;
+		
+		// Add days for complete years
+		for (let y = refYear; y < year; y++) {
+			const isLeap = ((((y - 1342) % 2820) % 128) % 33) % 4 === 1;
+			totalDays += isLeap ? 366 : 365;
+		}
+		
+		// Add days for complete months in target year
+		for (let m = 1; m < month; m++) {
+			totalDays += daysInMonth(year, m);
+		}
+		
+		// 1/1/1400 was Saturday (day 0), so add totalDays and mod 7
+		return totalDays % 7;
 	};
 
 	const handleDateClick = (day: number) => {
