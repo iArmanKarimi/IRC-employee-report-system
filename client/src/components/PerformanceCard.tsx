@@ -104,14 +104,18 @@ export function PerformanceCard({
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-						<Typography variant="body2" color="text.secondary">						Travel Assignment:
-					</Typography>
-					<Typography variant="body2">
-						{performance.travelAssignment} days
-					</Typography>
-				</Box>
-				<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-					<Typography variant="body2" color="text.secondary">							Truck Driver:
+						<Typography variant="body2" color="text.secondary">
+							{" "}
+							Travel Assignment:
+						</Typography>
+						<Typography variant="body2">
+							{performance.travelAssignment} days
+						</Typography>
+					</Box>
+					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
+						<Typography variant="body2" color="text.secondary">
+							{" "}
+							Truck Driver:
 						</Typography>
 						<Typography variant="body2">
 							{performance.truckDriver ? "Yes" : "No"}
