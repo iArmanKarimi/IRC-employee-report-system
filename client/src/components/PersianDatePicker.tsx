@@ -63,25 +63,25 @@ export function PersianDatePicker({
 	helperText,
 }: PersianDatePickerProps) {
 	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-	const [gregorianValue, setGregorianValue] = useState<string>("");
 	const [persianValue, setPersianValue] = useState<string>("");
 	const [calYear, setCalYear] = useState<number>(1403);
 	const [calMonth, setCalMonth] = useState<number>(1);
 
-	// Initialize with value
+	// Always derive gregorianValue from value prop
+	let gregorianValue = "";
+	if (value) {
+		if (typeof value === "string") {
+			gregorianValue = value.replace(/-/g, "/");
+		} else {
+			const isoStr = new Date(value).toISOString().split("T")[0];
+			gregorianValue = isoStr.replace(/-/g, "/");
+		}
+	}
+
+	// Keep persianValue and calendar state in sync with value
 	useEffect(() => {
-		if (value) {
-			let dateStr: string;
-			if (typeof value === "string") {
-				// Convert from YYYY-MM-DD to YYYY/MM/DD if needed
-				dateStr = value.replace(/-/g, "/");
-			} else {
-				// Convert Date object to YYYY/MM/DD
-				const isoStr = new Date(value).toISOString().split("T")[0];
-				dateStr = isoStr.replace(/-/g, "/");
-			}
-			setGregorianValue(dateStr);
-			const persian = gregorianToPersian(dateStr);
+		if (gregorianValue) {
+			const persian = gregorianToPersian(gregorianValue);
 			setPersianValue(persian);
 			if (persian) {
 				const [py, pm] = persian.split(/[-\/]/).map(Number);
@@ -91,10 +91,9 @@ export function PersianDatePicker({
 				}
 			}
 		} else {
-			setGregorianValue("");
 			setPersianValue("");
 		}
-	}, [value]);
+	}, [gregorianValue]);
 
 	const handleGregorianChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		let newValue = e.target.value;
@@ -114,13 +113,12 @@ export function PersianDatePicker({
 			newValue = newValue.slice(0, 10);
 		}
 
-		setGregorianValue(newValue);
-
 		// Only process and notify parent if we have a complete date
 		if (newValue.length === 10 && newValue.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
-			const persian = gregorianToPersian(newValue);
-			setPersianValue(persian);
 			onChange(newValue);
+		} else {
+			// For incomplete input, just update parent with empty string
+			onChange("");
 		}
 	};
 
@@ -138,7 +136,6 @@ export function PersianDatePicker({
 		).padStart(2, "0")}`;
 		try {
 			const gregorian = persianToGregorian(persianStr);
-			setGregorianValue(gregorian);
 			setPersianValue(persianStr);
 			setCalYear(year);
 			setCalMonth(month);
