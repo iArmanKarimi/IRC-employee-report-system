@@ -77,8 +77,8 @@ export function PersianDatePicker({
 
 	const firstDayOfMonth = (year: number, month: number): number => {
 		// Convert Persian date to Gregorian to get the day of week
-		const [gy, gm, gd] = j2g(year, month, 1);
-		const date = new Date(gy, gm - 1, gd);
+		const gregorian = j2g(year, month, 1);
+		const date = new Date(gregorian[0], gregorian[1] - 1, gregorian[2]);
 		const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
 		// Convert to Persian week (0 = Saturday, 1 = Sunday, 2 = Monday, etc.)
 		return (dayOfWeek + 1) % 7;

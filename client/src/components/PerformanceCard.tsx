@@ -33,11 +33,32 @@ export function PerformanceCard({
 					<Box
 						sx={{ display: "flex", gap: 0.5 }}
 						onClick={(e) => e.stopPropagation()}
+						onMouseDown={(e) => e.stopPropagation()}
 					>
-						<IconButton size="small" onClick={onEdit} color="primary">
+						<IconButton
+							size="small"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit();
+							}}
+							color="primary"
+							component="div"
+							role="button"
+							tabIndex={0}
+						>
 							<EditIcon fontSize="small" />
 						</IconButton>
-						<IconButton size="small" onClick={onDelete} color="error">
+						<IconButton
+							size="small"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDelete();
+							}}
+							color="error"
+							component="div"
+							role="button"
+							tabIndex={0}
+						>
 							<DeleteOutlineIcon fontSize="small" />
 						</IconButton>
 					</Box>
