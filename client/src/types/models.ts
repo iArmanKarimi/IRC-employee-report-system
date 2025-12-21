@@ -42,7 +42,6 @@ export interface IPerformance {
 	dailyLeave: number;
 	sickLeave: number;
 	absence: number;
-	volunteerShiftCount: number;
 	truckDriver: boolean;
 	travelAssignment: number;
 	month: string; // Format: YYYY-MM

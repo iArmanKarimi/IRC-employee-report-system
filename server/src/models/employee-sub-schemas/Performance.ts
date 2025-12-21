@@ -8,7 +8,6 @@ export interface IPerformance {
 	dailyLeave: number;
 	sickLeave: number;
 	absence: number;
-	volunteerShiftCount: number;
 	truckDriver: boolean;
 	travelAssignment: number;
 	month: string;
@@ -23,7 +22,6 @@ export const PerformanceSchema = new Schema<IPerformance>({
 	dailyLeave: { type: Number, default: 0, min: 0 },
 	sickLeave: { type: Number, default: 0, min: 0 },
 	absence: { type: Number, default: 0, min: 0 },
-	volunteerShiftCount: { type: Number, default: 0, min: 0 },
 	truckDriver: { type: Boolean, default: false },
 	travelAssignment: { type: Number, default: 0, min: 0, max: 31 },
 	month: { type: String, required: true /* match: /^\d{4}-(0[1-9]|1[0-2])$/ */ },

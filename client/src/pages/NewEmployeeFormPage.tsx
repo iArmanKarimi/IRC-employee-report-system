@@ -72,7 +72,6 @@ export default function NewEmployeeFormPage() {
 			dailyLeave: 0,
 			sickLeave: 0,
 			absence: 0,
-			volunteerShiftCount: 0,
 			truckDriver: false,
 			travelAssignment: 0,
 			month: new Date().toISOString().slice(0, 7),
