@@ -287,7 +287,6 @@ export default function NewEmployeeFormPage() {
 											label="Contact Number"
 											required
 											inputProps={{ pattern: "\\d{11}" }}
-											helperText="11 digits required"
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.contactNumber}
 											onChange={(e) =>
