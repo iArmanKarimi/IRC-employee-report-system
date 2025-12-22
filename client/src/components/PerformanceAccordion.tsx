@@ -128,27 +128,6 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							onChange={(e) => onChange("absence", Number(e.target.value))}
 						/>
 						<TextField
-							label="Volunteer Shift Count"
-							type="number"
-							inputProps={{ min: 0 }}
-							sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
-							value={performance.volunteerShiftCount}
-							onChange={(e) =>
-								onChange("volunteerShiftCount", Number(e.target.value))
-							}
-						/>
-					</Box>
-					<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-						<TextField
-							label="Travel Assignment (days)"
-							type="number"
-							inputProps={{ min: 0, max: 31 }}
-							sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
-							value={performance.travelAssignment}
-							onChange={(e) =>
-								onChange("travelAssignment", Number(e.target.value))
-							}
-						/>
 					</Box>
 					<FormControlLabel
 						control={

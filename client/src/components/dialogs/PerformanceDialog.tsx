@@ -148,28 +148,16 @@ export function PerformanceDialog({
 						}
 					/>
 					<TextField
-						label="Volunteer Shift Count"
-						type="number"
-						inputProps={{ min: 0 }}
-						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
-						value={formData.volunteerShiftCount}
-						onChange={(e) =>
-							handleFieldChange("volunteerShiftCount", Number(e.target.value))
-						}
-					/>
-				</Box>
-				<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-					<TextField
-						label="Travel Assignment (days)"
-						type="number"
-						inputProps={{ min: 0, max: 31 }}
-						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
-						value={formData.travelAssignment}
-						onChange={(e) =>
-							handleFieldChange("travelAssignment", Number(e.target.value))
-						}
-					/>
-				</Box>
+label="Travel Assignment (days)"
+type="number"
+inputProps={{ min: 0, max: 31 }}
+sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+value={formData.travelAssignment}
+onChange={(e) =>
+handleFieldChange("travelAssignment", Number(e.target.value))
+}
+/>
+</Box>
 				<FormControlLabel
 					control={
 						<Checkbox
