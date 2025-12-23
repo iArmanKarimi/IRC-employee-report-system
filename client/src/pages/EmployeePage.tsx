@@ -320,6 +320,7 @@ export default function EmployeePage() {
 													: "warning"
 											}
 											size="small"
+											variant="outlined"
 										/>
 									</Box>
 								</Box>

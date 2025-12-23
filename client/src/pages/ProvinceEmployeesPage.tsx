@@ -144,6 +144,7 @@ export default function ProvinceEmployeesPage() {
 														: "warning"
 												}
 												size="small"
+												variant="outlined"
 											/>
 										</TableCell>
 										<TableCell>
