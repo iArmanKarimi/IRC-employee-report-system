@@ -13,8 +13,13 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Pagination from "@mui/material/Pagination";
+import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
@@ -24,6 +29,91 @@ import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName } from "../utils/formatters";
+import type { IEmployee } from "../types/models";
+
+function EmployeeRow({
+	employee,
+	provinceId,
+}: {
+	employee: IEmployee;
+	provinceId: string;
+}) {
+	const [open, setOpen] = useState(false);
+
+	return (
+		<>
+			<TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+				<TableCell>
+					<IconButton
+						aria-label="expand row"
+						size="small"
+						onClick={(e) => {
+							e.stopPropagation();
+							setOpen(!open);
+						}}
+					>
+						{open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+					</IconButton>
+				</TableCell>
+				<TableCell component="th" scope="row">
+					{formatEmployeeName(employee)}
+				</TableCell>
+				<TableCell>{employee.basicInfo?.nationalID || "-"}</TableCell>
+				<TableCell>
+					{employee.performance ? (
+						<Chip
+							label={employee.performance.status
+								?.replace("_", " ")
+								.toUpperCase()}
+							color={
+								employee.performance.status === "active"
+									? "success"
+									: employee.performance.status === "inactive"
+									? "error"
+									: "warning"
+							}
+							size="small"
+							variant="outlined"
+						/>
+					) : (
+						"-"
+					)}
+				</TableCell>
+				<TableCell align="right">
+					<Button
+						component={Link}
+						to={ROUTES.PROVINCE_EMPLOYEE_DETAIL.replace(
+							":provinceId",
+							provinceId
+						).replace(":employeeId", employee._id)}
+						variant="outlined"
+						size="small"
+						startIcon={<VisibilityIcon />}
+						onClick={(e) => e.stopPropagation()}
+					>
+						View
+					</Button>
+				</TableCell>
+			</TableRow>
+			<TableRow>
+				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+					<Collapse in={open} timeout="auto" unmountOnExit>
+						<Box sx={{ margin: 2 }}>
+							<Typography variant="h6" gutterBottom component="div">
+								Performance Details
+							</Typography>
+							{employee.performance ? (
+								<></>
+							) : (
+								<>No performance has been recorded.</>
+							)}
+						</Box>
+					</Collapse>
+				</TableCell>
+			</TableRow>
+		</>
+	);
+}
 
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
@@ -109,62 +199,20 @@ export default function ProvinceEmployeesPage() {
 						<Table>
 							<TableHead>
 								<TableRow>
+									<TableCell />
 									<TableCell>Full Name</TableCell>
 									<TableCell>National ID</TableCell>
-									<TableCell>Branch</TableCell>
-									<TableCell>Rank</TableCell>
 									<TableCell>Status</TableCell>
-									<TableCell>Contact Number</TableCell>
 									<TableCell align="right">Actions</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
 								{employees.map((emp) => (
-									<TableRow
+									<EmployeeRow
 										key={emp._id}
-										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-									>
-										<TableCell component="th" scope="row">
-											{formatEmployeeName(emp)}
-										</TableCell>
-										<TableCell>{emp.basicInfo?.nationalID}</TableCell>
-										<TableCell>{emp.workPlace?.branch}</TableCell>
-										<TableCell>{emp.workPlace?.rank}</TableCell>
-										<TableCell>
-											<Chip
-												label={emp.performance?.status
-													?.replace("_", " ")
-													.toUpperCase()}
-												color={
-													emp.performance?.status === "active"
-														? "success"
-														: emp.performance?.status ===
-														  "inactive"
-														? "error"
-														: "warning"
-												}
-												size="small"
-												variant="outlined"
-											/>
-										</TableCell>
-										<TableCell>
-											{emp.additionalSpecifications?.contactNumber}
-										</TableCell>
-										<TableCell align="right">
-											<Button
-												component={Link}
-												to={ROUTES.PROVINCE_EMPLOYEE_DETAIL.replace(
-													":provinceId",
-													provinceId ?? ""
-												).replace(":employeeId", emp._id)}
-												variant="outlined"
-												size="small"
-												startIcon={<VisibilityIcon />}
-											>
-												View
-											</Button>
-										</TableCell>
-									</TableRow>
+										employee={emp}
+										provinceId={provinceId || ""}
+									/>
 								))}
 							</TableBody>
 						</Table>
