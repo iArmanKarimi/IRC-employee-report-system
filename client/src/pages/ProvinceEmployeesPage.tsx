@@ -172,7 +172,7 @@ export default function ProvinceEmployeesPage() {
 				)}
 
 				{pagination && pagination.pages > 1 && (
-					<Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+					<Box sx={{ mt: 3, mb: 4, display: "flex", justifyContent: "center" }}>
 						<Pagination
 							count={pagination.pages}
 							page={page}
