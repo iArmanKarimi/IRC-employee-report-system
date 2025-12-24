@@ -28,9 +28,7 @@ export function PerformanceCard({
 					sx={{ display: "flex", alignItems: "center", width: "100%", gap: 2 }}
 				>
 					<Typography sx={{ flex: 1, fontWeight: "medium" }}>
-						{performance.month
-							? `Performance: ${performance.month}`
-							: "Performance Record"}
+						Performance Record
 					</Typography>
 					<Box
 						sx={{ display: "flex", gap: 1 }}
