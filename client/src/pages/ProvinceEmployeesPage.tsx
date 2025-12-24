@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
+import Pagination from "@mui/material/Pagination";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
@@ -131,7 +132,7 @@ export default function ProvinceEmployeesPage() {
 				backLabel="Back to Provinces"
 			/>
 			<Container
-				sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}
+				sx={{ mt: 2, mb: 4, display: "flex", flexDirection: "column", gap: 3 }}
 			>
 				<Breadcrumbs
 					provinceName={provinceName || undefined}
@@ -174,37 +175,61 @@ export default function ProvinceEmployeesPage() {
 				{employees.length === 0 ? (
 					<EmptyState message="No employees found." />
 				) : (
-					<DataGrid
-						rows={employees}
-						columns={columns}
-						getRowId={(row) => row._id}
-						paginationModel={{ pageSize: limit, page }}
-						onPaginationModelChange={(newModel) => setPage(newModel.page)}
-						rowCount={pagination?.total || 0}
-						pageSizeOptions={[20]}
-						loading={loading}
-						disableColumnMenu
-						disableColumnFilter
-						disableColumnResize
-						disableDensitySelector
-						disableRowSelectionOnClick
-						paginationMode="server"
-						rowHeight={48}
-						getRowClassName={() => "custom-row"}
-						getCellClassName={() => "custom-cell"}
-						sx={{
-							"& .custom-row": {
-								alignItems: "center",
-							},
-							"& .custom-cell": {
-								display: "flex",
-								alignItems: "center",
-							},
-							"& .custom-row:hover": {
-								backgroundColor: theme.palette.action.hover,
-							},
-						}}
-					/>
+					<Stack spacing={3}>
+						<DataGrid
+							rows={employees}
+							columns={columns}
+							getRowId={(row) => row._id}
+							paginationModel={{ pageSize: limit, page }}
+							onPaginationModelChange={(newModel) => setPage(newModel.page)}
+							rowCount={pagination?.total || 0}
+							pageSizeOptions={[20]}
+							loading={loading}
+							disableColumnMenu
+							disableColumnFilter
+							disableColumnResize
+							disableDensitySelector
+							disableRowSelectionOnClick
+							paginationMode="server"
+							rowHeight={48}
+							getRowClassName={() => "custom-row"}
+							getCellClassName={() => "custom-cell"}
+							hideFooterPagination
+							hideFooter={false}
+							sx={{
+								"& .custom-row": {
+									alignItems: "center",
+								},
+								"& .custom-cell": {
+									display: "flex",
+									alignItems: "center",
+								},
+								"& .custom-row:hover": {
+									backgroundColor: theme.palette.action.hover,
+								},
+								"& .MuiDataGrid-footerContainer": {
+									display: "none",
+								},
+							}}
+						/>
+
+						<Stack
+							direction="row"
+							justifyContent="center"
+							alignItems="center"
+							sx={{ pt: 2 }}
+						>
+							<Pagination
+								count={Math.ceil((pagination?.total || 0) / limit)}
+								page={page + 1}
+								onChange={(_, value) => setPage(value - 1)}
+								color="primary"
+								size="medium"
+								showFirstButton
+								showLastButton
+							/>
+						</Stack>
+					</Stack>
 				)}
 			</Container>
 		</>
