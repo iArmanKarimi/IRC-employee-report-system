@@ -9,7 +9,6 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
 	DataGrid,
-	GridActionsCellItem,
 	type GridColDef,
 	type GridRenderCellParams,
 } from "@mui/x-data-grid";
@@ -190,14 +189,19 @@ export default function ProvinceEmployeesPage() {
 						disableDensitySelector
 						disableRowSelectionOnClick
 						paginationMode="server"
+						rowHeight={48}
+						getRowClassName={() => "custom-row"}
+						getCellClassName={() => "custom-cell"}
 						sx={{
-							"& .MuiDataGrid-cell": {
-								paddingY: 1,
+							"& .custom-row": {
+								alignItems: "center",
 							},
-							"& .MuiDataGrid-row": {
-								"&:hover": {
-									backgroundColor: theme.palette.action.hover,
-								},
+							"& .custom-cell": {
+								display: "flex",
+								alignItems: "center",
+							},
+							"& .custom-row:hover": {
+								backgroundColor: theme.palette.action.hover,
 							},
 						}}
 					/>
