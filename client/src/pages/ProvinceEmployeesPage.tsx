@@ -185,7 +185,7 @@ export default function ProvinceEmployeesPage() {
 							Employees
 						</Typography>
 						<Typography variant="body2" color="text.secondary">
-							{provinceName || "Loading province..."}
+							{loading ? "Loading province..." : provinceName}
 						</Typography>
 					</Stack>
 					<Stack direction="row" gap={2} alignItems="center">
@@ -207,9 +207,9 @@ export default function ProvinceEmployeesPage() {
 					</Stack>
 				</Stack>
 
-				{employees.length === 0 ? (
+				{!loading && employees.length === 0 ? (
 					<EmptyState message="No employees found." />
-				) : filteredEmployees.length === 0 ? (
+				) : filteredEmployees.length === 0 && !loading ? (
 					<EmptyState message="No employees match your search or filter criteria." />
 				) : (
 					<Stack spacing={1.5}>
