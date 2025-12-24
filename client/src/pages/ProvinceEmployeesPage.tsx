@@ -11,11 +11,11 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Pagination from "@mui/material/Pagination";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
-import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -30,6 +30,20 @@ import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName } from "../utils/formatters";
 import type { IEmployee } from "../types/models";
+
+function PerformanceSnippet(title: string, value: string | number | boolean) {
+	return (
+		<Paper
+			elevation={1}
+			sx={{ display: "flex", alignItems: "center", p: 0.5, m: 0.5 }}
+		>
+			<Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+				{title}
+			</Typography>
+			<Chip label={value} size="small" color="primary" />
+		</Paper>
+	);
+}
 
 function EmployeeRow({
 	employee,
@@ -95,7 +109,11 @@ function EmployeeRow({
 					</Button>
 				</TableCell>
 			</TableRow>
-			<TableRow>
+			<TableRow
+				sx={{
+					"& > *": { backgroundColor: (theme) => theme.palette.action.hover },
+				}}
+			>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
 					<Collapse in={open} timeout="auto" unmountOnExit>
 						<Box sx={{ margin: 2 }}>
@@ -103,7 +121,43 @@ function EmployeeRow({
 								Performance Details
 							</Typography>
 							{employee.performance ? (
-								<></>
+								<Stack
+									direction="row"
+									useFlexGap
+									flexWrap="wrap"
+									alignItems="center"
+									mt={1}
+								>
+									{PerformanceSnippet(
+										"Daily Performance",
+										employee.performance.dailyPerformance
+									)}
+									{PerformanceSnippet(
+										"Shift Count",
+										employee.performance.shiftCountPerLocation
+									)}
+									{PerformanceSnippet(
+										"Shift Duration",
+										employee.performance.shiftDuration
+									)}
+									{PerformanceSnippet(
+										"Overtime",
+										employee.performance.overtime
+									)}
+									{PerformanceSnippet(
+										"Daily Leave",
+										employee.performance.dailyLeave
+									)}
+									{PerformanceSnippet(
+										"Sick Leave",
+										employee.performance.sickLeave
+									)}
+									{PerformanceSnippet("Absence", employee.performance.absence)}
+									{PerformanceSnippet(
+										"Travel Assignment",
+										employee.performance.travelAssignment
+									)}
+								</Stack>
 							) : (
 								<>No performance has been recorded.</>
 							)}
@@ -157,13 +211,12 @@ export default function ProvinceEmployeesPage() {
 					showProvincesLink={isGlobalAdmin}
 				/>
 
-				<Box
-					sx={{
-						display: "flex",
-						justifyContent: "space-between",
-						alignItems: "center",
-						mb: 3,
-					}}
+				<Stack
+					direction="row"
+					justifyContent="space-between"
+					alignItems="center"
+					mb={3}
+					gap={2}
 				>
 					<Box>
 						<Typography variant="h4" component="h1" gutterBottom>
@@ -173,7 +226,7 @@ export default function ProvinceEmployeesPage() {
 							{provinceName || "Loading province..."}
 						</Typography>
 					</Box>
-					<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+					<Stack direction="row" gap={2} alignItems="center">
 						{pagination && (
 							<Chip label={`${pagination.total} total`} color="primary" />
 						)}
@@ -189,8 +242,8 @@ export default function ProvinceEmployeesPage() {
 						>
 							New Employee
 						</Button>
-					</Box>
-				</Box>
+					</Stack>
+				</Stack>
 
 				{employees.length === 0 ? (
 					<EmptyState message="No employees found." />
@@ -220,7 +273,7 @@ export default function ProvinceEmployeesPage() {
 				)}
 
 				{pagination && pagination.pages > 1 && (
-					<Box sx={{ mt: 3, mb: 4, display: "flex", justifyContent: "center" }}>
+					<Stack alignItems="center" mt={3} mb={4}>
 						<Pagination
 							count={pagination.pages}
 							page={page}
@@ -229,7 +282,7 @@ export default function ProvinceEmployeesPage() {
 							showFirstButton
 							showLastButton
 						/>
-					</Box>
+					</Stack>
 				)}
 			</Container>
 		</>
