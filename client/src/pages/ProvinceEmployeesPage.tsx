@@ -26,6 +26,9 @@ import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName } from "../utils/formatters";
 import type { IEmployee } from "../types/models";
 
+// Fetch limit for client-side operations
+const MAX_EMPLOYEES_FETCH_LIMIT = 10000;
+
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const [page, setPage] = useState(0);
@@ -38,7 +41,7 @@ export default function ProvinceEmployeesPage() {
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
 		1,
-		10000
+		MAX_EMPLOYEES_FETCH_LIMIT
 	);
 
 	// Reset to first page when search or filter changes
@@ -227,19 +230,15 @@ export default function ProvinceEmployeesPage() {
 				) : (
 					<Stack spacing={1.5}>
 						<DataGrid
-							rows={filteredEmployees}
+							rows={filteredEmployees.slice(page * limit, (page + 1) * limit)}
 							columns={columns}
 							getRowId={(row) => row._id}
-							paginationModel={{ pageSize: limit, page }}
-							onPaginationModelChange={(newModel) => setPage(newModel.page)}
-							pageSizeOptions={[20]}
 							loading={loading}
 							disableColumnMenu
 							disableColumnFilter
 							disableColumnResize
 							disableDensitySelector
 							disableRowSelectionOnClick
-							paginationMode="client"
 							rowHeight={40}
 							getRowClassName={() => "custom-row"}
 							getCellClassName={() => "custom-cell"}
