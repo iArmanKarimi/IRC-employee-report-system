@@ -9,6 +9,7 @@ import {
 	Stack,
 	IconButton,
 	Tooltip,
+	InputAdornment,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -68,20 +69,27 @@ export function SearchFilterBar({
 				value={localSearch}
 				onChange={handleSearchChange}
 				sx={{ flex: 1, minWidth: 250 }}
-				InputProps={{
-					startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
-					endAdornment: localSearch && (
-						<Tooltip title="Clear search">
-							<IconButton
-								size="small"
-								onClick={handleSearchClear}
-								edge="end"
-								sx={{ mr: -0.5 }}
-							>
-								<ClearIcon fontSize="small" />
-							</IconButton>
-						</Tooltip>
-					),
+				slotProps={{
+					input: {
+						startAdornment: (
+							<InputAdornment position="start">
+								<SearchIcon color="action" />
+							</InputAdornment>
+						),
+						endAdornment: localSearch && (
+							<InputAdornment position="end">
+								<Tooltip title="Clear search">
+									<IconButton
+										size="small"
+										onClick={handleSearchClear}
+										edge="end"
+									>
+										<ClearIcon fontSize="small" />
+									</IconButton>
+								</Tooltip>
+							</InputAdornment>
+						),
+					},
 				}}
 			/>
 
