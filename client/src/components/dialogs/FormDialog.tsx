@@ -1,3 +1,4 @@
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -34,6 +35,11 @@ export function FormDialog({
 	maxWidth = "md",
 	fullWidth = true,
 }: FormDialogProps) {
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		onSave();
+	};
+
 	return (
 		<Dialog
 			open={open}
@@ -41,21 +47,23 @@ export function FormDialog({
 			maxWidth={maxWidth}
 			fullWidth={fullWidth}
 		>
-			<DialogTitle>{title}</DialogTitle>
-			<DialogContent>{children}</DialogContent>
-			<DialogActions>
-				<Button onClick={onClose} disabled={loading}>
-					{cancelLabel}
-				</Button>
-				<Button
-					onClick={onSave}
-					variant="contained"
-					disabled={loading}
-					color="primary"
-				>
-					{loading ? "Saving..." : saveLabel}
-				</Button>
-			</DialogActions>
+			<form onSubmit={handleSubmit}>
+				<DialogTitle>{title}</DialogTitle>
+				<DialogContent>{children}</DialogContent>
+				<DialogActions>
+					<Button type="button" onClick={onClose} disabled={loading}>
+						{cancelLabel}
+					</Button>
+					<Button
+						type="submit"
+						variant="contained"
+						disabled={loading}
+						color="primary"
+					>
+						{loading ? "Saving..." : saveLabel}
+					</Button>
+				</DialogActions>
+			</form>
 		</Dialog>
 	);
 }
