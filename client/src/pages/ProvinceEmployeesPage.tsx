@@ -91,24 +91,25 @@ export default function ProvinceEmployeesPage() {
 		{
 			field: "actions",
 			headerName: "Actions",
-			type: "actions",
 			flex: 0.6,
 			minWidth: 100,
-			getActions: (params) => {
+			sortable: false,
+			renderCell: (params) => {
 				const viewUrl = ROUTES.PROVINCE_EMPLOYEE_DETAIL.replace(
 					":provinceId",
 					provinceId || ""
 				).replace(":employeeId", params.row._id);
-				return [
-					<GridActionsCellItem
-						icon={<VisibilityIcon fontSize="small" />}
-						label="View"
-						onClick={() => {
-							window.location.href = viewUrl;
-						}}
-						showInMenu={false}
-					/>,
-				];
+				return (
+					<Button
+						variant="outlined"
+						size="small"
+						startIcon={<VisibilityIcon fontSize="small" />}
+						onClick={() => (window.location.href = viewUrl)}
+						sx={{ textTransform: "none", borderRadius: 1, padding: 0.25 }}
+					>
+						View
+					</Button>
+				);
 			},
 		},
 	];
