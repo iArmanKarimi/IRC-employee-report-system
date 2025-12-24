@@ -6,10 +6,10 @@ import {
 	MenuItem,
 	FormControl,
 	InputLabel,
-	Stack,
 	IconButton,
 	Tooltip,
 	InputAdornment,
+	type SelectChangeEvent,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,7 +28,7 @@ export function SearchFilterBar({
 	filterValue = "",
 }: SearchFilterBarProps) {
 	const [localSearch, setLocalSearch] = useState(searchValue);
-	const [localFilter, setLocalFilter] = useState(""); // Default to 'All' (empty string)
+	const [localFilter, setLocalFilter] = useState(filterValue); // Default to 'All' (empty string)
 
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
@@ -41,7 +41,7 @@ export function SearchFilterBar({
 		onSearchChange("");
 	};
 
-	const handleFilterChange = (e: any) => {
+	const handleFilterChange = (e: SelectChangeEvent<string>) => {
 		const value = e.target.value;
 		setLocalFilter(value);
 		onFilterChange(value);

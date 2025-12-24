@@ -129,10 +129,11 @@ export default function ProvinceEmployeesPage() {
 				).replace(":employeeId", params.row._id);
 				return (
 					<Button
+						component={Link}
+						to={viewUrl}
 						variant="outlined"
 						size="small"
 						startIcon={<VisibilityIcon fontSize="small" />}
-						onClick={() => (window.location.href = viewUrl)}
 						sx={{ textTransform: "none", borderRadius: 1, padding: 0.25 }}
 					>
 						View
@@ -219,7 +220,6 @@ export default function ProvinceEmployeesPage() {
 							getRowId={(row) => row._id}
 							paginationModel={{ pageSize: limit, page }}
 							onPaginationModelChange={(newModel) => setPage(newModel.page)}
-							rowCount={filteredEmployees.length}
 							pageSizeOptions={[20]}
 							loading={loading}
 							disableColumnMenu
@@ -231,8 +231,7 @@ export default function ProvinceEmployeesPage() {
 							rowHeight={40}
 							getRowClassName={() => "custom-row"}
 							getCellClassName={() => "custom-cell"}
-							hideFooterPagination
-							hideFooter={false}
+							hideFooter
 							sx={{
 								borderRadius: 2,
 								border: "1px solid",
@@ -246,9 +245,6 @@ export default function ProvinceEmployeesPage() {
 								},
 								"& .custom-row:hover": {
 									backgroundColor: theme.palette.action.hover,
-								},
-								"& .MuiDataGrid-footerContainer": {
-									display: "none",
 								},
 								"& .MuiDataGrid-columnHeaders": {
 									borderBottom: "1px solid",
