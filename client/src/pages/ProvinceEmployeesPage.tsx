@@ -57,11 +57,15 @@ export default function ProvinceEmployeesPage() {
 			statusFilter === "" || employee.performance?.status === statusFilter;
 
 		let matchesPerformance = true;
-		if (performanceMetric && performanceValue !== null && employee.performance) {
+		if (
+			performanceMetric &&
+			performanceValue !== null &&
+			employee.performance
+		) {
 			const perfData = employee.performance as Record<string, any>;
 			const metricValue = perfData[performanceMetric];
 			if (metricValue !== undefined && metricValue !== null) {
-				matchesPerformance = Number(metricValue) >= performanceValue;
+				matchesPerformance = Number(metricValue) === performanceValue;
 			} else {
 				matchesPerformance = false;
 			}
