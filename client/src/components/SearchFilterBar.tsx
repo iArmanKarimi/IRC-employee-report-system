@@ -81,7 +81,7 @@ export function SearchFilterBar({
 			sx={{
 				display: "flex",
 				gap: 2.5,
-				alignItems: "flex-end",
+				   alignItems: "center",
 				flexWrap: "wrap",
 				p: 2,
 				backgroundColor: "background.paper",
