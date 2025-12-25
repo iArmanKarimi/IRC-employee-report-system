@@ -76,12 +76,6 @@ export function SearchFilterBar({
 		}
 	};
 
-	const handleClearPerformanceFilter = () => {
-		setLocalPerformanceMetric("");
-		setLocalPerformanceValue("");
-		onPerformanceFilterChange?.("", null);
-	};
-
 	return (
 		<Box
 			sx={{
@@ -144,11 +138,7 @@ export function SearchFilterBar({
 			</FormControl>
 
 			{/* Performance Metric Filter */}
-			<Stack
-				direction="row"
-				spacing={1}
-				alignItems="center"
-			>
+			<Stack direction="row" spacing={1} alignItems="center">
 				<FormControl size="small" sx={{ minWidth: 180 }}>
 					<InputLabel>Performance Metric</InputLabel>
 					<Select
@@ -176,25 +166,15 @@ export function SearchFilterBar({
 
 				{/* Performance Value Filter */}
 				{localPerformanceMetric && (
-					<>
-						<TextField
-							label="Value"
-							type="number"
-							size="small"
-							value={localPerformanceValue}
-							onChange={handlePerformanceValueChange}
-							inputProps={{ min: 0 }}
-							sx={{ width: 100 }}
-						/>
-						<IconButton
-							size="small"
-							onClick={handleClearPerformanceFilter}
-							title="Clear performance filter"
-							sx={{ mb: 0.5 }}
-						>
-							<ClearIcon fontSize="small" />
-						</IconButton>
-					</>
+					<TextField
+						label="Value"
+						type="number"
+						size="small"
+						value={localPerformanceValue}
+						onChange={handlePerformanceValueChange}
+						inputProps={{ min: 0 }}
+						sx={{ width: 100 }}
+					/>
 				)}
 			</Stack>
 		</Box>
