@@ -144,7 +144,11 @@ export function SearchFilterBar({
 			</FormControl>
 
 			{/* Performance Metric Filter */}
-		<Stack direction="row" spacing={1} alignItems="flex-end" sx={{ alignSelf: "flex-end" }}>
+			<Stack
+				direction="row"
+				spacing={1}
+				alignItems="center"
+			>
 				<FormControl size="small" sx={{ minWidth: 180 }}>
 					<InputLabel>Performance Metric</InputLabel>
 					<Select
