@@ -53,8 +53,14 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => ({
 export const prepareEmployeesExcel = (employees: any[]): XLSX.WorkBook => {
 	const completeData: ExcelEmployeeRow[] = employees.map(mapEmployeeToExcelRow);
 
+	// Derive a stable, explicit header list from the mapping itself so
+	// unexpected fields on the original employee documents (e.g. timestamps)
+	// don't end up as extra columns in the generated sheet.
+	const headers = Object.keys(mapEmployeeToExcelRow({}));
+
 	const workbook = XLSX.utils.book_new();
-	const completeSheet = XLSX.utils.json_to_sheet(completeData);
+	// Pass explicit headers to json_to_sheet to control the exact columns
+	const completeSheet = XLSX.utils.json_to_sheet(completeData, { header: headers });
 
 	// Set reasonable column widths based on number of columns
 	const colCount = Object.keys(completeData[0] || {}).length;
