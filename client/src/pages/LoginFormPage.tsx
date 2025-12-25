@@ -11,6 +11,7 @@ import Container from "@mui/material/Container";
 import LoginIcon from "@mui/icons-material/Login";
 import { authApi, type LoginResponse } from "../api/api";
 import { ROUTES } from "../const/endpoints";
+import bg from "../../public/login-bg.jpg";
 
 export default function LoginFormPage() {
 	const navigate = useNavigate();
@@ -57,7 +58,14 @@ export default function LoginFormPage() {
 	};
 
 	return (
-		<Container maxWidth="sm">
+		<Container
+			maxWidth="xl"
+			sx={{
+				backgroundImage: `url(${bg})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+			}}
+		>
 			<Box
 				sx={{
 					minHeight: "100vh",
