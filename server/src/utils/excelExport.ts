@@ -13,13 +13,13 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => ({
 	"First Name": emp.basicInfo?.firstName || "-",
 	"Last Name": emp.basicInfo?.lastName || "-",
 	"National ID": emp.basicInfo?.nationalID || "-",
-	Gender: emp.basicInfo?.male ? "Male" : "Female",
-	Married: emp.basicInfo?.married ? "Yes" : "No",
+	"Gender": emp.basicInfo?.male ? "Male" : "Female",
+	"Married": emp.basicInfo?.married ? "Yes" : "No",
 	"Children Count": emp.basicInfo?.childrenCount ?? "-",
 
 	// Work Place
-	Branch: emp.workPlace?.branch || "-",
-	Rank: emp.workPlace?.rank || "-",
+	"Branch": emp.workPlace?.branch || "-",
+	"Rank": emp.workPlace?.rank || "-",
 	"Licensed Workplace": emp.workPlace?.licensedWorkplace || "-",
 
 	// Additional Specifications
@@ -37,14 +37,14 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => ({
 	"Shift Duration": emp.performance?.shiftDuration
 		? `${emp.performance.shiftDuration} hours`
 		: "-",
-	Overtime: emp.performance?.overtime ?? "-",
+	"Overtime": emp.performance?.overtime ?? "-",
 	"Daily Leave": emp.performance?.dailyLeave ?? "-",
 	"Sick Leave": emp.performance?.sickLeave ?? "-",
-	Absence: emp.performance?.absence ?? "-",
+	"Absence": emp.performance?.absence ?? "-",
 	"Truck Driver": emp.performance?.truckDriver ? "Yes" : "No",
 	"Travel Assignment": emp.performance?.travelAssignment ?? "-",
-	Status: emp.performance?.status?.toUpperCase() ?? "-",
-	Notes: emp.performance?.notes || "-",
+	"Status": emp.performance?.status?.toUpperCase() ?? "-",
+	"Notes": emp.performance?.notes || "-",
 });
 
 /**
