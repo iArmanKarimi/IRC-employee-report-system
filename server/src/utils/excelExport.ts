@@ -62,11 +62,6 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => ({
 	"Travel Assignment": emp.performance?.travelAssignment ?? "-",
 	Status: emp.performance?.status?.toUpperCase() ?? "-",
 	Notes: emp.performance?.notes || "-",
-
-	// Meta
-	Province: typeof emp.provinceId === "string" ? emp.provinceId : emp.provinceId?.name || "-",
-	"Created At": formatDate(emp.createdAt),
-	"Updated At": formatDate(emp.updatedAt),
 });
 
 /**
