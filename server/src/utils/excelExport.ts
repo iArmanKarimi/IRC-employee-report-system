@@ -5,23 +5,6 @@ import { Response } from "express";
 export type ExcelEmployeeRow = Record<string, string | number | boolean | undefined>;
 
 /**
- * Formats a date as MM/DD/YYYY or returns '-' if invalid.
- */
-export const formatDate = (date: Date | string | undefined): string => {
-	if (!date) return "-";
-	try {
-		const dateObj = typeof date === "string" ? new Date(date) : date;
-		return dateObj.toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-		});
-	} catch {
-		return "-";
-	}
-};
-
-/**
  * Map a single employee document to a flattened Excel row.
  * Intentionally excludes internal identifiers like `_id`.
  */
@@ -41,11 +24,11 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => ({
 
 	// Additional Specifications
 	"Educational Degree": emp.additionalSpecifications?.educationalDegree || "-",
-	"Date of Birth": formatDate(emp.additionalSpecifications?.dateOfBirth),
+	"Date of Birth": (emp.additionalSpecifications?.dateOfBirth),
 	"Contact Number": emp.additionalSpecifications?.contactNumber || "-",
-	"Job Start Date": formatDate(emp.additionalSpecifications?.jobStartDate),
+	"Job Start Date": (emp.additionalSpecifications?.jobStartDate),
 	"Job End Date": emp.additionalSpecifications?.jobEndDate
-		? formatDate(emp.additionalSpecifications.jobEndDate)
+		? (emp.additionalSpecifications.jobEndDate)
 		: "-",
 
 	// Performance
