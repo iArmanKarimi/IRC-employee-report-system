@@ -44,18 +44,27 @@ const ensureUser = (req: Request): AuthenticatedUser => {
 	return req.user;
 };
 
-// Helper function to validate user can access the province and fetch employee
-// Throws HttpError if employee not found or access denied
+/**
+ * Validates that the authenticated user can access the specified province.
+ * Throws HttpError(403) if access is denied.
+ */
+const validateProvinceAccess = (req: Request, provinceId: string): AuthenticatedUser => {
+	const user = ensureUser(req);
+	if (!canAccessProvince(user, provinceId)) {
+		throw new HttpError(403, "Cannot access employees from another province");
+	}
+	return user;
+};
+
+/**
+ * Fetches an employee by ID, validates it belongs to the specified province,
+ * and ensures user has access. Throws HttpError if validation fails.
+ */
 const getEmployeeInProvinceOrThrow = async (
 	req: Request<EmployeeParams>,
 	provinceId: string
 ): Promise<EmployeeDocument> => {
-	const user = ensureUser(req);
-
-	// Check if user can access this province
-	if (!canAccessProvince(user, provinceId)) {
-		throw new HttpError(403, "Cannot access employees from another province");
-	}
+	validateProvinceAccess(req, provinceId);
 
 	const employee = await Employee.findById(req.params.employeeId).populate('provinceId');
 	if (!employee) {
@@ -151,16 +160,23 @@ const prepareEmployeesExcel = (employees: any[]) => {
 	return workbook;
 };
 
+/**
+ * Sends an Excel file as a download response
+ */
+const sendExcelFile = (res: Response, workbook: XLSX.WorkBook, baseFilename: string): void => {
+	const fileName = `${baseFilename}_${new Date().toISOString().split("T")[0]}.xlsx`;
+	res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+	const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+	res.end(buffer);
+};
+
 // GET /provinces/:provinceId/employees - List employees of a province with pagination
 router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res: Response, next: NextFunction) => {
 	try {
-		const user = ensureUser(req);
 		const { provinceId } = req.params;
-
-		// Check if user can access this province
-		if (!canAccessProvince(user, provinceId)) {
-			throw new HttpError(403, "Cannot access employees from another province");
-		}
+		validateProvinceAccess(req, provinceId);
 
 		// Get pagination parameters from query
 		const { page, limit, skip } = getPaginationParams(req, 20, 100);
@@ -199,13 +215,8 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 // GET /provinces/:provinceId/employees/export-excel - Export all employees to Excel
 router.get("/export-excel", requireAnyRole, async (req: Request<{ provinceId: string }>, res: Response, next: NextFunction) => {
 	try {
-		const user = ensureUser(req);
 		const { provinceId } = req.params;
-
-		// Check if user can access this province
-		if (!canAccessProvince(user, provinceId)) {
-			throw new HttpError(403, "Cannot access employees from another province");
-		}
+		validateProvinceAccess(req, provinceId);
 
 		// Fetch all employees for the province
 		const employees = await Employee.find({ provinceId }).lean();
@@ -214,17 +225,10 @@ router.get("/export-excel", requireAnyRole, async (req: Request<{ provinceId: st
 			throw new HttpError(404, "No employees found for this province");
 		}
 
-		// Generate Excel workbook
+		// Generate and send Excel workbook
 		const workbook = prepareEmployeesExcel(employees);
-
-		// Send as file
-		const fileName = `employees_${new Date().toISOString().split("T")[0]}.xlsx`;
-		res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-		res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-
-		const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 		logger.info("Employees exported to Excel", { provinceId, count: employees.length });
-		res.end(buffer);
+		sendExcelFile(res, workbook, "employees");
 	} catch (err: unknown) {
 		next(err);
 	}
@@ -233,13 +237,8 @@ router.get("/export-excel", requireAnyRole, async (req: Request<{ provinceId: st
 // POST /provinces/:provinceId/employees - Create employee in a province
 router.post("/", requireAnyRole, async (req: Request<{ provinceId: string }, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
 	try {
-		const user = ensureUser(req);
 		const { provinceId } = req.params;
-
-		// Check if user can access this province
-		if (!canAccessProvince(user, provinceId)) {
-			throw new HttpError(403, "Cannot create employee in another province");
-		}
+		validateProvinceAccess(req, provinceId);
 
 		const employee = new Employee({
 			...req.body,
@@ -268,7 +267,6 @@ router.get("/:employeeId", validateEmployeeId, requireAnyRole, async (req: Reque
 // PUT /provinces/:provinceId/employees/:employeeId - Update employee
 router.put("/:employeeId", validateEmployeeId, requireAnyRole, async (req: Request<EmployeeParams, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
 	try {
-		const user = ensureUser(req);
 		const { provinceId, employeeId } = req.params;
 
 		// Verify employee exists and belongs to province
