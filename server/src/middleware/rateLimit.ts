@@ -8,8 +8,6 @@ export const authRateLimiter = rateLimit({
 	windowMs: config.rateLimit.windowMs,
 	max: config.rateLimit.maxRequests,
 	message: "Too many login attempts, please try again later",
-	standardHeaders: true,
-	legacyHeaders: false,
 	skip: (req) => {
 		// Skip rate limiting in development mode
 		return config.nodeEnv === 'development';
