@@ -13,6 +13,7 @@ import { sanitizeInput } from "./middleware/sanitize";
 import { auditLog } from "./middleware/audit";
 // import { performanceMonitor } from "./middleware/performance";
 import { getConfig } from "./config";
+import path from "path";
 
 const config = getConfig();
 export const app = express();
@@ -55,6 +56,8 @@ app.use(session(sessionConfig));
 
 // Audit logging for mutations (POST, PUT, DELETE)
 app.use(auditLog);
+
+app.use('/img', express.static(path.join(__dirname, 'img')));
 
 // API Documentation routes (no auth required)
 app.use('/api-docs', apiDocsRoutes);
