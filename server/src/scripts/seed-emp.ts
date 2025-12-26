@@ -61,6 +61,7 @@ async function seedEmployees() {
 					dateOfBirth,
 					contactNumber,
 					jobStartDate,
+					truckDriver,
 				},
 				performance: {
 					dailyPerformance,
@@ -70,7 +71,6 @@ async function seedEmployees() {
 					dailyLeave,
 					sickLeave,
 					absence,
-					truckDriver,
 					travelAssignment,
 					status,
 					notes,

@@ -110,18 +110,6 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					onChange={(e) => onChange("travelAssignment", Number(e.target.value))}
 				/>
 			</Box>
-
-			<FormControlLabel
-				control={
-					<Checkbox
-						checked={performance.truckDriver}
-						onChange={(e) => onChange("truckDriver", e.target.checked)}
-					/>
-				}
-				label="Truck Driver"
-				sx={{ mt: 0.5 }}
-			/>
-
 			<FormControl fullWidth>
 				<InputLabel>Status</InputLabel>
 				<Select

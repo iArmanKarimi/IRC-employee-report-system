@@ -44,7 +44,6 @@ export function PerformanceManager({
 			dailyLeave: 0,
 			sickLeave: 0,
 			absence: 0,
-			truckDriver: false,
 			travelAssignment: 0,
 			month: currentMonth,
 			status: "active",

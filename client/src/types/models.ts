@@ -30,6 +30,7 @@ export interface IAdditionalSpecifications {
 	contactNumber: string;
 	jobStartDate: Date | string;
 	jobEndDate?: Date | string;
+	truckDriver: boolean;
 }
 
 // Performance sub-schema
@@ -41,7 +42,6 @@ export interface IPerformance {
 	dailyLeave: number;
 	sickLeave: number;
 	absence: number;
-	truckDriver: boolean;
 	travelAssignment: number;
 	status: 'active' | 'inactive' | 'on_leave';
 	notes?: string;

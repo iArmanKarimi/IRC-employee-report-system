@@ -6,6 +6,7 @@ export interface IAdditionalSpecifications {
 	contactNumber: string;
 	jobStartDate: Date;
 	jobEndDate?: Date;
+	truckDriver: boolean;
 }
 
 export const AdditionalSpecificationsSchema = new Schema<IAdditionalSpecifications>({
@@ -24,5 +25,6 @@ export const AdditionalSpecificationsSchema = new Schema<IAdditionalSpecificatio
 		}
 	},
 	jobStartDate: { type: Date, required: true },
-	jobEndDate: { type: Date }
+	jobEndDate: { type: Date },
+	truckDriver: { type: Boolean, default: false }
 });

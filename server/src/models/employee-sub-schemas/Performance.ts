@@ -8,7 +8,6 @@ export interface IPerformance {
 	dailyLeave: number;
 	sickLeave: number;
 	absence: number;
-	truckDriver: boolean;
 	travelAssignment: number;
 	status: string;
 	notes?: string;
@@ -22,7 +21,6 @@ export const PerformanceSchema = new Schema<IPerformance>({
 	dailyLeave: { type: Number, default: 0, min: 0 },
 	sickLeave: { type: Number, default: 0, min: 0 },
 	absence: { type: Number, default: 0, min: 0 },
-	truckDriver: { type: Boolean, default: false },
 	travelAssignment: { type: Number, default: 0, min: 0, max: 31 },
 	status: { type: String, default: 'active', enum: ['active', 'inactive', 'on_leave'] },
 	notes: { type: String, trim: true }

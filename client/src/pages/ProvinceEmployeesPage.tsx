@@ -193,7 +193,7 @@ export default function ProvinceEmployeesPage() {
 		(e) => e.performance?.status === "on_leave"
 	).length;
 	const truckDriverCount = employees.filter(
-		(e) => e.performance?.truckDriver
+		(e) => e.additionalSpecifications?.truckDriver
 	).length;
 
 	// DataGrid columns definition

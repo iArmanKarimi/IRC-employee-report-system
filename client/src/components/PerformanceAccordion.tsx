@@ -137,16 +137,6 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							}
 						/>
 					</Box>
-					<FormControlLabel
-						control={
-							<Checkbox
-								checked={performance.truckDriver}
-								onChange={(e) => onChange("truckDriver", e.target.checked)}
-							/>
-						}
-						label="Truck Driver"
-						sx={{ mt: 0.5 }}
-					/>
 					<FormControl fullWidth>
 						<InputLabel>Status</InputLabel>
 						<Select

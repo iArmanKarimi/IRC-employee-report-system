@@ -148,27 +148,16 @@ export function PerformanceDialog({
 						}
 					/>
 					<TextField
-label="Travel Assignment (days)"
-type="number"
-inputProps={{ min: 0, max: 31 }}
-sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
-value={formData.travelAssignment}
-onChange={(e) =>
-handleFieldChange("travelAssignment", Number(e.target.value))
-}
-/>
-</Box>
-				<FormControlLabel
-					control={
-						<Checkbox
-							checked={formData.truckDriver}
-							onChange={(e) =>
-								handleFieldChange("truckDriver", e.target.checked)
-							}
-						/>
-					}
-					label="Truck Driver"
-				/>
+						label="Travel Assignment (days)"
+						type="number"
+						inputProps={{ min: 0, max: 31 }}
+						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
+						value={formData.travelAssignment}
+						onChange={(e) =>
+							handleFieldChange("travelAssignment", Number(e.target.value))
+						}
+					/>
+				</Box>
 				<TextField
 					label="Notes"
 					multiline

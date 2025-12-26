@@ -105,12 +105,13 @@ export function PerformanceCard({
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
+					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
 							{" "}
-							Truck Driver:
+							Travel Assignment:
 						</Typography>
 						<Typography variant="body2">
-							{performance.truckDriver ? "Yes" : "No"}
+							{performance.travelAssignment} days
 						</Typography>
 					</Box>
 					{performance.notes && (

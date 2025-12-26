@@ -51,6 +51,7 @@ const prepareEmployeesExcel = async (employees: any[]) => {
 		"Job End Date": emp.additionalSpecifications?.jobEndDate
 			? formatDate(emp.additionalSpecifications.jobEndDate)
 			: "-",
+		"Truck Driver": emp.additionalSpecifications?.truckDriver ? "Yes" : "No",
 
 		// Performance
 		"Daily Performance": emp.performance?.dailyPerformance ?? "-",
@@ -62,7 +63,6 @@ const prepareEmployeesExcel = async (employees: any[]) => {
 		"Daily Leave": emp.performance?.dailyLeave ?? "-",
 		"Sick Leave": emp.performance?.sickLeave ?? "-",
 		Absence: emp.performance?.absence ?? "-",
-		"Truck Driver": emp.performance?.truckDriver ? "Yes" : "No",
 		"Travel Assignment": emp.performance?.travelAssignment ?? "-",
 		Status: emp.performance?.status?.toUpperCase() ?? "-",
 		Notes: emp.performance?.notes || "-",
@@ -137,7 +137,6 @@ router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), async (req: R
 					"performance.dailyLeave": 0,
 					"performance.sickLeave": 0,
 					"performance.absence": 0,
-					"performance.truckDriver": false,
 					"performance.travelAssignment": 0,
 					"performance.status": "active",
 					"performance.notes": ""

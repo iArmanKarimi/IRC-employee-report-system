@@ -32,7 +32,7 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => {
 		"Job End Date": emp.additionalSpecifications?.jobEndDate
 			? (emp.additionalSpecifications.jobEndDate)
 			: "-",
-
+		"Truck Driver": emp.additionalSpecifications?.truckDriver ? "Yes" : "No",
 		// Performance
 		"Daily Performance": emp.performance?.dailyPerformance ?? "-",
 		"Shift Count Per Location": emp.performance?.shiftCountPerLocation ?? "-",
@@ -43,7 +43,6 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => {
 		"Daily Leave": emp.performance?.dailyLeave ?? "-",
 		"Sick Leave": emp.performance?.sickLeave ?? "-",
 		"Absence": emp.performance?.absence ?? "-",
-		"Truck Driver": emp.performance?.truckDriver ? "Yes" : "No",
 		"Travel Assignment": emp.performance?.travelAssignment ?? "-",
 		"Status": emp.performance?.status?.toUpperCase() ?? "-",
 		"Notes": emp.performance?.notes || "-",
