@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
@@ -50,6 +50,18 @@ export default function EmployeePage() {
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
+	const [localPerformance, setLocalPerformance] = useState<IPerformance | null>(
+		null
+	);
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+	// Sync local performance state with employee data
+	useEffect(() => {
+		if (employee?.performance) {
+			setLocalPerformance(employee.performance);
+			setHasUnsavedChanges(false);
+		}
+	}, [employee]);
 
 	const handleEditOpen = () => {
 		setEditDialogOpen(true);
@@ -125,88 +137,22 @@ export default function EmployeePage() {
 		}
 	}
 
-	const handlePerformanceChange = async (
-		key: keyof IPerformance,
-		value: any
-	) => {
-		if (!employee) return;
-		if (!employee.performance) return;
-		// Ensure all required fields are present and not undefined
-		const updatedPerformance: IPerformance = {
-			dailyPerformance:
-				typeof (key === "dailyPerformance"
-					? value
-					: employee.performance.dailyPerformance) === "number"
-					? key === "dailyPerformance"
-						? value
-						: employee.performance.dailyPerformance
-					: 0,
-			shiftCountPerLocation:
-				typeof (key === "shiftCountPerLocation"
-					? value
-					: employee.performance.shiftCountPerLocation) === "number"
-					? key === "shiftCountPerLocation"
-						? value
-						: employee.performance.shiftCountPerLocation
-					: 0,
-			shiftDuration:
-				(key === "shiftDuration"
-					? value
-					: employee.performance.shiftDuration) ?? 8,
-			overtime:
-				typeof (key === "overtime" ? value : employee.performance.overtime) ===
-				"number"
-					? key === "overtime"
-						? value
-						: employee.performance.overtime
-					: 0,
-			dailyLeave:
-				typeof (key === "dailyLeave"
-					? value
-					: employee.performance.dailyLeave) === "number"
-					? key === "dailyLeave"
-						? value
-						: employee.performance.dailyLeave
-					: 0,
-			sickLeave:
-				typeof (key === "sickLeave"
-					? value
-					: employee.performance.sickLeave) === "number"
-					? key === "sickLeave"
-						? value
-						: employee.performance.sickLeave
-					: 0,
-			absence:
-				typeof (key === "absence" ? value : employee.performance.absence) ===
-				"number"
-					? key === "absence"
-						? value
-						: employee.performance.absence
-					: 0,
-			truckDriver:
-				typeof (key === "truckDriver"
-					? value
-					: employee.performance.truckDriver) === "boolean"
-					? key === "truckDriver"
-						? value
-						: employee.performance.truckDriver
-					: false,
-			travelAssignment:
-				typeof (key === "travelAssignment"
-					? value
-					: employee.performance.travelAssignment) === "number"
-					? key === "travelAssignment"
-						? value
-						: employee.performance.travelAssignment
-					: 0,
-			status:
-				(key === "status" ? value : employee.performance.status) ?? "active",
-			notes: (key === "notes" ? value : employee.performance.notes) ?? "",
-		};
+	const handlePerformanceChange = (key: keyof IPerformance, value: any) => {
+		if (!localPerformance) return;
+		setLocalPerformance((prev) => {
+			if (!prev) return prev;
+			return { ...prev, [key]: value };
+		});
+		setHasUnsavedChanges(true);
+	};
+
+	const handleSavePerformance = async () => {
+		if (!localPerformance) return;
 		await updatePerformance(
-			updatedPerformance,
-			"Failed to update performance record. Please try again or contact support if the issue persists."
+			localPerformance,
+			"Failed to update performance record"
 		);
+		setHasUnsavedChanges(false);
 	};
 
 	if (loading) {
@@ -405,12 +351,28 @@ export default function EmployeePage() {
 					{/* Performance Record */}
 					<Card>
 						<CardContent>
-							<Typography variant="h6" gutterBottom>
-								Current Month Performance
-							</Typography>
-							{employee.performance ? (
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "space-between",
+									alignItems: "center",
+									mb: 2,
+								}}
+							>
+								<Typography variant="h6">Current Month Performance</Typography>
+								<Button
+									variant="contained"
+									color="primary"
+									onClick={handleSavePerformance}
+									disabled={saving || !hasUnsavedChanges}
+									size="small"
+								>
+									{saving ? "Saving..." : "Save Changes"}
+								</Button>
+							</Box>
+							{localPerformance ? (
 								<PerformanceDisplay
-									performance={employee.performance}
+									performance={localPerformance}
 									onChange={handlePerformanceChange}
 								/>
 							) : (
