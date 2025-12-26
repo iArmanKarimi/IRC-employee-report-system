@@ -9,8 +9,14 @@ import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import WarningIcon from "@mui/icons-material/Warning";
 import { ROUTES, API_BASE_URL } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import { useProvinces } from "../hooks/useProvinces";
@@ -18,11 +24,23 @@ import { provinceApi } from "../api/api";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function GlobalAdminDashboardPage() {
 	const { provinces, loading, error, refetch } = useProvinces();
 	const [clearing, setClearing] = useState(false);
+	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+	const [countdown, setCountdown] = useState(5);
+
+	// Countdown timer effect
+	useEffect(() => {
+		if (confirmDialogOpen && countdown > 0) {
+			const timer = setTimeout(() => {
+				setCountdown((prev) => prev - 1);
+			}, 1000);
+			return () => clearTimeout(timer);
+		}
+	}, [confirmDialogOpen, countdown]);
 
 	const handleExportAllEmployees = async () => {
 		try {
@@ -53,15 +71,18 @@ export default function GlobalAdminDashboardPage() {
 		}
 	};
 
-	const handleClearAllPerformances = async () => {
-		if (
-			!window.confirm(
-				"Are you sure you want to clear all employee performance data? This action cannot be undone."
-			)
-		) {
-			return;
-		}
+	const handleOpenClearDialog = () => {
+		setCountdown(5);
+		setConfirmDialogOpen(true);
+	};
 
+	const handleCloseClearDialog = () => {
+		setConfirmDialogOpen(false);
+		setCountdown(5);
+	};
+
+	const handleClearAllPerformances = async () => {
+		handleCloseClearDialog();
 		setClearing(true);
 		try {
 			const response = await provinceApi.clearAllPerformances();
@@ -118,7 +139,7 @@ export default function GlobalAdminDashboardPage() {
 					</Typography>
 					<Stack direction="row" spacing={2}>
 						<Button
-							onClick={handleClearAllPerformances}
+							onClick={handleOpenClearDialog}
 							variant="outlined"
 							color="error"
 							startIcon={<DeleteSweepIcon />}
@@ -221,6 +242,60 @@ export default function GlobalAdminDashboardPage() {
 						</Card>
 					))}
 				</Box>
+
+				{/* Confirm Clear Performances Dialog */}
+				<Dialog
+					open={confirmDialogOpen}
+					onClose={handleCloseClearDialog}
+					maxWidth="sm"
+					fullWidth
+				>
+					<DialogTitle>
+						<Stack direction="row" alignItems="center" spacing={1}>
+							<WarningIcon color="error" />
+							<Typography>Clear All Employee Performances</Typography>
+						</Stack>
+					</DialogTitle>
+					<DialogContent>
+						<DialogContentText>
+							<strong>Warning:</strong> You are about to clear all performance
+							data from all employees across all provinces. This action cannot
+							be undone.
+						</DialogContentText>
+						<DialogContentText sx={{ mt: 2 }}>
+							This will remove all performance records including:
+						</DialogContentText>
+						<Box component="ul" sx={{ mt: 1, color: "text.secondary" }}>
+							<li>Daily performance scores</li>
+							<li>Shift information</li>
+							<li>Overtime records</li>
+							<li>Leave and absence data</li>
+							<li>Status and notes</li>
+						</Box>
+						{countdown > 0 && (
+							<DialogContentText
+								sx={{ mt: 2, fontWeight: "bold", color: "error.main" }}
+							>
+								Please wait {countdown} second{countdown !== 1 ? "s" : ""}{" "}
+								before confirming...
+							</DialogContentText>
+						)}
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={handleCloseClearDialog} color="inherit">
+							Cancel
+						</Button>
+						<Button
+							onClick={handleClearAllPerformances}
+							color="error"
+							variant="contained"
+							disabled={countdown > 0}
+							startIcon={<DeleteSweepIcon />}
+						>
+							Confirm Clear All
+						</Button>
+					</DialogActions>
+				</Dialog>
 			</Container>
 		</>
 	);
