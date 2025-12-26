@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { Response } from "express";
 
 // Type for the flattened Excel row
@@ -53,29 +53,51 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => {
 /**
  * Prepares a workbook with a single Employees sheet from an array of employees.
  */
-export const prepareEmployeesExcel = (employees: any[]): XLSX.WorkBook => {
+export const prepareEmployeesExcel = async (employees: any[]): Promise<ExcelJS.Workbook> => {
+	const workbook = new ExcelJS.Workbook();
+	const worksheet = workbook.addWorksheet("Employees");
+
 	// Map each employee through our explicit mapping function
 	const completeData: ExcelEmployeeRow[] = employees.map(mapEmployeeToExcelRow);
 
-	const workbook = XLSX.utils.book_new();
-	const completeSheet = XLSX.utils.json_to_sheet(completeData);
+	if (completeData.length === 0) {
+		// Add headers even if no data
+		worksheet.columns = [];
+		return workbook;
+	}
 
-	// Set reasonable column widths based on number of columns
-	const colCount = Object.keys(completeData[0] || {}).length;
-	completeSheet["!cols"] = new Array(colCount).fill(0).map(() => ({ wch: 18 }));
+	// Add headers from the first employee's keys
+	const headers = Object.keys(completeData[0]);
+	worksheet.columns = headers.map((header) => ({
+		header,
+		key: header,
+		width: 18,
+	}));
 
-	XLSX.utils.book_append_sheet(workbook, completeSheet, "Employees");
+	// Add data rows
+	completeData.forEach((row) => {
+		worksheet.addRow(row);
+	});
+
+	// Style header row
+	worksheet.getRow(1).font = { bold: true };
+	worksheet.getRow(1).fill = {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: { argb: "FFD3D3D3" },
+	};
+
 	return workbook;
 };
 
 /**
  * Sends an Excel file as a download response
  */
-export const sendExcelFile = (res: Response, workbook: XLSX.WorkBook, baseFilename: string): void => {
+export const sendExcelFile = async (res: Response, workbook: ExcelJS.Workbook, baseFilename: string): Promise<void> => {
 	const fileName = `${baseFilename}_${new Date().toISOString().split("T")[0]}.xlsx`;
 	res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 	res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
 
-	const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
-	res.end(buffer);
+	await workbook.xlsx.write(res);
 };
+

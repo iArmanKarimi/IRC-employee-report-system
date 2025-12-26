@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { Employee } from "../models/Employee";
 import { auth } from "../middleware/auth";
 import { USER_ROLE } from "../types/roles";
@@ -24,7 +24,10 @@ const formatDate = (date: Date | string | undefined): string => {
 };
 
 // Helper function to prepare Excel export data
-const prepareEmployeesExcel = (employees: any[]) => {
+const prepareEmployeesExcel = async (employees: any[]) => {
+	const workbook = new ExcelJS.Workbook();
+	const worksheet = workbook.addWorksheet("Employees");
+
 	// Create a single complete sheet with all employee data (no _id, no meta fields)
 	const completeData = employees.map((emp) => ({
 		// Basic Info
@@ -65,15 +68,31 @@ const prepareEmployeesExcel = (employees: any[]) => {
 		Notes: emp.performance?.notes || "-",
 	}));
 
-	// Create workbook with single complete sheet
-	const workbook = XLSX.utils.book_new();
-	const completeSheet = XLSX.utils.json_to_sheet(completeData);
+	if (completeData.length === 0) {
+		// Return empty workbook if no data
+		return workbook;
+	}
 
-	// Set reasonable column widths
-	const colCount = Object.keys(completeData[0] || {}).length;
-	completeSheet["!cols"] = new Array(colCount).fill(0).map(() => ({ wch: 18 }));
+	// Add headers from the first employee's keys
+	const headers = Object.keys(completeData[0]);
+	worksheet.columns = headers.map((header) => ({
+		header,
+		key: header,
+		width: 18,
+	}));
 
-	XLSX.utils.book_append_sheet(workbook, completeSheet, "Employees");
+	// Add data rows
+	completeData.forEach((row) => {
+		worksheet.addRow(row);
+	});
+
+	// Style header row
+	worksheet.getRow(1).font = { bold: true };
+	worksheet.getRow(1).fill = {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: { argb: "FFD3D3D3" },
+	};
 
 	return workbook;
 };
@@ -89,16 +108,15 @@ router.get("/export-all", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res
 		}
 
 		// Generate Excel workbook
-		const workbook = prepareEmployeesExcel(employees);
+		const workbook = await prepareEmployeesExcel(employees);
 
 		// Send as file
 		const fileName = `employees_all_${new Date().toISOString().split("T")[0]}.xlsx`;
 		res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
 
-		const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+		await workbook.xlsx.write(res);
 		logger.info("All employees exported to Excel", { count: employees.length });
-		res.end(buffer);
 	} catch (err: unknown) {
 		next(err);
 	}

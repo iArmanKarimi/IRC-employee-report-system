@@ -21,12 +21,12 @@
 		"connect-mongo": "^5.1.0",
 		"cors": "^2.8.5",
 		"dotenv": "^17.2.3",
+		"exceljs": "^4.4.0",
 		"express": "^5.1.0",
 		"express-rate-limit": "^8.2.1",
 		"express-session": "^1.18.2",
 		"jsonwebtoken": "^9.0.2",
-		"mongoose": "^8.3.3",
-		"xlsx": "^0.18.5"
+		"mongoose": "^8.3.3"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^6.0.0",
