@@ -210,22 +210,6 @@ export default function ProvinceEmployeesPage() {
 			},
 		},
 		{
-			field: "truckDriver",
-			headerName: "Truck Driver",
-			flex: 0.6,
-			minWidth: 110,
-			align: "center",
-			headerAlign: "center",
-			renderCell: (params: GridRenderCellParams<IEmployee>) => {
-				const employee = params.row;
-				return employee.additionalSpecifications?.truckDriver ? (
-					<Chip label="Yes" color="info" size="small" variant="outlined" />
-				) : (
-					<Chip label="No" color="default" size="small" variant="outlined" />
-				);
-			},
-		},
-		{
 			field: "nationalID",
 			headerName: "National ID",
 			flex: 0.8,

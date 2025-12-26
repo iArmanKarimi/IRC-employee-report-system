@@ -221,7 +221,9 @@ export function EditEmployeeDialog({
 					<FormControlLabel
 						control={
 							<Checkbox
-								checked={formData.additionalSpecifications?.truckDriver || false}
+								checked={
+									formData.additionalSpecifications?.truckDriver || false
+								}
 								onChange={(e) =>
 									handleFieldChange(
 										"additionalSpecifications.truckDriver",
