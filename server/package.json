@@ -9,6 +9,7 @@
 		"start": "node dist/index.js",
 		"seed:db": "ts-node src/scripts/seed-db.ts",
 		"seed:emp": "ts-node src/scripts/seed-emp.ts",
+		"clear:db": "ts-node src/scripts/clear-db.ts",
 		"test": "jest --runInBand",
 		"test:watch": "jest --watch --runInBand"
 	},
