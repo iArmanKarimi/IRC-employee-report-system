@@ -122,4 +122,169 @@ router.get("/export-all", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res
 	}
 });
 
+// GET /employees - List all employees for Global Admin Dashboard (Global Admin only)
+router.get("/", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const page = Math.max(1, parseInt(req.query.page as string) || 1);
+		const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
+		const skip = (page - 1) * limit;
+
+		const employees = await Employee.find()
+			.populate("provinceId", "_id name")
+			.skip(skip)
+			.limit(limit)
+			.lean();
+
+		const total = await Employee.countDocuments();
+
+		res.json({
+			success: true,
+			data: employees,
+			pagination: {
+				page,
+				limit,
+				total,
+				pages: Math.ceil(total / limit),
+			},
+		});
+
+		logger.info("Global admin retrieved all employees", { page, limit, count: employees.length });
+	} catch (err: unknown) {
+		next(err);
+	}
+});
+
+// GET /employees/dashboard/metrics - Get aggregated metrics for dashboard (Global Admin only)
+router.get("/dashboard/metrics", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const employees = await Employee.find()
+			.populate("provinceId", "_id name")
+			.lean();
+
+		if (employees.length === 0) {
+			return res.json({
+				success: true,
+				data: {
+					totalEmployees: 0,
+					activeEmployees: 0,
+					inactiveEmployees: 0,
+					onLeaveEmployees: 0,
+					driverCount: 0,
+					averagePerformance: 0,
+					turnoverRate: 0,
+					provinceBreakdown: [],
+					branchBreakdown: [],
+					rankBreakdown: [],
+					workplaceBreakdown: [],
+				},
+			});
+		}
+
+		// Calculate basic metrics
+		const totalEmployees = employees.length;
+		const activeEmployees = employees.filter((e) => e.performance?.status === "active").length;
+		const inactiveEmployees = employees.filter((e) => e.performance?.status === "inactive").length;
+		const onLeaveEmployees = employees.filter((e) => e.performance?.status === "on_leave").length;
+		const driverCount = employees.filter((e) => e.performance?.truckDriver).length;
+
+		// Calculate average performance
+		const performanceScores = employees
+			.filter((e) => e.performance?.dailyPerformance !== undefined)
+			.map((e) => e.performance?.dailyPerformance ?? 0);
+		const averagePerformance = performanceScores.length > 0
+			? performanceScores.reduce((a, b) => a + b, 0) / performanceScores.length
+			: 0;
+
+		// Calculate turnover rate (employees with job end date in current month)
+		const currentMonth = new Date();
+		const currentYear = currentMonth.getFullYear();
+		const currentMonthNum = currentMonth.getMonth();
+		const turnoverEmployees = employees.filter((e) => {
+			const jobEndDate = e.additionalSpecifications?.jobEndDate
+				? new Date(e.additionalSpecifications.jobEndDate)
+				: null;
+			if (!jobEndDate) return false;
+			return jobEndDate.getFullYear() === currentYear && jobEndDate.getMonth() === currentMonthNum;
+		}).length;
+		const turnoverRate = totalEmployees > 0 ? (turnoverEmployees / totalEmployees) * 100 : 0;
+
+		// Province breakdown
+		const provinceMap = new Map<string, { name: string; count: number }>();
+		employees.forEach((emp) => {
+			const provinceId = typeof emp.provinceId === "string" ? emp.provinceId : emp.provinceId?._id;
+			const provinceName = typeof emp.provinceId === "object" && emp.provinceId?.name ? emp.provinceId.name : "Unknown";
+			if (provinceId) {
+				if (!provinceMap.has(provinceId)) {
+					provinceMap.set(provinceId, { name: provinceName, count: 0 });
+				}
+				const pData = provinceMap.get(provinceId)!;
+				pData.count += 1;
+			}
+		});
+
+		const provinceBreakdown = Array.from(provinceMap.values()).sort((a, b) => b.count - a.count);
+
+		// Branch breakdown
+		const branchMap = new Map<string, number>();
+		employees.forEach((emp) => {
+			const branch = emp.workPlace?.branch;
+			if (branch) {
+				branchMap.set(branch, (branchMap.get(branch) ?? 0) + 1);
+			}
+		});
+		const branchBreakdown = Array.from(branchMap.entries())
+			.map(([name, count]) => ({ name, count }))
+			.sort((a, b) => b.count - a.count);
+
+		// Rank breakdown
+		const rankMap = new Map<string, number>();
+		employees.forEach((emp) => {
+			const rank = emp.workPlace?.rank;
+			if (rank) {
+				rankMap.set(rank, (rankMap.get(rank) ?? 0) + 1);
+			}
+		});
+		const rankBreakdown = Array.from(rankMap.entries())
+			.map(([name, count]) => ({ name, count }))
+			.sort((a, b) => b.count - a.count);
+
+		// Workplace breakdown
+		const workplaceMap = new Map<string, number>();
+		employees.forEach((emp) => {
+			const workplace = emp.workPlace?.licensedWorkplace;
+			if (workplace) {
+				workplaceMap.set(workplace, (workplaceMap.get(workplace) ?? 0) + 1);
+			}
+		});
+		const workplaceBreakdown = Array.from(workplaceMap.entries())
+			.map(([name, count]) => ({ name, count }))
+			.sort((a, b) => b.count - a.count);
+
+		res.json({
+			success: true,
+			data: {
+				totalEmployees,
+				activeEmployees,
+				inactiveEmployees,
+				onLeaveEmployees,
+				driverCount,
+				averagePerformance: parseFloat(averagePerformance.toFixed(2)),
+				turnoverRate: parseFloat(turnoverRate.toFixed(2)),
+				provinceBreakdown,
+				branchBreakdown,
+				rankBreakdown,
+				workplaceBreakdown,
+			},
+		});
+
+		logger.info("Dashboard metrics calculated", {
+			totalEmployees,
+			activeEmployees,
+			driverCount,
+		});
+	} catch (err: unknown) {
+		next(err);
+	}
+});
+
 export default router;
