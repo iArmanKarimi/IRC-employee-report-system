@@ -122,4 +122,31 @@ router.get("/export-all", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res
 	}
 });
 
+// DELETE /employees/clear-performances - Clear all employee performance data (Global Admin only)
+router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		// Update all employees to remove performance field
+		const result = await Employee.updateMany(
+			{ performance: { $exists: true } },
+			{ $unset: { performance: "" } }
+		);
+
+		logger.info("All employee performances cleared", {
+			matchedCount: result.matchedCount,
+			modifiedCount: result.modifiedCount
+		});
+
+		res.json({
+			success: true,
+			data: {
+				matchedCount: result.matchedCount,
+				modifiedCount: result.modifiedCount
+			},
+			message: `Successfully cleared performance data from ${result.modifiedCount} employee(s)`
+		});
+	} catch (err: unknown) {
+		next(err);
+	}
+});
+
 export default router;

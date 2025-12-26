@@ -10,15 +10,19 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { ROUTES, API_BASE_URL } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import { useProvinces } from "../hooks/useProvinces";
+import { provinceApi } from "../api/api";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
+import { useState } from "react";
 
 export default function GlobalAdminDashboardPage() {
 	const { provinces, loading, error, refetch } = useProvinces();
+	const [clearing, setClearing] = useState(false);
 
 	const handleExportAllEmployees = async () => {
 		try {
@@ -46,6 +50,31 @@ export default function GlobalAdminDashboardPage() {
 		} catch (err) {
 			console.error("Export failed:", err);
 			alert("Failed to export employees");
+		}
+	};
+
+	const handleClearAllPerformances = async () => {
+		if (
+			!window.confirm(
+				"Are you sure you want to clear all employee performance data? This action cannot be undone."
+			)
+		) {
+			return;
+		}
+
+		setClearing(true);
+		try {
+			const response = await provinceApi.clearAllPerformances();
+			alert(
+				`Successfully cleared performance data from ${
+					response.data?.modifiedCount || 0
+				} employee(s)`
+			);
+		} catch (err) {
+			console.error("Clear performances failed:", err);
+			alert("Failed to clear employee performances");
+		} finally {
+			setClearing(false);
 		}
 	};
 
@@ -87,14 +116,25 @@ export default function GlobalAdminDashboardPage() {
 					<Typography variant="h4" component="h1" gutterBottom sx={{ m: 0 }}>
 						Provinces
 					</Typography>
-					<Button
-						onClick={handleExportAllEmployees}
-						variant="outlined"
-						color="primary"
-						startIcon={<FileDownloadIcon />}
-					>
-						Export All Employees
-					</Button>
+					<Stack direction="row" spacing={2}>
+						<Button
+							onClick={handleClearAllPerformances}
+							variant="outlined"
+							color="error"
+							startIcon={<DeleteSweepIcon />}
+							disabled={clearing}
+						>
+							{clearing ? "Clearing..." : "Clear All Performances"}
+						</Button>
+						<Button
+							onClick={handleExportAllEmployees}
+							variant="outlined"
+							color="primary"
+							startIcon={<FileDownloadIcon />}
+						>
+							Export All Employees
+						</Button>
+					</Stack>
 				</Stack>
 
 				<Box

@@ -73,6 +73,10 @@ export const provinceApi = {
 	deleteEmployee: (provinceId: string, employeeId: string) =>
 		api
 			.delete<ApiResponse<{ message: string }>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId))
+			.then(unwrap),
+	clearAllPerformances: () =>
+		api
+			.delete<ApiResponse<{ matchedCount: number; modifiedCount: number }>>(API_ENDPOINTS.CLEAR_ALL_PERFORMANCES)
 			.then(unwrap)
 };
 

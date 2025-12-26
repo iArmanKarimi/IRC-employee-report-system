@@ -14,7 +14,8 @@ export const API_ENDPOINTS = {
 	PROVINCES: "/provinces",
 	provinceById: (provinceId: string) => `/provinces/${provinceId}`,
 	provinceEmployees: (provinceId: string) => `/provinces/${provinceId}/employees`,
-	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`
+	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`,
+	CLEAR_ALL_PERFORMANCES: "/employees/clear-performances"
 } as const;
 
 export default { ROUTES, API_ENDPOINTS };
