@@ -243,9 +243,7 @@ export default function ProvinceEmployeesPage() {
 	return (
 		<>
 			<NavBar
-				title={
-					provinceName ? `${provinceName} Employees` : "Province Employees"
-				}
+				title={`${provinceName} Employees`}
 				backTo={isGlobalAdmin ? ROUTES.PROVINCES : undefined}
 				backLabel="Back to Provinces"
 			/>
@@ -276,7 +274,7 @@ export default function ProvinceEmployeesPage() {
 							{loading ? "Loading province..." : provinceName}
 						</Typography>
 					</Stack>
-					<Stack direction="row" gap={2} alignItems="center" flexWrap="wrap">
+					<Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
 						{pagination && (
 							<>
 								<Chip label={`${pagination.total} total`} color="primary" />
