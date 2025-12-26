@@ -114,10 +114,11 @@ export function SearchFilterBar({
 		<Box
 			sx={{
 				display: "flex",
-				gap: 2.5,
-				alignItems: "center",
-				flexWrap: "wrap",
-				p: 2,
+				gap: { xs: 1.5, sm: 2, md: 2.5 },
+				alignItems: { xs: "stretch", sm: "center" },
+				flexDirection: { xs: "column", md: "row" },
+				flexWrap: { md: "wrap" },
+				p: { xs: 1.5, sm: 2 },
 				backgroundColor: "background.paper",
 				borderRadius: 1,
 				border: "1px solid",
@@ -125,12 +126,19 @@ export function SearchFilterBar({
 			}}
 		>
 			<Stack
-				direction="row"
-				spacing={1.5}
-				alignItems="center"
-				sx={{ flex: 1, minWidth: 280 }}
+				direction={{ xs: "column", sm: "row" }}
+				spacing={{ xs: 1, sm: 1.5 }}
+				alignItems="stretch"
+				sx={{
+					flex: { xs: "1 1 auto", md: 1 },
+					minWidth: { xs: "100%", sm: 280, md: 320 },
+					width: { xs: "100%", md: "auto" },
+				}}
 			>
-				<FormControl size="small" sx={{ minWidth: 150 }}>
+				<FormControl
+					size="small"
+					sx={{ minWidth: { xs: "100%", sm: 130, md: 150 } }}
+				>
 					<InputLabel>Search by</InputLabel>
 					<Select
 						value={localSearchField}
@@ -152,7 +160,7 @@ export function SearchFilterBar({
 					size="small"
 					value={localSearch}
 					onChange={handleSearchChange}
-					sx={{ flex: 1, minWidth: 200 }}
+					sx={{ flex: 1, minWidth: { xs: "100%", sm: 180, md: 200 } }}
 					slotProps={{
 						input: {
 							startAdornment: (
@@ -179,8 +187,16 @@ export function SearchFilterBar({
 			</Stack>
 
 			{/* Toggle Filters Dropdown */}
-			<Stack direction="row" spacing={1} alignItems="center">
-				<FormControl size="small" sx={{ minWidth: 140 }}>
+			<Stack
+				direction={{ xs: "column", sm: "row" }}
+				spacing={{ xs: 1, sm: 1 }}
+				alignItems="stretch"
+				sx={{ width: { xs: "100%", md: "auto" } }}
+			>
+				<FormControl
+					size="small"
+					sx={{ minWidth: { xs: "100%", sm: 120, md: 140 } }}
+				>
 					<InputLabel>Marital Status</InputLabel>
 					<Select
 						value={localToggleFilters.maritalStatus}
@@ -195,7 +211,10 @@ export function SearchFilterBar({
 					</Select>
 				</FormControl>
 
-				<FormControl size="small" sx={{ minWidth: 100 }}>
+				<FormControl
+					size="small"
+					sx={{ minWidth: { xs: "100%", sm: 90, md: 100 } }}
+				>
 					<InputLabel>Gender</InputLabel>
 					<Select
 						value={localToggleFilters.gender}
@@ -208,7 +227,10 @@ export function SearchFilterBar({
 					</Select>
 				</FormControl>
 
-				<FormControl size="small" sx={{ minWidth: 100 }}>
+				<FormControl
+					size="small"
+					sx={{ minWidth: { xs: "100%", sm: 90, md: 100 } }}
+				>
 					<InputLabel>Status</InputLabel>
 					<Select
 						value={localToggleFilters.status}
@@ -224,8 +246,16 @@ export function SearchFilterBar({
 			</Stack>
 
 			{/* Metric Filter */}
-			<Stack direction="row" spacing={1} alignItems="center">
-				<FormControl size="small" sx={{ minWidth: 180 }}>
+			<Stack
+				direction={{ xs: "column", sm: "row" }}
+				spacing={{ xs: 1, sm: 1 }}
+				alignItems="stretch"
+				sx={{ width: { xs: "100%", md: "auto" } }}
+			>
+				<FormControl
+					size="small"
+					sx={{ minWidth: { xs: "100%", sm: 160, md: 180 } }}
+				>
 					<InputLabel>Metric</InputLabel>
 					<Select
 						value={localPerformanceMetric}
@@ -260,7 +290,7 @@ export function SearchFilterBar({
 						value={localPerformanceValue}
 						onChange={handlePerformanceValueChange}
 						inputProps={{ min: 0 }}
-						sx={{ width: 100 }}
+						sx={{ width: { xs: "100%", sm: 90, md: 100 } }}
 					/>
 				)}
 			</Stack>
