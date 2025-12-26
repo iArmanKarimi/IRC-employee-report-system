@@ -65,6 +65,7 @@ export interface IProvince {
 	name: string;
 	admin: string | IUser;
 	employees: string[];
+	imageUrl?: string;
 }
 
 // User model
