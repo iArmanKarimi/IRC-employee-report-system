@@ -36,12 +36,106 @@ export type LoginResponse = {
 	provinceId?: string | null;
 };
 
+// Dashboard types
+export type DashboardOverview = {
+	totalProvinces: number;
+	totalEmployees: number;
+	totalAdmins: number;
+	employeeStatuses: {
+		active: number;
+		inactive: number;
+		onLeave: number;
+	};
+};
+
+export type EmployeeAnalytics = {
+	totalCount: number;
+	avgChildrenCount: number;
+	maleCount: number;
+	femaleCount: number;
+	marriedCount: number;
+};
+
+export type ProvinceAnalytic = {
+	_id: string;
+	name: string;
+	employeeCount: number;
+};
+
+export type PerformanceAnalytic = {
+	_id: string;
+	count: number;
+	avgDailyPerformance: number;
+	avgOvertimeHours: number;
+	totalTruckDrivers: number;
+};
+
+export type DashboardAnalytics = {
+	employees: EmployeeAnalytics;
+	provinces: ProvinceAnalytic[];
+	performance: PerformanceAnalytic[];
+};
+
+export type PerformanceStatus = {
+	_id: string;
+	count: number;
+	avgDailyPerformance: number;
+	avgDailyLeave: number;
+	avgSickLeave: number;
+	avgAbsence: number;
+	avgOvertime: number;
+	totalShifts: number;
+	avgShiftDuration: number;
+};
+
+export type RankDistribution = {
+	_id: string;
+	count: number;
+	avgDailyPerformance: number;
+};
+
+export type BranchDistribution = {
+	_id: string;
+	count: number;
+	avgPerformance: number;
+};
+
+export type PerformanceSummary = {
+	byStatus: PerformanceStatus[];
+	byRank: RankDistribution[];
+	byBranch: BranchDistribution[];
+};
+
+export type ProvinceOverview = {
+	_id: string;
+	name: string;
+	employeeCount: number;
+	activeEmployeeCount: number;
+	avgEmployeePerformance: number;
+	admin: {
+		_id: string;
+		username: string;
+	};
+};
+
+export type RecentActivityItem = {
+	_id: string;
+	basicInfo: {
+		firstName: string;
+		lastName: string;
+	};
+	createdAt: string;
+	updatedAt: string;
+	province: {
+		_id: string;
+		name: string;
+	};
+};
+
 // Export types from models
 export type Province = IProvince;
 export type Employee = IEmployee;
 export type { UpdateEmployeeInput, CreateEmployeeInput };
-
-const unwrap = <T>(response: { data: T }): T => response.data;
 
 export const authApi = {
 	login: (payload: LoginRequest) =>
@@ -76,5 +170,23 @@ export const provinceApi = {
 			.then(unwrap)
 };
 
-export default api;
+export const dashboardApi = {
+	getOverview: () =>
+		api.get<ApiResponse<DashboardOverview>>(API_ENDPOINTS.DASHBOARD_OVERVIEW).then(unwrap),
+	getAnalytics: () =>
+		api.get<ApiResponse<DashboardAnalytics>>(API_ENDPOINTS.DASHBOARD_ANALYTICS).then(unwrap),
+	getPerformanceSummary: () =>
+		api.get<ApiResponse<PerformanceSummary>>(API_ENDPOINTS.DASHBOARD_PERFORMANCE_SUMMARY).then(unwrap),
+	getProvincesOverview: () =>
+		api.get<ApiResponse<ProvinceOverview[]>>(API_ENDPOINTS.DASHBOARD_PROVINCES_OVERVIEW).then(unwrap),
+	getRecentActivity: (limit: number = 20) =>
+		api
+			.get<ApiResponse<RecentActivityItem[]>>(API_ENDPOINTS.DASHBOARD_RECENT_ACTIVITY, {
+				params: { limit }
+			})
+			.then(unwrap)
+};
 
+const unwrap = <T>(response: { data: T }): T => response.data;
+
+export default api;

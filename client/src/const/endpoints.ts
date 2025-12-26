@@ -14,7 +14,13 @@ export const API_ENDPOINTS = {
 	PROVINCES: "/provinces",
 	provinceById: (provinceId: string) => `/provinces/${provinceId}`,
 	provinceEmployees: (provinceId: string) => `/provinces/${provinceId}/employees`,
-	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`
+	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`,
+	// Dashboard endpoints
+	DASHBOARD_OVERVIEW: "/dashboard/overview",
+	DASHBOARD_ANALYTICS: "/dashboard/analytics",
+	DASHBOARD_PERFORMANCE_SUMMARY: "/dashboard/performance-summary",
+	DASHBOARD_PROVINCES_OVERVIEW: "/dashboard/provinces-overview",
+	DASHBOARD_RECENT_ACTIVITY: "/dashboard/recent-activity"
 } as const;
 
 export default { ROUTES, API_ENDPOINTS };

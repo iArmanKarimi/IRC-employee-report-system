@@ -50,6 +50,19 @@ export const API_DOCS_ROUTES = {
 } as const;
 
 /**
+ * Dashboard Routes
+ * Base path: /dashboard
+ * Access: Global Admin only
+ */
+export const DASHBOARD_ROUTES = {
+	OVERVIEW: '/dashboard/overview',                    // GET - High-level metrics
+	ANALYTICS: '/dashboard/analytics',                  // GET - Detailed analytics
+	PERFORMANCE_SUMMARY: '/dashboard/performance-summary', // GET - Performance metrics
+	PROVINCES_OVERVIEW: '/dashboard/provinces-overview',   // GET - All provinces overview
+	RECENT_ACTIVITY: '/dashboard/recent-activity'       // GET - Recently updated employees
+} as const;
+
+/**
  * System Routes
  */
 export const SYSTEM_ROUTES = {
@@ -63,6 +76,7 @@ export const ROUTES = {
 	AUTH: AUTH_ROUTES,
 	PROVINCES: PROVINCE_ROUTES,
 	EMPLOYEES: EMPLOYEE_ROUTES,
+	DASHBOARD: DASHBOARD_ROUTES,
 	API_DOCS: API_DOCS_ROUTES,
 	SYSTEM: SYSTEM_ROUTES
 } as const;
@@ -81,6 +95,11 @@ export const ROUTES = {
  * | GET    /provinces/:id/employees/:empId   | ✓            | ✓ (own)        | ✗      |
  * | PUT    /provinces/:id/employees/:empId   | ✓            | ✓ (own)        | ✗      |
  * | DELETE /provinces/:id/employees/:empId   | ✓            | ✓ (own)        | ✗      |
+ * | GET    /dashboard/overview               | ✓            | ✗              | ✗      |
+ * | GET    /dashboard/analytics              | ✓            | ✗              | ✗      |
+ * | GET    /dashboard/performance-summary    | ✓            | ✗              | ✗      |
+ * | GET    /dashboard/provinces-overview     | ✓            | ✗              | ✗      |
+ * | GET    /dashboard/recent-activity        | ✓            | ✗              | ✗      |
  * | GET    /api-docs                         | ✓            | ✓              | ✓      |
  * | GET    /health                           | ✓            | ✓              | ✓      |
  */

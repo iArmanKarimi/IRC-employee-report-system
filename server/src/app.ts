@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth";
 import provinceRoutes from "./routes/provinces";
 import employeeRoutes from './routes/employees';
 import employeesGlobalRoutes from './routes/employees-global';
+import dashboardRoutes from './routes/dashboard';
 import apiDocsRoutes from './routes/api-docs';
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger } from "./middleware/logger";
@@ -67,6 +68,9 @@ app.use('/auth', authRoutes);
 
 // Global employees routes (export all employees)
 app.use('/employees', employeesGlobalRoutes);
+
+// Dashboard routes (analytics and metrics)
+app.use('/dashboard', dashboardRoutes);
 
 // Province routes (includes employee routes as nested)
 app.use('/provinces', provinceRoutes);
