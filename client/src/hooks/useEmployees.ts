@@ -16,7 +16,7 @@ type UseEmployeesResult = {
 
 /**
  * Hook to fetch and manage a list of employees for a province
- * @param provinceId - The province ID
+ * @param provinceId - The province ID (optional - if undefined, fetches all employees for global admin)
  * @param page - Current page number
  * @param limit - Items per page
  * @returns Employees data, pagination info, loading state, error, and refetch function
@@ -32,17 +32,20 @@ export function useEmployees(
 	const [error, setError] = useState<string | null>(null);
 
 	const fetchEmployees = async () => {
-		if (!provinceId) {
-			setError("Province ID is missing");
-			setLoading(false);
-			return;
-		}
-
 		setLoading(true);
 		setError(null);
 		try {
-			const response: PaginatedResponse<Employee> =
-				await provinceApi.listEmployees(provinceId, page, limit);
+			// If provinceId is provided, use province-scoped endpoint
+			// If not provided, use global endpoint for all employees
+			const response: PaginatedResponse<Employee> = provinceId
+				? await provinceApi.listEmployees(provinceId, page, limit)
+				: await fetch(`/api/employees?page=${page}&limit=${limit}`, {
+					credentials: "include",
+				}).then((res) => {
+					if (!res.ok) throw new Error("Failed to fetch employees");
+					return res.json();
+				});
+
 			setEmployees(response.data ?? []);
 			setPagination(response.pagination);
 		} catch (err) {
