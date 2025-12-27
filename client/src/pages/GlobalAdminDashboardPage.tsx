@@ -32,7 +32,7 @@ import { useState, useEffect } from "react";
 
 export default function GlobalAdminDashboardPage() {
 	const { provinces, loading, error, refetch } = useProvinces();
-	const { settings, togglePerformanceLock } = useGlobalSettings();
+	const { settings, togglePerformanceLock, refetch: refetchSettings } = useGlobalSettings();
 	const [clearing, setClearing] = useState(false);
 	const [toggling, setToggling] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -96,6 +96,8 @@ export default function GlobalAdminDashboardPage() {
 		setToggling(true);
 		try {
 			await togglePerformanceLock();
+			// Refetch settings to ensure UI updates
+			await refetchSettings();
 			const newStatus = !settings?.performanceLocked;
 			setToastMessage(
 				newStatus
