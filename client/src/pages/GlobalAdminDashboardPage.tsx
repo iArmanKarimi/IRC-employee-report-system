@@ -32,11 +32,7 @@ import { useState, useEffect } from "react";
 
 export default function GlobalAdminDashboardPage() {
 	const { provinces, loading, error, refetch } = useProvinces();
-	const {
-		settings,
-		togglePerformanceLock,
-		refetch: refetchSettings,
-	} = useGlobalSettings();
+	const { settings, togglePerformanceLock } = useGlobalSettings();
 	const [clearing, setClearing] = useState(false);
 	const [toggling, setToggling] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -99,16 +95,14 @@ export default function GlobalAdminDashboardPage() {
 	const handleToggleLockClick = async () => {
 		setToggling(true);
 		try {
-			await togglePerformanceLock();
-			// Refetch settings to ensure UI updates
-			await refetchSettings();
-			const newStatus = !settings?.performanceLocked;
+			const response = await togglePerformanceLock();
+			const newStatus = response?.performanceLocked;
 			setToastMessage(
 				newStatus
 					? "Performance editing has been locked for all employees"
 					: "Performance editing has been unlocked for all employees"
 			);
-			setToastSeverity("success");
+			setToastSeverity(newStatus ? "error" : "success");
 			setToastOpen(true);
 		} catch (err: any) {
 			console.error("Toggle lock failed:", err);
