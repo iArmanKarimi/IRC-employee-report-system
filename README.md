@@ -40,6 +40,7 @@ Province admins themselves are **fixed** (not created through the UI or API).
 - Province‑scoped employee management
 - **Create, edit, delete employees** (province‑scoped)
 - **Performance record management** (add, edit, delete)
+- **Global Performance Lock** — Prevent all employees from editing performance records system-wide
 - Fetch employees belonging to a selected province
 - Material-UI frontend with custom theme
 - No generic `/employees` root — everything is province‑scoped
@@ -64,6 +65,15 @@ All employee data is nested under provinces.
 | ------ | ------------------------ | -------------------------------------- |
 | GET    | `/provinces`             | List all provinces (Global Admin only) |
 | GET    | `/provinces/:provinceId` | Get details of a specific province     |
+
+---
+
+## **🔹 Global Settings**
+
+| Method | Endpoint                                   | Description                                         |
+| ------ | ------------------------------------------ | --------------------------------------------------- |
+| GET    | `/global-settings`                         | Get global settings (performance lock status)       |
+| POST   | `/global-settings/toggle-performance-lock` | Toggle performance editing lock (Global Admin only) |
 
 ---
 
@@ -122,7 +132,46 @@ Actions:
 
 ---
 
-## 📦 Data Model
+## � Performance Lock Feature
+
+The Global Admin can lock/unlock performance editing across the entire system.
+
+### **How It Works**
+
+1. **Locking**: Global Admin clicks the lock toggle on the dashboard
+
+   - Sets `performanceLocked: true` in global settings
+   - All employees receive HTTP 423 (Locked) when attempting to edit performance
+
+2. **UI Feedback**:
+
+   - Lock toggle button shows current state (🔒 locked / 🔓 unlocked)
+   - Toast notification displays with distinct messages and colors:
+     - **Warning (orange)**: "Performance editing is now LOCKED"
+     - **Success (green)**: "Performance editing is now UNLOCKED"
+   - Employees see alert when locked: "Performance records are currently locked. You cannot make changes at this time."
+
+3. **Reset All** button is disabled when lock is active (prevents accidental resets during lock period)
+
+### **API Response**
+
+```json
+{
+	"success": true,
+	"data": {
+		"_id": "...",
+		"performanceLocked": true,
+		"lastLockedBy": "admin_user_id",
+		"lockedAt": "2025-12-28T...",
+		"createdAt": "...",
+		"updatedAt": "..."
+	}
+}
+```
+
+---
+
+## �📦 Data Model
 
 ### **User**
 
@@ -159,6 +208,21 @@ Actions:
 ```
 
 Employees always reference the province they belong to.
+
+### **GlobalSettings**
+
+```
+{
+  id: string,
+  performanceLocked: boolean,
+  lastLockedBy: string (user id),
+  lockedAt: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Stores system-wide settings including the performance lock status.
 
 ---
 
