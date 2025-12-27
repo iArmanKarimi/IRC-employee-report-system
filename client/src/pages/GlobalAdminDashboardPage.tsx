@@ -195,51 +195,64 @@ export default function GlobalAdminDashboardPage() {
 						alignItems="center"
 						sx={{ flexWrap: "wrap" }}
 					>
-{/* Performance Lock Toggle */}
-					<Stack direction="row" alignItems="center" spacing={1}>
-						<Typography variant="body2" sx={{ fontWeight: 600, minWidth: "fit-content" }}>
-							Performance:
-						</Typography>
-						<ToggleButtonGroup
-							value={settings?.performanceLocked ? "locked" : "unlocked"}
-							exclusive
-							size="small"
-							sx={{
-								border: "2px solid",
-								borderColor: "divider",
-								borderRadius: 1,
-							}}
-						>
-							<ToggleButton
-								value="unlocked"
-								onChange={() => {
-									if (settings?.performanceLocked) {
-										handleToggleLock(
-											{} as React.ChangeEvent<HTMLInputElement>
-										);
-									}
-								}}
-								disabled={toggling}
-								aria-label="unlock"
+						{/* Performance Lock Toggle */}
+						<Stack direction="row" alignItems="center" spacing={1}>
+							<Typography
+								variant="body2"
+								sx={{ fontWeight: 600, minWidth: "fit-content" }}
 							>
-								<LockOpenIcon sx={{ fontSize: "1.25rem" }} />
-							</ToggleButton>
-							<ToggleButton
-								value="locked"
-								onChange={() => {
-									if (!settings?.performanceLocked) {
-										handleToggleLock(
-											{} as React.ChangeEvent<HTMLInputElement>
-										);
-									}
+								Performance:
+							</Typography>
+							<ToggleButtonGroup
+								value={settings?.performanceLocked ? "locked" : "unlocked"}
+								exclusive
+								size="small"
+								sx={{
+									border: "2px solid",
+									borderColor: "divider",
+									borderRadius: 1,
 								}}
-								disabled={toggling}
-								aria-label="lock"
 							>
-								<LockIcon sx={{ fontSize: "1.25rem" }} />
-							</ToggleButton>
-						</ToggleButtonGroup>
-					</Stack>
+								<ToggleButton
+									value="unlocked"
+									onChange={() => {
+										if (settings?.performanceLocked) {
+											handleToggleLock(
+												{} as React.ChangeEvent<HTMLInputElement>
+											);
+										}
+									}}
+									disabled={toggling}
+									aria-label="unlock"
+									sx={{
+										"&:hover": { boxShadow: "none" },
+										"&:focus": { boxShadow: "none" },
+										"&.Mui-selected": { boxShadow: "none" },
+									}}
+								>
+									<LockOpenIcon sx={{ fontSize: "1.25rem" }} />
+								</ToggleButton>
+								<ToggleButton
+									value="locked"
+									onChange={() => {
+										if (!settings?.performanceLocked) {
+											handleToggleLock(
+												{} as React.ChangeEvent<HTMLInputElement>
+											);
+										}
+									}}
+									disabled={toggling}
+									aria-label="lock"
+									sx={{
+										"&:hover": { boxShadow: "none" },
+										"&:focus": { boxShadow: "none" },
+										"&.Mui-selected": { boxShadow: "none" },
+									}}
+								>
+									<LockIcon sx={{ fontSize: "1.25rem" }} />
+								</ToggleButton>
+							</ToggleButtonGroup>
+						</Stack>
 
 						{/* Action Buttons */}
 						<Button
