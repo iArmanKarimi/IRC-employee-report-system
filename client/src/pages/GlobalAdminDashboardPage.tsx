@@ -15,7 +15,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Alert from "@mui/material/Alert";
-import Switch from "@mui/material/Switch";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import LockIcon from "@mui/icons-material/Lock";
@@ -93,7 +94,9 @@ export default function GlobalAdminDashboardPage() {
 		setCountdown(5);
 	};
 
-	const handleToggleLock = async (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleToggleLock = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
 		event.preventDefault();
 		setToggling(true);
 		try {
@@ -186,69 +189,57 @@ export default function GlobalAdminDashboardPage() {
 					<Typography variant="h4" component="h1" gutterBottom sx={{ m: 0 }}>
 						Provinces
 					</Typography>
-					<Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: "wrap" }}>
-						{/* Performance Lock Card */}
-						<Box
+					<Stack
+						direction="row"
+						spacing={1.5}
+						alignItems="center"
+						sx={{ flexWrap: "wrap" }}
+					>
+{/* Performance Lock Toggle */}
+					<Stack direction="row" alignItems="center" spacing={1}>
+						<Typography variant="body2" sx={{ fontWeight: 600, minWidth: "fit-content" }}>
+							Performance:
+						</Typography>
+						<ToggleButtonGroup
+							value={settings?.performanceLocked ? "locked" : "unlocked"}
+							exclusive
+							size="small"
 							sx={{
 								border: "2px solid",
-								borderColor: settings?.performanceLocked
-									? "error.main"
-									: "success.main",
-								borderRadius: 2,
-								padding: 1.25,
-								display: "flex",
-								alignItems: "center",
-								gap: 1,
-								backgroundColor: settings?.performanceLocked
-									? "rgba(211, 47, 47, 0.05)"
-									: "rgba(56, 142, 60, 0.05)",
-								transition: "all 0.3s ease",
+								borderColor: "divider",
+								borderRadius: 1,
 							}}
 						>
-							<Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-								<Typography
-									variant="caption"
-									sx={{ fontWeight: 700, fontSize: "0.7rem", textTransform: "uppercase" }}
-								>
-									Performance
-								</Typography>
-								<Stack direction="row" alignItems="center" spacing={0.75}>
-									{settings?.performanceLocked ? (
-										<LockIcon
-											sx={{
-												color: "error.main",
-												fontSize: "1.5rem",
-											}}
-										/>
-									) : (
-										<LockOpenIcon
-											sx={{
-												color: "success.main",
-												fontSize: "1.5rem",
-											}}
-										/>
-									)}
-									<Typography
-										variant="subtitle2"
-										sx={{
-											fontWeight: 700,
-											color: settings?.performanceLocked
-												? "error.main"
-												: "success.main",
-										}}
-									>
-										{settings?.performanceLocked ? "LOCKED" : "UNLOCKED"}
-									</Typography>
-								</Stack>
-							</Box>
-							<Switch
-								checked={settings?.performanceLocked || false}
-								onChange={handleToggleLock}
+							<ToggleButton
+								value="unlocked"
+								onChange={() => {
+									if (settings?.performanceLocked) {
+										handleToggleLock(
+											{} as React.ChangeEvent<HTMLInputElement>
+										);
+									}
+								}}
 								disabled={toggling}
-								color="error"
-								size="medium"
-							/>
-						</Box>
+								aria-label="unlock"
+							>
+								<LockOpenIcon sx={{ fontSize: "1.25rem" }} />
+							</ToggleButton>
+							<ToggleButton
+								value="locked"
+								onChange={() => {
+									if (!settings?.performanceLocked) {
+										handleToggleLock(
+											{} as React.ChangeEvent<HTMLInputElement>
+										);
+									}
+								}}
+								disabled={toggling}
+								aria-label="lock"
+							>
+								<LockIcon sx={{ fontSize: "1.25rem" }} />
+							</ToggleButton>
+						</ToggleButtonGroup>
+					</Stack>
 
 						{/* Action Buttons */}
 						<Button
