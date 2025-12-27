@@ -15,6 +15,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Alert from "@mui/material/Alert";
+import Switch from "@mui/material/Switch";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import LockIcon from "@mui/icons-material/Lock";
@@ -36,7 +37,6 @@ export default function GlobalAdminDashboardPage() {
 	const [clearing, setClearing] = useState(false);
 	const [toggling, setToggling] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-	const [lockDialogOpen, setLockDialogOpen] = useState(false);
 	const [countdown, setCountdown] = useState(5);
 	const [toastOpen, setToastOpen] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
@@ -93,16 +93,8 @@ export default function GlobalAdminDashboardPage() {
 		setCountdown(5);
 	};
 
-	const handleOpenLockDialog = () => {
-		setLockDialogOpen(true);
-	};
-
-	const handleCloseLockDialog = () => {
-		setLockDialogOpen(false);
-	};
-
-	const handleToggleLock = async () => {
-		handleCloseLockDialog();
+	const handleToggleLock = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
 		setToggling(true);
 		try {
 			await togglePerformanceLock();
@@ -194,54 +186,89 @@ export default function GlobalAdminDashboardPage() {
 					<Typography variant="h4" component="h1" gutterBottom sx={{ m: 0 }}>
 						Provinces
 					</Typography>
-					<Stack direction="row" spacing={2} alignItems="center">
-						{/* Lock Status Indicator */}
-						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-							{settings?.performanceLocked ? (
-								<>
-									<LockIcon sx={{ color: "error.main", fontSize: "1.25rem" }} />
-									<Typography variant="caption" sx={{ color: "error.main" }}>
-										Locked
-									</Typography>
-								</>
-							) : (
-								<>
-									<LockOpenIcon
-										sx={{ color: "success.main", fontSize: "1.25rem" }}
-									/>
-									<Typography variant="caption" sx={{ color: "success.main" }}>
-										Unlocked
-									</Typography>
-								</>
-							)}
-						</Box>
-						<Button
-							onClick={handleOpenLockDialog}
-							variant={settings?.performanceLocked ? "contained" : "outlined"}
-							color={settings?.performanceLocked ? "error" : "success"}
-							startIcon={
-								settings?.performanceLocked ? <LockIcon /> : <LockOpenIcon />
-							}
-							disabled={toggling}
+					<Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: "wrap" }}>
+						{/* Performance Lock Card */}
+						<Box
+							sx={{
+								border: "2px solid",
+								borderColor: settings?.performanceLocked
+									? "error.main"
+									: "success.main",
+								borderRadius: 2,
+								padding: 1.25,
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								backgroundColor: settings?.performanceLocked
+									? "rgba(211, 47, 47, 0.05)"
+									: "rgba(56, 142, 60, 0.05)",
+								transition: "all 0.3s ease",
+							}}
 						>
-							{settings?.performanceLocked ? "Unlock" : "Lock"}
-						</Button>
+							<Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+								<Typography
+									variant="caption"
+									sx={{ fontWeight: 700, fontSize: "0.7rem", textTransform: "uppercase" }}
+								>
+									Performance
+								</Typography>
+								<Stack direction="row" alignItems="center" spacing={0.75}>
+									{settings?.performanceLocked ? (
+										<LockIcon
+											sx={{
+												color: "error.main",
+												fontSize: "1.5rem",
+											}}
+										/>
+									) : (
+										<LockOpenIcon
+											sx={{
+												color: "success.main",
+												fontSize: "1.5rem",
+											}}
+										/>
+									)}
+									<Typography
+										variant="subtitle2"
+										sx={{
+											fontWeight: 700,
+											color: settings?.performanceLocked
+												? "error.main"
+												: "success.main",
+										}}
+									>
+										{settings?.performanceLocked ? "LOCKED" : "UNLOCKED"}
+									</Typography>
+								</Stack>
+							</Box>
+							<Switch
+								checked={settings?.performanceLocked || false}
+								onChange={handleToggleLock}
+								disabled={toggling}
+								color="error"
+								size="medium"
+							/>
+						</Box>
+
+						{/* Action Buttons */}
 						<Button
 							onClick={handleOpenClearDialog}
 							variant="outlined"
 							color="error"
 							startIcon={<DeleteSweepIcon />}
 							disabled={clearing || settings?.performanceLocked}
+							size="small"
 						>
-							{clearing ? "Resetting..." : "Reset All Performances"}
+							{clearing ? "Resetting..." : "Reset All"}
 						</Button>
 						<Button
 							onClick={handleExportAllEmployees}
-							variant="outlined"
+							variant="contained"
 							color="primary"
 							startIcon={<FileDownloadIcon />}
+							size="small"
 						>
-							Export All Employees
+							Export All
 						</Button>
 					</Stack>
 				</Stack>
@@ -381,87 +408,6 @@ export default function GlobalAdminDashboardPage() {
 							startIcon={<DeleteSweepIcon />}
 						>
 							Confirm Reset All
-						</Button>
-					</DialogActions>
-				</Dialog>
-
-				{/* Lock Confirmation Dialog */}
-				<Dialog
-					open={lockDialogOpen}
-					onClose={handleCloseLockDialog}
-					aria-labelledby="lock-dialog-title"
-					aria-describedby="lock-dialog-description"
-				>
-					<DialogTitle
-						id="lock-dialog-title"
-						sx={{ display: "flex", alignItems: "center", gap: 1 }}
-					>
-						{settings?.performanceLocked ? (
-							<>
-								<LockOpenIcon color="success" />
-								Unlock Performance Editing?
-							</>
-						) : (
-							<>
-								<LockIcon color="error" />
-								Lock Performance Editing?
-							</>
-						)}
-					</DialogTitle>
-					<DialogContent>
-						{settings?.performanceLocked ? (
-							<DialogContentText id="lock-dialog-description">
-								<Alert severity="info" icon={<LockOpenIcon />} sx={{ mb: 2 }}>
-									This will <strong>allow</strong> all employees to edit their
-									performance records.
-								</Alert>
-								<Typography variant="body2" color="text.secondary">
-									Employees will be able to:
-								</Typography>
-								<Box component="ul" sx={{ mt: 1, color: "text.secondary" }}>
-									<li>Edit their performance metrics</li>
-									<li>Update shift information</li>
-									<li>Modify absence and leave records</li>
-								</Box>
-							</DialogContentText>
-						) : (
-							<DialogContentText id="lock-dialog-description">
-								<Alert severity="warning" icon={<LockIcon />} sx={{ mb: 2 }}>
-									This will <strong>prevent</strong> all employees from editing
-									their performance records.
-								</Alert>
-								<Typography variant="body2" color="text.secondary">
-									Employees will <strong>not</strong> be able to:
-								</Typography>
-								<Box component="ul" sx={{ mt: 1, color: "text.secondary" }}>
-									<li>Edit their performance metrics</li>
-									<li>Update shift information</li>
-									<li>Modify absence and leave records</li>
-								</Box>
-								<Typography
-									variant="body2"
-									color="text.secondary"
-									sx={{ mt: 2 }}
-								>
-									The "Reset All Performances" action will also be disabled
-									while the lock is active.
-								</Typography>
-							</DialogContentText>
-						)}
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleCloseLockDialog} color="inherit">
-							Cancel
-						</Button>
-						<Button
-							onClick={handleToggleLock}
-							color={settings?.performanceLocked ? "success" : "error"}
-							variant="contained"
-							startIcon={
-								settings?.performanceLocked ? <LockOpenIcon /> : <LockIcon />
-							}
-						>
-							{settings?.performanceLocked ? "Confirm Unlock" : "Confirm Lock"}
 						</Button>
 					</DialogActions>
 				</Dialog>
