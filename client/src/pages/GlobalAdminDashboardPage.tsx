@@ -92,10 +92,7 @@ export default function GlobalAdminDashboardPage() {
 		setCountdown(5);
 	};
 
-	const handleToggleLock = async (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
-		event.preventDefault();
+	const handleToggleLockClick = async () => {
 		setToggling(true);
 		try {
 			await togglePerformanceLock();
@@ -211,13 +208,7 @@ export default function GlobalAdminDashboardPage() {
 								}}
 							>
 								<Button
-									onClick={() => {
-										if (settings?.performanceLocked) {
-											handleToggleLock(
-												{} as React.ChangeEvent<HTMLInputElement>
-											);
-										}
-									}}
+									onClick={handleToggleLockClick}
 									disabled={toggling}
 									sx={{
 										padding: "6px 16px",
@@ -247,13 +238,7 @@ export default function GlobalAdminDashboardPage() {
 								</Button>
 								<Box sx={{ width: "1px", backgroundColor: "divider" }} />
 								<Button
-									onClick={() => {
-										if (!settings?.performanceLocked) {
-											handleToggleLock(
-												{} as React.ChangeEvent<HTMLInputElement>
-											);
-										}
-									}}
+									onClick={handleToggleLockClick}
 									disabled={toggling}
 									sx={{
 										padding: "6px 16px",
