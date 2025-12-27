@@ -14,6 +14,7 @@ import type { IPerformance } from "../types/models";
 type PerformanceManagerProps = {
 	performances: IPerformance[];
 	saving: boolean;
+	performanceLocked?: boolean;
 	onAdd: (performance: IPerformance) => Promise<void>;
 	onEdit: (index: number, performance: IPerformance) => Promise<void>;
 	onDelete: (index: number) => Promise<void>;
@@ -22,6 +23,7 @@ type PerformanceManagerProps = {
 export function PerformanceManager({
 	performances,
 	saving,
+	performanceLocked,
 	onAdd,
 	onEdit,
 	onDelete,
@@ -35,7 +37,6 @@ export function PerformanceManager({
 	const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
 
 	const handleAddClick = () => {
-		const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
 		setPerformanceData({
 			dailyPerformance: 0,
 			shiftCountPerLocation: 0,
@@ -45,7 +46,6 @@ export function PerformanceManager({
 			sickLeave: 0,
 			absence: 0,
 			travelAssignment: 0,
-			month: currentMonth,
 			status: "active",
 			notes: "",
 		});
@@ -131,7 +131,7 @@ export function PerformanceManager({
 					open={dialogOpen}
 					performance={performanceData}
 					saving={saving}
-					isEdit={editingIndex !== null}
+					performanceLocked={performanceLocked}
 					onClose={() => setDialogOpen(false)}
 					onSave={handleSave}
 				/>

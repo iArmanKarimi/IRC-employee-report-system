@@ -15,7 +15,9 @@ export const API_ENDPOINTS = {
 	provinceById: (provinceId: string) => `/provinces/${provinceId}`,
 	provinceEmployees: (provinceId: string) => `/provinces/${provinceId}/employees`,
 	provinceEmployeeById: (provinceId: string, employeeId: string) => `/provinces/${provinceId}/employees/${employeeId}`,
-	CLEAR_ALL_PERFORMANCES: "/employees/clear-performances"
+	CLEAR_ALL_PERFORMANCES: "/employees/clear-performances",
+	GLOBAL_SETTINGS: "/global-settings",
+	TOGGLE_PERFORMANCE_LOCK: "/global-settings/toggle-performance-lock"
 } as const;
 
 export default { ROUTES, API_ENDPOINTS };

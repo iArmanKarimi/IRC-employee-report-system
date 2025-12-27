@@ -9,8 +9,10 @@ import Chip from "@mui/material/Chip";
 import Pagination from "@mui/material/Pagination";
 import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
+import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import LockIcon from "@mui/icons-material/Lock";
 import {
 	DataGrid,
 	type GridColDef,
@@ -23,6 +25,7 @@ import Breadcrumbs from "../components/Breadcrumbs";
 import { SearchFilterBar } from "../components/SearchFilterBar";
 import { useEmployees } from "../hooks/useEmployees";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
+import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
@@ -44,6 +47,7 @@ export default function ProvinceEmployeesPage() {
 		truckDriverOnly: false,
 	});
 	const { isGlobalAdmin } = useIsGlobalAdmin();
+	const { settings } = useGlobalSettings();
 	const theme = useTheme();
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
@@ -483,6 +487,13 @@ export default function ProvinceEmployeesPage() {
 			<Container
 				sx={{ py: 2, display: "flex", flexDirection: "column", gap: 2 }}
 			>
+				{settings?.performanceLocked && (
+					<Alert severity="warning" icon={<LockIcon />}>
+						Performance editing is currently locked. Employees cannot modify
+						their performance records.
+					</Alert>
+				)}
+
 				<Breadcrumbs
 					provinceName={provinceName || undefined}
 					showProvincesLink={isGlobalAdmin}

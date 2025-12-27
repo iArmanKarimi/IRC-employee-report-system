@@ -55,6 +55,7 @@ export default function NewEmployeeFormPage() {
 			contactNumber: "",
 			jobStartDate: "",
 			jobEndDate: undefined,
+			truckDriver: false,
 		},
 	});
 	const [loading, setLoading] = useState(false);

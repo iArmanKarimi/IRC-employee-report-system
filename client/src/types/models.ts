@@ -76,6 +76,14 @@ export interface IUser {
 	provinceId?: string | IProvince;
 }
 
+// Global Settings model
+export interface IGlobalSettings {
+	_id: string;
+	performanceLocked: boolean;
+	lastLockedBy?: IUser | string;
+	lockedAt?: Date | string;
+}
+
 // Form types for creating/updating
 export type CreateEmployeeInput = Omit<IEmployee, '_id' | 'createdAt' | 'updatedAt' | 'performance'> & { performance?: IPerformance };
 export type UpdateEmployeeInput = Partial<Omit<IEmployee, '_id' | 'provinceId' | 'createdAt' | 'updatedAt'>>;

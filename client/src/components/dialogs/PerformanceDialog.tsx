@@ -4,10 +4,10 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
+import LockIcon from "@mui/icons-material/Lock";
 import { FormDialog } from "./FormDialog";
 import type { IPerformance } from "../../types/models";
 
@@ -15,7 +15,7 @@ type PerformanceDialogProps = {
 	open: boolean;
 	performance: IPerformance;
 	saving: boolean;
-	isEdit: boolean;
+	performanceLocked?: boolean;
 	onClose: () => void;
 	onSave: (data: IPerformance) => Promise<void>;
 };
@@ -24,7 +24,7 @@ export function PerformanceDialog({
 	open,
 	performance,
 	saving,
-	isEdit,
+	performanceLocked,
 	onClose,
 	onSave,
 }: PerformanceDialogProps) {
@@ -44,24 +44,19 @@ export function PerformanceDialog({
 	return (
 		<FormDialog
 			open={open}
-			title={isEdit ? "Edit Performance" : "Add Performance"}
+			title="Edit Performance"
 			loading={saving}
 			onClose={onClose}
 			onSave={handleSave}
+			saveDisabled={performanceLocked}
 		>
 			<Stack spacing={2}>
-				<TextField
-					label=""
-					placeholder="Month (YYYY-MM)"
-					type="month"
-					required
-					value={formData.month}
-					onChange={(e) => handleFieldChange("month", e.target.value)}
-					InputLabelProps={{ shrink: true }}
-					helperText="Month (YYYY-MM)"
-					fullWidth
-					sx={{ mt: 2 }}
-				/>
+				{performanceLocked && (
+					<Alert severity="error" icon={<LockIcon />}>
+						Performance editing is currently locked by a global administrator.
+						You cannot make changes at this time.
+					</Alert>
+				)}
 				<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<TextField
 						label="Daily Performance"

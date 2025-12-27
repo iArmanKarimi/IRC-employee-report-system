@@ -17,6 +17,7 @@ type FormDialogProps = {
 	cancelLabel?: string;
 	maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 	fullWidth?: boolean;
+	saveDisabled?: boolean;
 };
 
 /**
@@ -34,6 +35,7 @@ export function FormDialog({
 	cancelLabel = "Cancel",
 	maxWidth = "md",
 	fullWidth = true,
+	saveDisabled = false,
 }: FormDialogProps) {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -57,7 +59,7 @@ export function FormDialog({
 					<Button
 						type="submit"
 						variant="contained"
-						disabled={loading}
+						disabled={loading || saveDisabled}
 						color="primary"
 					>
 						{loading ? "Saving..." : saveLabel}

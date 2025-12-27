@@ -6,24 +6,31 @@ import {
 	InputLabel,
 	Select,
 	MenuItem,
-	FormControlLabel,
-	Checkbox,
 	Stack,
-	Typography,
+	Alert,
 } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
 import type { IPerformance } from "../types/models";
 
 interface PerformanceDisplayProps {
 	performance: IPerformance;
 	onChange: (key: keyof IPerformance, value: any) => void;
+	locked?: boolean;
 }
 
 const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 	performance,
 	onChange,
+	locked,
 }) => {
 	return (
 		<Stack spacing={2.5}>
+			{locked && (
+				<Alert severity="warning" icon={<LockIcon />}>
+					Performance records are currently locked. You cannot make changes at
+					this time.
+				</Alert>
+			)}
 			<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
 				<TextField
 					label="Daily Performance"

@@ -25,6 +25,7 @@ import { ConfirmDialog } from "../components/dialogs/ConfirmDialog";
 import { useEmployee } from "../hooks/useEmployee";
 import { useApiMutation } from "../hooks/useApiMutation";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
+import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { formatEmployeeName } from "../utils/formatters";
 import type { IPerformance } from "../types/models";
 
@@ -35,6 +36,7 @@ export default function EmployeePage() {
 	}>();
 	const navigate = useNavigate();
 	const { isGlobalAdmin } = useIsGlobalAdmin();
+	const { settings } = useGlobalSettings();
 	const { employee, loading, error, refetch } = useEmployee(
 		provinceId,
 		employeeId
@@ -370,7 +372,9 @@ export default function EmployeePage() {
 									variant="contained"
 									color="primary"
 									onClick={handleSavePerformance}
-									disabled={saving || !hasUnsavedChanges}
+									disabled={
+										saving || !hasUnsavedChanges || settings?.performanceLocked
+									}
 									size="small"
 								>
 									{saving ? "Saving..." : "Save Changes"}
@@ -380,6 +384,7 @@ export default function EmployeePage() {
 								<PerformanceDisplay
 									performance={localPerformance}
 									onChange={handlePerformanceChange}
+									locked={settings?.performanceLocked}
 								/>
 							) : (
 								<Typography color="text.secondary">

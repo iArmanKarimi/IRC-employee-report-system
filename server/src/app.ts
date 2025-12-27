@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth";
 import provinceRoutes from "./routes/provinces";
 import employeeRoutes from './routes/employees';
 import employeesGlobalRoutes from './routes/employees-global';
+import globalSettingsRoutes from './routes/global-settings';
 import apiDocsRoutes from './routes/api-docs';
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger } from "./middleware/logger";
@@ -61,6 +62,9 @@ app.use('/img', express.static(path.join(__dirname, 'img')));
 
 // API Documentation routes (no auth required)
 app.use('/api-docs', apiDocsRoutes);
+
+// Global settings routes (includes performance lock status)
+app.use('/global-settings', globalSettingsRoutes);
 
 // Auth routes
 app.use('/auth', authRoutes);

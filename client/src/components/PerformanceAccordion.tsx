@@ -10,8 +10,6 @@ import {
 	InputLabel,
 	Select,
 	MenuItem,
-	FormControlLabel,
-	Checkbox,
 	Stack,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -31,23 +29,10 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 	return (
 		<Accordion defaultExpanded={index === 0}>
 			<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-				<Typography fontWeight="bold">
-					{performance.month
-						? `Performance: ${performance.month}`
-						: `Performance #${index + 1}`}
-				</Typography>
+				<Typography fontWeight="bold">{`Performance #${index + 1}`}</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
 				<Stack spacing={2.5} sx={{ mt: 1 }}>
-					<TextField
-						label="Month (YYYY-MM)"
-						type="month"
-						required
-						value={performance.month}
-						onChange={(e) => onChange("month", e.target.value)}
-						InputLabelProps={{ shrink: true }}
-						fullWidth
-					/>
 					<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
 						<TextField
 							label="Daily Performance"

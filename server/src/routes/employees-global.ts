@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import ExcelJS from "exceljs";
 import { Employee } from "../models/Employee";
 import { auth } from "../middleware/auth";
+import { checkPerformanceLocked } from "../middleware/performanceLock";
 import { USER_ROLE } from "../types/roles";
 import { HttpError } from "../utils/errors";
 import { logger } from "../middleware/logger";
@@ -123,7 +124,7 @@ router.get("/export-all", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res
 });
 
 // DELETE /employees/clear-performances - Reset all employee performance data to defaults (Global Admin only)
-router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), checkPerformanceLocked, async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		// Reset all employees' performance fields to default values
 		const result = await Employee.updateMany(

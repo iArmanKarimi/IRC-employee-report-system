@@ -14,12 +14,16 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Alert from "@mui/material/Alert";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import WarningIcon from "@mui/icons-material/Warning";
 import { ROUTES, API_BASE_URL } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import { useProvinces } from "../hooks/useProvinces";
+import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { provinceApi } from "../api/api";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
@@ -28,11 +32,18 @@ import { useState, useEffect } from "react";
 
 export default function GlobalAdminDashboardPage() {
 	const { provinces, loading, error, refetch } = useProvinces();
+	const { settings, togglePerformanceLock } = useGlobalSettings();
 	const [clearing, setClearing] = useState(false);
+	const [toggling, setToggling] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 	const [countdown, setCountdown] = useState(5);
+	const [toastOpen, setToastOpen] = useState(false);
+	const [toastMessage, setToastMessage] = useState("");
+	const [toastSeverity, setToastSeverity] = useState<
+		"success" | "error" | "warning"
+	>("success");
 
-	// Countdown timer effect
+	// Countdown timer effect (only for clear dialog)
 	useEffect(() => {
 		if (confirmDialogOpen && countdown > 0) {
 			const timer = setTimeout(() => {
@@ -41,6 +52,16 @@ export default function GlobalAdminDashboardPage() {
 			return () => clearTimeout(timer);
 		}
 	}, [confirmDialogOpen, countdown]);
+
+	// Auto-close toast after 4 seconds
+	useEffect(() => {
+		if (toastOpen) {
+			const timer = setTimeout(() => {
+				setToastOpen(false);
+			}, 4000);
+			return () => clearTimeout(timer);
+		}
+	}, [toastOpen]);
 
 	const handleExportAllEmployees = async () => {
 		try {
@@ -81,16 +102,47 @@ export default function GlobalAdminDashboardPage() {
 		setCountdown(5);
 	};
 
+	const handleToggleLockClick = async () => {
+		setToggling(true);
+		setToastOpen(false);
+		try {
+			const response = await togglePerformanceLock();
+			const newStatus = response?.performanceLocked;
+
+			// Force update with new message and severity
+			setToastMessage(
+				newStatus
+					? "🔒 Performance editing is now LOCKED"
+					: "🔓 Performance editing is now UNLOCKED"
+			);
+			setToastSeverity(newStatus ? "warning" : "success");
+			setToastOpen(true);
+		} catch (err: any) {
+			const errorMessage =
+				err?.response?.data?.error ||
+				err?.response?.data?.message ||
+				err?.message ||
+				"Failed to toggle";
+			setToastMessage(`❌ ${errorMessage}`);
+			setToastSeverity("error");
+			setToastOpen(true);
+		} finally {
+			setToggling(false);
+		}
+	};
+
 	const handleClearAllPerformances = async () => {
 		handleCloseClearDialog();
 		setClearing(true);
 		try {
 			const response = await provinceApi.clearAllPerformances();
-			alert(
+			setToastMessage(
 				`Successfully reset performance data for ${
 					response.data?.modifiedCount || 0
 				} employee(s)`
 			);
+			setToastSeverity("success");
+			setToastOpen(true);
 		} catch (err: any) {
 			console.error("Reset performances failed:", err);
 			const errorMessage =
@@ -98,7 +150,9 @@ export default function GlobalAdminDashboardPage() {
 				err?.response?.data?.message ||
 				err?.message ||
 				"Unknown error";
-			alert(`Failed to reset employee performances: ${errorMessage}`);
+			setToastMessage(`Failed to reset employee performances: ${errorMessage}`);
+			setToastSeverity("error");
+			setToastOpen(true);
 		} finally {
 			setClearing(false);
 		}
@@ -142,23 +196,110 @@ export default function GlobalAdminDashboardPage() {
 					<Typography variant="h4" component="h1" gutterBottom sx={{ m: 0 }}>
 						Provinces
 					</Typography>
-					<Stack direction="row" spacing={2}>
+					<Stack
+						direction="row"
+						spacing={1.5}
+						alignItems="center"
+						sx={{ flexWrap: "wrap" }}
+					>
+						{/* Performance Lock Toggle */}
+						<Stack direction="row" alignItems="center" spacing={1}>
+							<Typography
+								variant="body2"
+								sx={{ fontWeight: 600, minWidth: "fit-content" }}
+							>
+								Performance:
+							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									border: "2px solid",
+									borderColor: "divider",
+									borderRadius: 1,
+									overflow: "hidden",
+								}}
+							>
+								<Button
+									onClick={handleToggleLockClick}
+									disabled={toggling}
+									sx={{
+										padding: "6px 16px",
+										minWidth: "auto",
+										color: !settings?.performanceLocked
+											? "primary.main"
+											: "text.secondary",
+										backgroundColor: !settings?.performanceLocked
+											? "action.selected"
+											: "transparent",
+										border: "none",
+										borderRadius: 0,
+										"&:hover": {
+											backgroundColor: !settings?.performanceLocked
+												? "action.selected"
+												: "action.hover",
+										},
+										"&:focus": {
+											outline: "none",
+										},
+										"&:focus-visible": {
+											outline: "none",
+										},
+									}}
+								>
+									<LockOpenIcon sx={{ fontSize: "1.25rem" }} />
+								</Button>
+								<Box sx={{ width: "1px", backgroundColor: "divider" }} />
+								<Button
+									onClick={handleToggleLockClick}
+									disabled={toggling}
+									sx={{
+										padding: "6px 16px",
+										minWidth: "auto",
+										color: settings?.performanceLocked
+											? "error.main"
+											: "text.secondary",
+										backgroundColor: settings?.performanceLocked
+											? "action.selected"
+											: "transparent",
+										border: "none",
+										borderRadius: 0,
+										"&:hover": {
+											backgroundColor: settings?.performanceLocked
+												? "action.selected"
+												: "action.hover",
+										},
+										"&:focus": {
+											outline: "none",
+										},
+										"&:focus-visible": {
+											outline: "none",
+										},
+									}}
+								>
+									<LockIcon sx={{ fontSize: "1.25rem" }} />
+								</Button>
+							</Box>
+						</Stack>
+
+						{/* Action Buttons */}
 						<Button
 							onClick={handleOpenClearDialog}
 							variant="outlined"
 							color="error"
 							startIcon={<DeleteSweepIcon />}
-							disabled={clearing}
+							disabled={clearing || settings?.performanceLocked}
+							size="small"
 						>
-							{clearing ? "Resetting..." : "Reset All Performances"}
+							{clearing ? "Resetting..." : "Reset All"}
 						</Button>
 						<Button
 							onClick={handleExportAllEmployees}
-							variant="outlined"
+							variant="contained"
 							color="primary"
 							startIcon={<FileDownloadIcon />}
+							size="small"
 						>
-							Export All Employees
+							Export All
 						</Button>
 					</Stack>
 				</Stack>
@@ -301,6 +442,26 @@ export default function GlobalAdminDashboardPage() {
 						</Button>
 					</DialogActions>
 				</Dialog>
+
+				{/* Toast Notification */}
+				{toastOpen && (
+					<Box
+						sx={{
+							position: "fixed",
+							bottom: 20,
+							right: 20,
+							zIndex: 1400,
+						}}
+					>
+						<Alert
+							severity={toastSeverity}
+							onClose={() => setToastOpen(false)}
+							sx={{ boxShadow: 2 }}
+						>
+							{toastMessage}
+						</Alert>
+					</Box>
+				)}
 			</Container>
 		</>
 	);

@@ -105,7 +105,6 @@ export function PerformanceCard({
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
 							{" "}
 							Travel Assignment:

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { isValidObjectId } from "mongoose";
 import { Employee } from "../models/Employee";
 import { requireAnyRole, canAccessProvince, AuthenticatedUser } from "../middleware/auth";
+import { checkPerformanceLocked } from "../middleware/performanceLock";
 import { USER_ROLE } from "../types/roles";
 import { HttpError } from "../utils/errors";
 import { validateAndResolveProvinceId } from "../utils/provinceValidation";
@@ -172,7 +173,7 @@ router.get("/:employeeId", validateEmployeeId, requireAnyRole, async (req: Reque
 });
 
 // PUT /provinces/:provinceId/employees/:employeeId - Update employee
-router.put("/:employeeId", validateEmployeeId, requireAnyRole, async (req: Request<EmployeeParams, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
+router.put("/:employeeId", validateEmployeeId, requireAnyRole, checkPerformanceLocked, async (req: Request<EmployeeParams, any, ProvinceScopedBody>, res: Response, next: NextFunction) => {
 	try {
 		const { provinceId, employeeId } = req.params;
 
