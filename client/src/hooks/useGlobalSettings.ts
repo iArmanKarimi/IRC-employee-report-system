@@ -13,7 +13,7 @@ export function useGlobalSettings() {
 			setLoading(true);
 			setError(null);
 			const response = await api.get(API_ENDPOINTS.GLOBAL_SETTINGS);
-			setSettings(response.data);
+			setSettings(response.data.data);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to fetch global settings");
 		} finally {

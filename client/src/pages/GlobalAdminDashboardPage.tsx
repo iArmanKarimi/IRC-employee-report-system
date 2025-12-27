@@ -108,7 +108,7 @@ export default function GlobalAdminDashboardPage() {
 		try {
 			const response = await togglePerformanceLock();
 			const newStatus = response?.performanceLocked;
-			
+
 			// Force update with new message and severity
 			setToastMessage(
 				newStatus
