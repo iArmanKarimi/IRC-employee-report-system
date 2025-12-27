@@ -39,9 +39,9 @@ export default function GlobalAdminDashboardPage() {
 	const [countdown, setCountdown] = useState(5);
 	const [toastOpen, setToastOpen] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
-	const [toastSeverity, setToastSeverity] = useState<"success" | "error" | "warning">(
-		"success"
-	);
+	const [toastSeverity, setToastSeverity] = useState<
+		"success" | "error" | "warning"
+	>("success");
 
 	// Countdown timer effect (only for clear dialog)
 	useEffect(() => {
@@ -104,34 +104,28 @@ export default function GlobalAdminDashboardPage() {
 
 	const handleToggleLockClick = async () => {
 		setToggling(true);
+		setToastOpen(false);
 		try {
 			const response = await togglePerformanceLock();
-			console.log("Toggle response:", response);
 			const newStatus = response?.performanceLocked;
-			console.log("New lock status:", newStatus);
-			setToastOpen(false); // Close any existing toast first
-			setTimeout(() => {
-				setToastMessage(
-					newStatus
-						? "Performance editing has been locked for all employees"
-						: "Performance editing has been unlocked for all employees"
-				);
-				setToastSeverity(newStatus ? "warning" : "success");
-				setToastOpen(true);
-			}, 100);
+			
+			// Force update with new message and severity
+			setToastMessage(
+				newStatus
+					? "🔒 Performance editing is now LOCKED"
+					: "🔓 Performance editing is now UNLOCKED"
+			);
+			setToastSeverity(newStatus ? "warning" : "success");
+			setToastOpen(true);
 		} catch (err: any) {
-			console.error("Toggle lock failed:", err);
 			const errorMessage =
 				err?.response?.data?.error ||
 				err?.response?.data?.message ||
 				err?.message ||
-				"Unknown error";
-			setToastOpen(false);
-			setTimeout(() => {
-				setToastMessage(`Failed to toggle performance lock: ${errorMessage}`);
-				setToastSeverity("error");
-				setToastOpen(true);
-			}, 100);
+				"Failed to toggle";
+			setToastMessage(`❌ ${errorMessage}`);
+			setToastSeverity("error");
+			setToastOpen(true);
 		} finally {
 			setToggling(false);
 		}
