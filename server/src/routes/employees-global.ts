@@ -126,7 +126,7 @@ router.get("/export-all", auth(USER_ROLE.GLOBAL_ADMIN), async (req: Request, res
 // DELETE /employees/clear-performances - Reset all employee performance data to defaults (Global Admin only)
 router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), checkPerformanceLocked, async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		// Reset all employees' performance fields to default values
+		// Reset all employees' performance fields to default values (excluding status)
 		const result = await Employee.updateMany(
 			{ performance: { $exists: true } },
 			{
@@ -139,7 +139,6 @@ router.delete("/clear-performances", auth(USER_ROLE.GLOBAL_ADMIN), checkPerforma
 					"performance.sickLeave": 0,
 					"performance.absence": 0,
 					"performance.travelAssignment": 0,
-					"performance.status": "active",
 					"performance.notes": ""
 				}
 			}

@@ -153,6 +153,21 @@ The Global Admin can lock/unlock performance editing across the entire system.
 
 3. **Reset All** button is disabled when lock is active (prevents accidental resets during lock period)
 
+### **Reset All Performances**
+
+Global Admin can reset all employee performance metrics to defaults:
+- **Preserved**: Employee status (remains unchanged)
+- **Reset to defaults**:
+  - Daily performance: 0
+  - Shift count per location: 0
+  - Shift duration: 8 hours
+  - Overtime: 0
+  - Daily leave: 0
+  - Sick leave: 0
+  - Absence: 0
+  - Travel assignment: 0
+  - Notes: cleared
+
 ### **API Response**
 
 ```json
