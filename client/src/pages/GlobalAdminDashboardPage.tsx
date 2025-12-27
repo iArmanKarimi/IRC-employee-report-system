@@ -44,15 +44,15 @@ export default function GlobalAdminDashboardPage() {
 		"success"
 	);
 
-	// Countdown timer effect
+	// Countdown timer effect (only for clear dialog)
 	useEffect(() => {
-		if ((confirmDialogOpen || lockDialogOpen) && countdown > 0) {
+		if (confirmDialogOpen && countdown > 0) {
 			const timer = setTimeout(() => {
 				setCountdown((prev) => prev - 1);
 			}, 1000);
 			return () => clearTimeout(timer);
 		}
-	}, [confirmDialogOpen, lockDialogOpen, countdown]);
+	}, [confirmDialogOpen, countdown]);
 
 	const handleExportAllEmployees = async () => {
 		try {
@@ -94,13 +94,11 @@ export default function GlobalAdminDashboardPage() {
 	};
 
 	const handleOpenLockDialog = () => {
-		setCountdown(5);
 		setLockDialogOpen(true);
 	};
 
 	const handleCloseLockDialog = () => {
 		setLockDialogOpen(false);
-		setCountdown(5);
 	};
 
 	const handleToggleLock = async () => {
@@ -450,14 +448,6 @@ export default function GlobalAdminDashboardPage() {
 								</Typography>
 							</DialogContentText>
 						)}
-						{countdown > 0 && (
-							<DialogContentText
-								sx={{ mt: 2, fontWeight: "bold", color: "warning.main" }}
-							>
-								Please wait {countdown} second{countdown !== 1 ? "s" : ""}{" "}
-								before confirming...
-							</DialogContentText>
-						)}
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleCloseLockDialog} color="inherit">
@@ -467,7 +457,6 @@ export default function GlobalAdminDashboardPage() {
 							onClick={handleToggleLock}
 							color={settings?.performanceLocked ? "success" : "error"}
 							variant="contained"
-							disabled={countdown > 0}
 							startIcon={
 								settings?.performanceLocked ? <LockOpenIcon /> : <LockIcon />
 							}
