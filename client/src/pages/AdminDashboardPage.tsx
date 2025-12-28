@@ -183,6 +183,8 @@ export default function AdminDashboardPage() {
 						}}
 					>
 						📊 دشبورد مدیریت
+					</Typography>
+
 					{/* Stat Cards Grid */}
 					<Box
 						sx={{
