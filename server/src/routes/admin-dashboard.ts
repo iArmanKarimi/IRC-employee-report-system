@@ -116,7 +116,7 @@ router.get(
 				employeeDistribution: {
 					byEducation: [],
 					byRank: [],
-				byBranchByProvince: [],
+					byBranchByProvince: [],
 					truckDriverCount: 0,
 					maleCount: 0,
 					femaleCount: 0,

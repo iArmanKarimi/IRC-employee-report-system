@@ -410,10 +410,15 @@ export default function AdminDashboardPage() {
 											{stats.employeeDistribution.byBranchByProvince.map(
 												(provinceData: any, idx: number) => (
 													<Box key={idx} sx={{ mb: 3 }}>
-														<Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+														<Typography
+															variant="subtitle2"
+															sx={{ fontWeight: 600, mb: 1 }}
+														>
 															{provinceData.province}
 														</Typography>
-														<Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+														<Box
+															sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}
+														>
 															{provinceData.branches.map(
 																(branch: any, branchIdx: number) => (
 																	<Box
