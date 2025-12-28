@@ -375,6 +375,7 @@ export default function AdminDashboardPage() {
 					)}
 
 					{/* Gender Distribution */}
+				{genderData.length > 0 && (
 					<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
 						<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 							<Group
@@ -405,8 +406,8 @@ export default function AdminDashboardPage() {
 							</MuiPieChart>
 						</ResponsiveContainer>
 					</Card>
-				</Box>
-
+				)}
+			</Box>
 				{/* Employees by Province - Full Width */}
 				{provinceData.length > 0 && (
 					<Card
@@ -506,8 +507,8 @@ export default function AdminDashboardPage() {
 					{selectedProvince !== "all" &&
 						stats.employeeDistribution?.byRankByProvince &&
 						stats.employeeDistribution?.byRankByProvince.length > 0 && (
-						<Box sx={{ mb: 4 }}>
-							{stats.employeeDistribution?.byRankByProvince
+							<Box sx={{ mb: 4 }}>
+								{stats.employeeDistribution?.byRankByProvince
 									.filter(
 										(p: any) =>
 											selectedProvince === "all" ||
@@ -556,16 +557,16 @@ export default function AdminDashboardPage() {
 					{/* Branch Distribution - Only when specific province selected */}
 					{selectedProvince !== "all" &&
 						stats.employeeDistribution?.byBranchByProvince &&
-					stats.employeeDistribution?.byBranchByProvince.length > 0 && (
-						<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
-							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-								<BarChart
-									sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
-								/>
-								Distribution by Branch (by Province)
-							</Typography>
-									{stats.employeeDistribution?.byBranchByProvince &&
-										stats.employeeDistribution?.byBranchByProvince.length > 0 && (
+						stats.employeeDistribution?.byBranchByProvince.length > 0 && (
+							<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
+								<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+									<BarChart
+										sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
+									/>
+									Distribution by Branch (by Province)
+								</Typography>
+								{stats.employeeDistribution?.byBranchByProvince &&
+									stats.employeeDistribution?.byBranchByProvince.length > 0 && (
 										<Box>
 											{stats.employeeDistribution?.byBranchByProvince
 												.filter(
