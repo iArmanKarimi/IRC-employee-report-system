@@ -1,6 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
+	direction: 'rtl',
 	palette: {
 		primary: {
 			main: '#2c3e50', // Professional dark blue-grey
