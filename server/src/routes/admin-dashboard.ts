@@ -51,9 +51,12 @@ interface DashboardStats {
 			rank: string;
 			count: number;
 		}>;
-		byBranch: Array<{
-			branch: string;
-			count: number;
+		byBranchByProvince: Array<{
+			province: string;
+			branches: Array<{
+				branch: string;
+				count: number;
+			}>;
 		}>;
 		truckDriverCount: number;
 		maleCount: number;
@@ -113,7 +116,7 @@ router.get(
 				employeeDistribution: {
 					byEducation: [],
 					byRank: [],
-					byBranch: [],
+				byBranchByProvince: [],
 					truckDriverCount: 0,
 					maleCount: 0,
 					femaleCount: 0,
@@ -125,7 +128,7 @@ router.get(
 			const provinceMap = new Map<string, number>();
 			const educationMap = new Map<string, number>();
 			const rankMap = new Map<string, number>();
-			const branchMap = new Map<string, number>();
+			const branchByProvinceMap = new Map<string, Map<string, number>>();
 			let totalPerformance = 0;
 			let performanceCount = 0;
 			const currentMonth = new Date().getMonth();
@@ -167,9 +170,14 @@ router.get(
 				const rank = emp.workPlace?.rank || "Unknown";
 				rankMap.set(rank, (rankMap.get(rank) || 0) + 1);
 
-				// Branch distribution
+				// Branch distribution by province
 				const branch = emp.workPlace?.branch || "Unknown";
-				branchMap.set(branch, (branchMap.get(branch) || 0) + 1);
+				const provinceName = (emp.provinceId as any)?.name || "Unknown";
+				if (!branchByProvinceMap.has(provinceId)) {
+					branchByProvinceMap.set(provinceId, new Map());
+				}
+				const branchMapForProvince = branchByProvinceMap.get(provinceId)!;
+				branchMapForProvince.set(branch, (branchMapForProvince.get(branch) || 0) + 1);
 
 				// Performance metrics
 				if (emp.performance) {
@@ -211,9 +219,18 @@ router.get(
 				.map(([rank, count]) => ({ rank, count }))
 				.sort((a, b) => b.count - a.count);
 
-			stats.employeeDistribution.byBranch = Array.from(branchMap.entries())
-				.map(([branch, count]) => ({ branch, count }))
-				.sort((a, b) => b.count - a.count);
+			// Convert branch by province map to array sorted by province
+			stats.employeeDistribution.byBranchByProvince = Array.from(branchByProvinceMap.entries())
+				.map(([provinceId, branchMap]) => {
+					const province = provinces.find((p) => p._id.toString() === provinceId);
+					return {
+						province: province?.name || "Unknown",
+						branches: Array.from(branchMap.entries())
+							.map(([branch, count]) => ({ branch, count }))
+							.sort((a, b) => b.count - a.count),
+					};
+				})
+				.sort((a, b) => b.branches.reduce((sum, b) => sum + b.count, 0) - a.branches.reduce((sum, b) => sum + b.count, 0));
 
 			// Calculate average performance
 			if (performanceCount > 0) {

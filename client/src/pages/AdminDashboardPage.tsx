@@ -402,22 +402,43 @@ export default function AdminDashboardPage() {
 									<BarChart
 										sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
 									/>
-									Distribution by Branch
+									Distribution by Branch (by Province)
 								</Typography>
-								<ResponsiveContainer width="100%" height={300}>
-									<MuiBarChart data={stats.employeeDistribution.byBranch}>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis
-											dataKey="branch"
-											angle={-45}
-											textAnchor="end"
-											height={80}
-										/>
-										<YAxis />
-										<Tooltip />
-										<Bar dataKey="count" fill="#FFB3BA" />
-									</MuiBarChart>
-								</ResponsiveContainer>
+								{stats.employeeDistribution.byBranchByProvince &&
+									stats.employeeDistribution.byBranchByProvince.length > 0 && (
+										<Box>
+											{stats.employeeDistribution.byBranchByProvince.map(
+												(provinceData: any, idx: number) => (
+													<Box key={idx} sx={{ mb: 3 }}>
+														<Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+															{provinceData.province}
+														</Typography>
+														<Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+															{provinceData.branches.map(
+																(branch: any, branchIdx: number) => (
+																	<Box
+																		key={branchIdx}
+																		sx={{
+																			display: "inline-block",
+																			padding: "6px 12px",
+																			backgroundColor:
+																				COLORS[branchIdx % COLORS.length],
+																			color: "white",
+																			borderRadius: "4px",
+																			fontSize: "12px",
+																			fontWeight: 500,
+																		}}
+																	>
+																		{branch.branch}: {branch.count}
+																	</Box>
+																)
+															)}
+														</Box>
+													</Box>
+												)
+											)}
+										</Box>
+									)}
 							</Card>
 						)}
 				</Box>
