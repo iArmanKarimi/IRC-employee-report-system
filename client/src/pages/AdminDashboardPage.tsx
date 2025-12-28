@@ -358,45 +358,6 @@ export default function AdminDashboardPage() {
 					</Card>
 				)}
 
-				{/* Education Distribution */}
-				{stats.employeeDistribution.byEducation &&
-					stats.employeeDistribution.byEducation.length > 0 && (
-						<Card
-							sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 4 }}
-						>
-							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-								<PieChart
-									sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
-								/>
-								Education Distribution
-							</Typography>
-							<ResponsiveContainer width="100%" height={300}>
-								<MuiPieChart>
-									<Pie
-										data={stats.employeeDistribution.byEducation}
-										cx="50%"
-										cy="50%"
-										labelLine={false}
-										label={({ degree, count }: any) => `${degree}: ${count}`}
-										outerRadius={80}
-										fill="#8884d8"
-										dataKey="count"
-									>
-										{stats.employeeDistribution.byEducation.map(
-											(_entry: any, index: number) => (
-												<Cell
-													key={`cell-${index}`}
-													fill={COLORS[index % COLORS.length]}
-												/>
-											)
-										)}
-									</Pie>
-									<Tooltip />
-								</MuiPieChart>
-							</ResponsiveContainer>
-						</Card>
-					)}
-
 				{/* Rank & Branch Distribution Side by Side */}
 				<Box
 					sx={{
