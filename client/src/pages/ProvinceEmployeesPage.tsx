@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -13,13 +13,14 @@ import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LockIcon from "@mui/icons-material/Lock";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {
 	DataGrid,
 	type GridColDef,
 	type GridRenderCellParams,
 } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
-import { ROUTES } from "../const/endpoints";
+import { ROUTES, API_BASE_URL } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { SearchFilterBar } from "../components/SearchFilterBar";
@@ -49,11 +50,27 @@ export default function ProvinceEmployeesPage() {
 	const { isGlobalAdmin } = useIsGlobalAdmin();
 	const { settings } = useGlobalSettings();
 	const theme = useTheme();
+	const [exporting, setExporting] = useState(false);
+	const [toastOpen, setToastOpen] = useState(false);
+	const [toastMessage, setToastMessage] = useState("");
+	const [toastSeverity, setToastSeverity] = useState<
+		"success" | "error" | "warning"
+	>("success");
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
 		page + 1,
 		limit
 	);
+
+	// Auto-close toast after 4 seconds
+	useEffect(() => {
+		if (toastOpen) {
+			const timer = setTimeout(() => {
+				setToastOpen(false);
+			}, 4000);
+			return () => clearTimeout(timer);
+		}
+	}, [toastOpen]);
 
 	const searchFieldOptions = [
 		{ value: "all", label: "All fields" },
@@ -214,6 +231,51 @@ export default function ProvinceEmployeesPage() {
 	const truckDriverCount = employees.filter(
 		(e) => e.additionalSpecifications?.truckDriver
 	).length;
+
+	const handleExportProvinceEmployees = async () => {
+		setExporting(true);
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/provinces/${provinceId}/employees/export-excel`,
+				{
+					method: "GET",
+					credentials: "include",
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error("Failed to export employees");
+			}
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute(
+				"download",
+				`employees_${provinceName || "province"}_${new Date()
+					.toISOString()
+					.split("T")[0]}.xlsx`
+			);
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			window.URL.revokeObjectURL(url);
+
+			setToastMessage(
+				`✅ Successfully exported ${pagination?.total || employees.length} employee(s)`
+			);
+			setToastSeverity("success");
+			setToastOpen(true);
+		} catch (err) {
+			console.error("Export failed:", err);
+			setToastMessage("❌ Failed to export employees");
+			setToastSeverity("error");
+			setToastOpen(true);
+		} finally {
+			setExporting(false);
+		}
+	};
 
 	// DataGrid columns definition
 	const columns: GridColDef[] = [
@@ -545,6 +607,14 @@ export default function ProvinceEmployeesPage() {
 							</>
 						)}
 						<Button
+							onClick={handleExportProvinceEmployees}
+							disabled={exporting || employees.length === 0}
+							variant="outlined"
+							startIcon={<FileDownloadIcon />}
+						>
+							Export to Excel
+						</Button>
+						<Button
 							component={Link}
 							to={ROUTES.PROVINCE_EMPLOYEE_NEW.replace(
 								":provinceId",
@@ -642,6 +712,26 @@ export default function ProvinceEmployeesPage() {
 							/>
 						</Stack>
 					</Stack>
+				)}
+
+				{/* Toast Notification */}
+				{toastOpen && (
+					<Box
+						sx={{
+							position: "fixed",
+							bottom: 20,
+							right: 20,
+							zIndex: 1400,
+						}}
+					>
+						<Alert
+							severity={toastSeverity}
+							onClose={() => setToastOpen(false)}
+							sx={{ boxShadow: 2 }}
+						>
+							{toastMessage}
+						</Alert>
+					</Box>
 				)}
 			</Container>
 		</>
