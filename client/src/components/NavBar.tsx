@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,6 +11,7 @@ import { useTheme } from "@mui/material/styles";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { authApi } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
@@ -29,10 +30,14 @@ export default function NavBar({
 	backLabel = "Back",
 }: NavBarProps) {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 	const [loading, setLoading] = useState(false);
 	const { isGlobalAdmin } = useIsGlobalAdmin();
+
+	const isOnDashboard = location.pathname === ROUTES.ADMIN_DASHBOARD;
+	const isOnProvinces = location.pathname === ROUTES.PROVINCES;
 
 	const handleLogout = async () => {
 		setLoading(true);
@@ -85,35 +90,67 @@ export default function NavBar({
 				</Typography>
 				{isGlobalAdmin && (
 					<Box sx={{ ml: 1.5 }}>
-						{isMobile ? (
-							<IconButton
-								color="inherit"
-								onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
-								size="small"
-								aria-label="Admin Dashboard"
-								title="Admin Dashboard"
-							>
-								<DashboardIcon />
-							</IconButton>
-						) : (
-							<Button
-								color="inherit"
-								variant="outlined"
-								onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
-								startIcon={<DashboardIcon />}
-								size="small"
-								sx={{
-									borderColor: "rgba(255, 255, 255, 0.3)",
-									"&:hover": {
-										borderColor: "rgba(255, 255, 255, 0.5)",
-										backgroundColor: "rgba(255, 255, 255, 0.1)",
-									},
-								}}
-								aria-label="Admin Dashboard"
-							>
-								Dashboard
-							</Button>
-						)}
+						{isOnDashboard ? (
+							isMobile ? (
+								<IconButton
+									color="inherit"
+									onClick={() => navigate(ROUTES.PROVINCES)}
+									size="small"
+									aria-label="Provinces"
+									title="Provinces"
+								>
+									<LocationOnIcon />
+								</IconButton>
+							) : (
+								<Button
+									color="inherit"
+									variant="outlined"
+									onClick={() => navigate(ROUTES.PROVINCES)}
+									startIcon={<LocationOnIcon />}
+									size="small"
+									sx={{
+										borderColor: "rgba(255, 255, 255, 0.3)",
+										"&:hover": {
+											borderColor: "rgba(255, 255, 255, 0.5)",
+											backgroundColor: "rgba(255, 255, 255, 0.1)",
+										},
+									}}
+									aria-label="Provinces"
+								>
+									Provinces
+								</Button>
+							)
+						) : isOnProvinces ? (
+							isMobile ? (
+								<IconButton
+									color="inherit"
+									onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
+									size="small"
+									aria-label="Admin Dashboard"
+									title="Admin Dashboard"
+								>
+									<DashboardIcon />
+								</IconButton>
+							) : (
+								<Button
+									color="inherit"
+									variant="outlined"
+									onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
+									startIcon={<DashboardIcon />}
+									size="small"
+									sx={{
+										borderColor: "rgba(255, 255, 255, 0.3)",
+										"&:hover": {
+											borderColor: "rgba(255, 255, 255, 0.5)",
+											backgroundColor: "rgba(255, 255, 255, 0.1)",
+										},
+									}}
+									aria-label="Admin Dashboard"
+								>
+									Dashboard
+								</Button>
+							)
+						) : null}
 					</Box>
 				)}
 				{showLogout && (
