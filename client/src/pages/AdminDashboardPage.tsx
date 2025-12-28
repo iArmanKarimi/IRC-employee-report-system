@@ -3,6 +3,10 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import PieChart from "@mui/icons-material/PieChart";
 import BarChart from "@mui/icons-material/BarChart";
 import TrendingUp from "@mui/icons-material/TrendingUp";
@@ -49,6 +53,7 @@ export default function AdminDashboardPage() {
 	const [stats, setStats] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [selectedProvince, setSelectedProvince] = useState<string>("all");
 
 	useEffect(() => {
 		const fetchDashboardStats = async () => {
@@ -198,6 +203,26 @@ export default function AdminDashboardPage() {
 					))}
 				</Box>
 
+				{/* Province Selector */}
+				<Box sx={{ mb: 4 }}>
+					<FormControl sx={{ minWidth: 250 }}>
+						<InputLabel>Filter by Province</InputLabel>
+						<Select
+							value={selectedProvince}
+							onChange={(e) => setSelectedProvince(e.target.value)}
+							label="Filter by Province"
+						>
+							<MenuItem value="all">All Provinces</MenuItem>
+							{stats.employeesByProvince &&
+								stats.employeesByProvince.map((province: any) => (
+									<MenuItem key={province._id} value={province.name}>
+										{province.name}
+									</MenuItem>
+								))}
+						</Select>
+					</FormControl>
+				</Box>
+
 				{/* Charts Section - 2 Column Grid */}
 				<Box
 					sx={{
@@ -306,8 +331,13 @@ export default function AdminDashboardPage() {
 				{stats.absenceOverviewByProvince &&
 					stats.absenceOverviewByProvince.length > 0 && (
 						<Box sx={{ mb: 4 }}>
-							{stats.absenceOverviewByProvince.map(
-								(provinceData: any, idx: number) => (
+							{stats.absenceOverviewByProvince
+								.filter(
+									(p: any) =>
+										selectedProvince === "all" ||
+										p.province === selectedProvince
+								)
+								.map((provinceData: any, idx: number) => (
 									<Card
 										key={idx}
 										sx={{
@@ -356,8 +386,7 @@ export default function AdminDashboardPage() {
 											</MuiBarChart>
 										</ResponsiveContainer>
 									</Card>
-								)
-							)}
+								))}
 						</Box>
 					)}
 
@@ -367,8 +396,13 @@ export default function AdminDashboardPage() {
 					{stats.employeeDistribution.byRankByProvince &&
 						stats.employeeDistribution.byRankByProvince.length > 0 && (
 							<Box sx={{ mb: 4 }}>
-								{stats.employeeDistribution.byRankByProvince.map(
-									(provinceData: any, idx: number) => (
+								{stats.employeeDistribution.byRankByProvince
+									.filter(
+										(p: any) =>
+											selectedProvince === "all" ||
+											p.province === selectedProvince
+									)
+									.map((provinceData: any, idx: number) => (
 										<Card
 											key={idx}
 											sx={{
@@ -403,8 +437,7 @@ export default function AdminDashboardPage() {
 												</MuiBarChart>
 											</ResponsiveContainer>
 										</Card>
-									)
-								)}
+									))}
 							</Box>
 						)}
 
@@ -421,8 +454,13 @@ export default function AdminDashboardPage() {
 								{stats.employeeDistribution.byBranchByProvince &&
 									stats.employeeDistribution.byBranchByProvince.length > 0 && (
 										<Box>
-											{stats.employeeDistribution.byBranchByProvince.map(
-												(provinceData: any, idx: number) => (
+											{stats.employeeDistribution.byBranchByProvince
+												.filter(
+													(p: any) =>
+														selectedProvince === "all" ||
+														p.province === selectedProvince
+												)
+												.map((provinceData: any, idx: number) => (
 													<Box key={idx} sx={{ mb: 3 }}>
 														<Typography
 															variant="subtitle2"
@@ -454,8 +492,7 @@ export default function AdminDashboardPage() {
 															)}
 														</Box>
 													</Box>
-												)
-											)}
+												))}
 										</Box>
 									)}
 							</Card>
@@ -570,8 +607,13 @@ export default function AdminDashboardPage() {
 					{stats.performanceMetricsByProvince &&
 						stats.performanceMetricsByProvince.length > 0 && (
 							<Box>
-								{stats.performanceMetricsByProvince.map(
-									(provinceData: any, idx: number) => (
+								{stats.performanceMetricsByProvince
+									.filter(
+										(p: any) =>
+											selectedProvince === "all" ||
+											p.province === selectedProvince
+									)
+									.map((provinceData: any, idx: number) => (
 										<Card
 											key={idx}
 											sx={{
@@ -685,8 +727,7 @@ export default function AdminDashboardPage() {
 												</Box>
 											</Box>
 										</Card>
-									)
-								)}
+									))}
 							</Box>
 						)}
 				</Box>
