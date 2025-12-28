@@ -20,11 +20,11 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import WarningIcon from "@mui/icons-material/Warning";
-import { ROUTES, API_BASE_URL } from "../const/endpoints";
+import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import { useProvinces } from "../hooks/useProvinces";
 import { useGlobalSettings } from "../hooks/useGlobalSettings";
-import { provinceApi } from "../api/api";
+import { provinceApi, globalApi } from "../api/api";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
@@ -65,16 +65,7 @@ export default function GlobalAdminDashboardPage() {
 
 	const handleExportAllEmployees = async () => {
 		try {
-			const response = await fetch(`${API_BASE_URL}/employees/export-all`, {
-				method: "GET",
-				credentials: "include",
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to export employees");
-			}
-
-			const blob = await response.blob();
+			const blob = await globalApi.exportAllEmployees();
 			const url = window.URL.createObjectURL(blob);
 			const link = document.createElement("a");
 			link.href = url;
@@ -88,7 +79,9 @@ export default function GlobalAdminDashboardPage() {
 			window.URL.revokeObjectURL(url);
 		} catch (err) {
 			console.error("Export failed:", err);
-			alert("Failed to export employees");
+			setToastMessage("❌ Failed to export employees");
+			setToastSeverity("error");
+			setToastOpen(true);
 		}
 	};
 

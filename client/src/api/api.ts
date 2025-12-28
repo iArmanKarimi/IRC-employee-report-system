@@ -74,10 +74,25 @@ export const provinceApi = {
 		api
 			.delete<ApiResponse<{ message: string }>>(API_ENDPOINTS.provinceEmployeeById(provinceId, employeeId))
 			.then(unwrap),
+	exportProvinceEmployees: async (provinceId: string) => {
+		const response = await api.get(`/provinces/${provinceId}/employees/export-excel`, {
+			responseType: 'blob'
+		});
+		return response.data;
+	},
 	clearAllPerformances: () =>
 		api
 			.delete<ApiResponse<{ matchedCount: number; modifiedCount: number }>>(API_ENDPOINTS.CLEAR_ALL_PERFORMANCES)
 			.then(unwrap)
+};
+
+export const globalApi = {
+	exportAllEmployees: async () => {
+		const response = await api.get('/employees/export-all', {
+			responseType: 'blob'
+		});
+		return response.data;
+	}
 };
 
 export default api;

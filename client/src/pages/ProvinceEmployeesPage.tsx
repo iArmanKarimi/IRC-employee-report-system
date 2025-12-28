@@ -20,7 +20,7 @@ import {
 	type GridRenderCellParams,
 } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
-import { ROUTES, API_BASE_URL } from "../const/endpoints";
+import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { SearchFilterBar } from "../components/SearchFilterBar";
@@ -32,6 +32,7 @@ import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName } from "../utils/formatters";
 import type { IEmployee } from "../types/models";
+import { provinceApi } from "../api/api";
 
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
@@ -233,21 +234,10 @@ export default function ProvinceEmployeesPage() {
 	).length;
 
 	const handleExportProvinceEmployees = async () => {
+		if (!provinceId) return;
 		setExporting(true);
 		try {
-			const response = await fetch(
-				`${API_BASE_URL}/provinces/${provinceId}/employees/export-excel`,
-				{
-					method: "GET",
-					credentials: "include",
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error("Failed to export employees");
-			}
-
-			const blob = await response.blob();
+			const blob = await provinceApi.exportProvinceEmployees(provinceId);
 			const url = window.URL.createObjectURL(blob);
 			const link = document.createElement("a");
 			link.href = url;
