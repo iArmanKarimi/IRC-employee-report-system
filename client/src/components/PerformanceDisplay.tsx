@@ -27,8 +27,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 		<Stack spacing={2.5}>
 			{locked && (
 				<Alert severity="warning" icon={<LockIcon />}>
-					Performance records are currently locked. You cannot make changes at
-					this time.
+				سوابق عملکرد در حال حاضر قفل شده است. شما نمی‌توانید در این زمان تغییراتی ایجاد کنید.
 				</Alert>
 			)}
 			<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
@@ -59,15 +58,15 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					required
 				>
-					<InputLabel>Shift Duration</InputLabel>
-					<Select
-						value={performance.shiftDuration}
-						label="Shift Duration"
-						onChange={(e) => onChange("shiftDuration", Number(e.target.value))}
-					>
-						<MenuItem value={8}>8 hours</MenuItem>
-						<MenuItem value={16}>16 hours</MenuItem>
-						<MenuItem value={24}>24 hours</MenuItem>
+				<InputLabel>مدت شیفت</InputLabel>
+				<Select
+					value={performance.shiftDuration}
+					label="مدت شیفت"
+					onChange={(e) => onChange("shiftDuration", Number(e.target.value))}
+				>
+					<MenuItem value={8}>8 ساعت</MenuItem>
+					<MenuItem value={16}>16 ساعت</MenuItem>
+					<MenuItem value={24}>24 ساعت</MenuItem>
 					</Select>
 				</FormControl>
 				<TextField

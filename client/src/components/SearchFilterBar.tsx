@@ -66,13 +66,13 @@ export function SearchFilterBar({
 	const [localToggleFilters, setLocalToggleFilters] = useState(toggleFilters);
 
 	const fieldOptions = searchFieldOptions ?? [
-		{ value: "all", label: "All fields" },
-		{ value: "name", label: "Name" },
-		{ value: "nationalId", label: "National ID" },
-		{ value: "contactNumber", label: "Contact number" },
-		{ value: "branch", label: "Branch" },
-		{ value: "rank", label: "Rank" },
-		{ value: "province", label: "Province" },
+		{ value: "all", label: "همه فیلدها" },
+		{ value: "name", label: "نام" },
+		{ value: "nationalId", label: "کد ملی" },
+		{ value: "contactNumber", label: "شماره تماس" },
+		{ value: "branch", label: "شعبه" },
+		{ value: "rank", label: "رتبه" },
+		{ value: "province", label: "استان" },
 	];
 
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,11 +148,11 @@ export function SearchFilterBar({
 					size="small"
 					sx={{ minWidth: { xs: "100%", sm: 130, md: 150 } }}
 				>
-					<InputLabel>Search by</InputLabel>
+					<InputLabel>جستجو بر اساس</InputLabel>
 					<Select
 						value={localSearchField}
 						onChange={handleSearchFieldChange}
-						label="Search by"
+						label="جستجو بر اساس"
 					>
 						{fieldOptions.map((option) => (
 							<MenuItem key={option.value} value={option.value}>
@@ -164,7 +164,7 @@ export function SearchFilterBar({
 
 				{/* Search Input */}
 				<TextField
-					placeholder="Enter search value..."
+					placeholder="مقدار جستجو را وارد کنید..."
 					variant="outlined"
 					size="small"
 					value={localSearch}
@@ -179,7 +179,7 @@ export function SearchFilterBar({
 							),
 							endAdornment: localSearch && (
 								<InputAdornment position="end">
-									<Tooltip title="Clear search">
+									<Tooltip title="پاک کردن جستجو">
 										<IconButton
 											size="small"
 											onClick={handleSearchClear}
@@ -206,17 +206,17 @@ export function SearchFilterBar({
 					size="small"
 					sx={{ minWidth: { xs: "100%", sm: 120, md: 140 } }}
 				>
-					<InputLabel>Marital Status</InputLabel>
+					<InputLabel>وضعیت تاهل</InputLabel>
 					<Select
 						value={localToggleFilters.maritalStatus}
 						onChange={(e) =>
 							handleToggleFilterChange("maritalStatus", e.target.value)
 						}
-						label="Marital Status"
+						label="وضعیت تاهل"
 					>
-						<MenuItem value="">All</MenuItem>
-						<MenuItem value="married">Married</MenuItem>
-						<MenuItem value="single">Single</MenuItem>
+						<MenuItem value="">همه</MenuItem>
+						<MenuItem value="married">متاهل</MenuItem>
+						<MenuItem value="single">مجرد</MenuItem>
 					</Select>
 				</FormControl>
 
@@ -224,15 +224,15 @@ export function SearchFilterBar({
 					size="small"
 					sx={{ minWidth: { xs: "100%", sm: 90, md: 100 } }}
 				>
-					<InputLabel>Gender</InputLabel>
+					<InputLabel>جنسیت</InputLabel>
 					<Select
 						value={localToggleFilters.gender}
 						onChange={(e) => handleToggleFilterChange("gender", e.target.value)}
-						label="Gender"
+						label="جنسیت"
 					>
-						<MenuItem value="">All</MenuItem>
-						<MenuItem value="male">Male</MenuItem>
-						<MenuItem value="female">Female</MenuItem>
+						<MenuItem value="">همه</MenuItem>
+						<MenuItem value="male">مرد</MenuItem>
+						<MenuItem value="female">زن</MenuItem>
 					</Select>
 				</FormControl>
 
@@ -240,16 +240,16 @@ export function SearchFilterBar({
 					size="small"
 					sx={{ minWidth: { xs: "100%", sm: 90, md: 100 } }}
 				>
-					<InputLabel>Status</InputLabel>
+					<InputLabel>وضعیت</InputLabel>
 					<Select
 						value={localToggleFilters.status}
 						onChange={(e) => handleToggleFilterChange("status", e.target.value)}
-						label="Status"
+						label="وضعیت"
 					>
-						<MenuItem value="">All</MenuItem>
-						<MenuItem value="active">Active</MenuItem>
-						<MenuItem value="inactive">Inactive</MenuItem>
-						<MenuItem value="on_leave">On Leave</MenuItem>
+						<MenuItem value="">همه</MenuItem>
+						<MenuItem value="active">فعال</MenuItem>
+						<MenuItem value="inactive">غیرفعال</MenuItem>
+						<MenuItem value="on_leave">در مرخصی</MenuItem>
 					</Select>
 				</FormControl>
 
@@ -263,7 +263,7 @@ export function SearchFilterBar({
 							}
 						/>
 					}
-					label="Truck Drivers"
+					label="رانندگان کامیون"
 				/>
 			</Stack>
 
@@ -278,35 +278,33 @@ export function SearchFilterBar({
 					size="small"
 					sx={{ minWidth: { xs: "100%", sm: 160, md: 180 } }}
 				>
-					<InputLabel>Metric</InputLabel>
+					<InputLabel>معیار</InputLabel>
 					<Select
 						value={localPerformanceMetric}
 						onChange={handlePerformanceMetricChange}
-						label="Metric"
+						label="معیار"
 					>
 						<MenuItem value="">
-							<em>Select metric...</em>
+							<em>انتخاب معیار...</em>
 						</MenuItem>
-						<MenuItem value="dailyPerformance">Daily Performance</MenuItem>
+						<MenuItem value="dailyPerformance">عملکرد روزانه</MenuItem>
 						<MenuItem value="shiftCountPerLocation">
-							Shift Count per Location
+							تعداد شیفت در هر مکان
 						</MenuItem>
-						<MenuItem value="shiftDuration">Shift Duration (hours)</MenuItem>
-						<MenuItem value="overtime">Overtime (hours)</MenuItem>
-						<MenuItem value="dailyLeave">Daily Leave</MenuItem>
-						<MenuItem value="sickLeave">Sick Leave</MenuItem>
-						<MenuItem value="absence">Absence</MenuItem>
-						<MenuItem value="travelAssignment">
-							Travel Assignment (days)
-						</MenuItem>
-						<MenuItem value="childrenCount">Children Count</MenuItem>
+						<MenuItem value="shiftDuration">مدت شیفت (ساعت)</MenuItem>
+						<MenuItem value="overtime">اضافه کاری (ساعت)</MenuItem>
+						<MenuItem value="dailyLeave">مرخصی روزانه</MenuItem>
+						<MenuItem value="sickLeave">مرخصی استعلاجی</MenuItem>
+						<MenuItem value="absence">غیبت</MenuItem>
+						<MenuItem value="travelAssignment">ماموریت سفر (روز)</MenuItem>
+						<MenuItem value="childrenCount">تعداد فرزندان</MenuItem>
 					</Select>
 				</FormControl>
 
 				{/* Metric Value Filter */}
 				{localPerformanceMetric && (
 					<TextField
-						label="Value"
+						label="مقدار"
 						type="number"
 						size="small"
 						value={localPerformanceValue}
