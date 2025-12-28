@@ -424,6 +424,7 @@ export default function AdminDashboardPage() {
 										selectedProvince === "all" ||
 										p.province === selectedProvince
 								)
+								.filter((p: any) => p?.data && p.data.length > 0)
 								.map((provinceData: any, idx: number) => (
 									<Card
 										key={idx}
@@ -489,6 +490,7 @@ export default function AdminDashboardPage() {
 											selectedProvince === "all" ||
 											p.province === selectedProvince
 									)
+									.filter((p: any) => p?.data && p.data.length > 0)
 									.map((provinceData: any, idx: number) => (
 										<Card
 											key={idx}
@@ -546,6 +548,9 @@ export default function AdminDashboardPage() {
 													(p: any) =>
 														selectedProvince === "all" ||
 														p.province === selectedProvince
+												)
+												.filter(
+													(p: any) => p?.branches && p.branches.length > 0
 												)
 												.map((provinceData: any, idx: number) => (
 													<Box key={idx} sx={{ mb: 3 }}>
@@ -700,6 +705,7 @@ export default function AdminDashboardPage() {
 											selectedProvince === "all" ||
 											p.province === selectedProvince
 									)
+									.filter((p: any) => p?.data)
 									.map((provinceData: any, idx: number) => (
 										<Card
 											key={idx}
