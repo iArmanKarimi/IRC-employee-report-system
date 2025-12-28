@@ -3,10 +3,6 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import PieChart from "@mui/icons-material/PieChart";
 import BarChart from "@mui/icons-material/BarChart";
 import TrendingUp from "@mui/icons-material/TrendingUp";
@@ -203,24 +199,115 @@ export default function AdminDashboardPage() {
 					))}
 				</Box>
 
-				{/* Province Selector */}
+				{/* Province Selector Grid */}
 				<Box sx={{ mb: 4 }}>
-					<FormControl sx={{ minWidth: 250 }}>
-						<InputLabel>Filter by Province</InputLabel>
-						<Select
-							value={selectedProvince}
-							onChange={(e) => setSelectedProvince(e.target.value)}
-							label="Filter by Province"
+					<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+						📍 Filter by Province
+					</Typography>
+					<Box
+						sx={{
+							display: "grid",
+							gridTemplateColumns: {
+								xs: "repeat(4, minmax(0, 1fr))",
+								sm: "repeat(6, minmax(0, 1fr))",
+								md: "repeat(8, minmax(0, 1fr))",
+								lg: "repeat(10, minmax(0, 1fr))",
+							},
+							gap: 1,
+							mb: 2,
+						}}
+					>
+						{/* All Provinces Button */}
+						<Card
+							onClick={() => setSelectedProvince("all")}
+							sx={{
+								height: "100%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								cursor: "pointer",
+								transition: "all 0.3s ease-in-out",
+								backgroundColor:
+									selectedProvince === "all"
+										? "primary.main"
+										: "background.paper",
+								color: selectedProvince === "all" ? "white" : "inherit",
+								border:
+									selectedProvince === "all" ? "none" : "1px solid #e0e0e0",
+								"&:hover": {
+									transform: "translateY(-4px)",
+									boxShadow: 4,
+									backgroundColor:
+										selectedProvince === "all"
+											? "primary.dark"
+											: "action.hover",
+								},
+							}}
 						>
-							<MenuItem value="all">All Provinces</MenuItem>
-							{stats.employeesByProvince &&
-								stats.employeesByProvince.map((province: any) => (
-									<MenuItem key={province._id} value={province.name}>
+							<Typography sx={{ fontWeight: 600, textAlign: "center", p: 1 }}>
+								All
+							</Typography>
+						</Card>
+
+						{/* Individual Province Cards */}
+						{stats.employeesByProvince &&
+							stats.employeesByProvince.map((province: any) => (
+								<Card
+									key={province._id}
+									onClick={() => setSelectedProvince(province.name)}
+									sx={{
+										height: "100%",
+										display: "flex",
+										flexDirection: "column",
+										alignItems: "center",
+										justifyContent: "center",
+										cursor: "pointer",
+										transition: "all 0.3s ease-in-out",
+										backgroundColor:
+											selectedProvince === province.name
+												? "primary.main"
+												: "background.paper",
+										color:
+											selectedProvince === province.name ? "white" : "inherit",
+										border:
+											selectedProvince === province.name
+												? "none"
+												: "1px solid #e0e0e0",
+										p: 1,
+										textAlign: "center",
+										"&:hover": {
+											transform: "translateY(-4px)",
+											boxShadow: 4,
+											backgroundColor:
+												selectedProvince === province.name
+													? "primary.dark"
+													: "action.hover",
+										},
+									}}
+								>
+									<Typography
+										variant="caption"
+										sx={{
+											fontWeight: 600,
+											fontSize: "0.75rem",
+											overflow: "hidden",
+											textOverflow: "ellipsis",
+											display: "-webkit-box",
+											WebkitLineClamp: 2,
+											WebkitBoxOrient: "vertical",
+										}}
+									>
 										{province.name}
-									</MenuItem>
-								))}
-						</Select>
-					</FormControl>
+									</Typography>
+									<Typography
+										variant="caption"
+										sx={{ fontSize: "0.65rem", mt: 0.5 }}
+									>
+										({province.count})
+									</Typography>
+								</Card>
+							))}
+					</Box>
 				</Box>
 
 				{/* Charts Section - 2 Column Grid */}
