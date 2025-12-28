@@ -64,7 +64,7 @@ export function EditEmployeeDialog({
 	return (
 		<FormDialog
 			open={open}
-			title="Edit Employee"
+			title="ویرایش کارمند"
 			loading={saving}
 			onClose={onClose}
 			onSave={handleSubmit}

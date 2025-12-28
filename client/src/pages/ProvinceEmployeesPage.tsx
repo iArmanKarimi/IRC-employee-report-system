@@ -534,9 +534,9 @@ export default function ProvinceEmployeesPage() {
 	return (
 		<>
 			<NavBar
-				title={`${provinceName} Employees`}
+				title={`کارکنان ${provinceName}`}
 				backTo={isGlobalAdmin ? ROUTES.PROVINCES : undefined}
-				backLabel="Back to Provinces"
+				backLabel="بازگشت به استان‌ها"
 			/>
 			<Container
 				sx={{ py: 2, display: "flex", flexDirection: "column", gap: 2 }}

@@ -79,7 +79,7 @@ export default function Breadcrumbs({
 				separator={
 					<NavigateNextIcon fontSize="small" sx={{ transform: "scaleX(-1)" }} />
 				}
-				aria-label="breadcrumb"
+				aria-label="مسیر صفحات"
 				sx={{
 					"& .MuiBreadcrumbs-li": {
 						display: "flex",

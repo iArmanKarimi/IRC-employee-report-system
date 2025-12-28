@@ -206,7 +206,7 @@ export default function EmployeePage() {
 						color="primary"
 						startIcon={<EditIcon />}
 						onClick={handleEditOpen}
-						aria-label="Edit Employee"
+						aria-label="ویرایش کارمند"
 						size="medium"
 					>
 						ویرایش کارمند
@@ -216,7 +216,7 @@ export default function EmployeePage() {
 						color="error"
 						startIcon={<DeleteIcon />}
 						onClick={() => setDeleteDialogOpen(true)}
-						aria-label="Delete Employee"
+						aria-label="حذف کارمند"
 						size="medium"
 					>
 						حذف کارمند
@@ -402,7 +402,19 @@ export default function EmployeePage() {
 								? ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId)
 								: "/"
 						}
-					startIcon={<ArrowBackIcon sx={{ transform: 'scaleX(-1)' }} />}
+						startIcon={<ArrowBackIcon sx={{ transform: "scaleX(-1)" }} />}
+						disabled={!provinceId}
+						aria-disabled={!provinceId}
+						aria-label={
+							provinceId ? "بازگشت به کارکنان" : "بازگشت در دسترس نیست"
+						}
+					>
+						بازگشت به کارکنان
+					</Button>
+				</Box>
+
+				<EditEmployeeDialog
+					open={editDialogOpen}
 					employee={employee}
 					saving={saving}
 					onClose={() => setEditDialogOpen(false)}

@@ -44,7 +44,7 @@ export function PerformanceDialog({
 	return (
 		<FormDialog
 			open={open}
-			title="Edit Performance"
+			title="ویرایش عملکرد"
 			loading={saving}
 			onClose={onClose}
 			onSave={handleSave}

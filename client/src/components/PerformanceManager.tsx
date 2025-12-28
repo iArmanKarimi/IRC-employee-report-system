@@ -139,8 +139,8 @@ export function PerformanceManager({
 
 			<ConfirmDialog
 				open={deleteDialogOpen}
-				title="Confirm Delete"
-				message="Are you sure you want to delete this performance record? This action cannot be undone."
+				title="تایید حذف"
+				message="آیا مطمئن هستید که می‌خواهید این رکورد عملکرد را حذف کنید؟ این عمل قابل بازگشت نیست."
 				loading={saving}
 				onClose={() => setDeleteDialogOpen(false)}
 				onConfirm={handleDeleteConfirm}

@@ -93,7 +93,7 @@ export default function LoginFormPage() {
 					<form onSubmit={handleSubmit}>
 						<Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
 							<TextField
-								label="Username"
+								label="نام کاربری"
 								type="text"
 								value={username}
 								onChange={(e) => setUsername(e.target.value)}
