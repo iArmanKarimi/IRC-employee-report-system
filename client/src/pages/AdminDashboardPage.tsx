@@ -361,7 +361,7 @@ export default function AdminDashboardPage() {
 									/>
 									Employee Status
 								</Typography>
-							<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+								<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
 									<MuiPieChart>
 										<Pie
 											data={statusData}
@@ -395,7 +395,7 @@ export default function AdminDashboardPage() {
 									/>
 									Gender Distribution
 								</Typography>
-							<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+								<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
 									<MuiPieChart>
 										<Pie
 											data={genderData}
@@ -423,7 +423,11 @@ export default function AdminDashboardPage() {
 					{/* Employees by Province - Full Width */}
 					{provinceData.length > 0 && (
 						<Card
-							sx={{ boxShadow: CARD_SHADOW, p: CARD_PADDING, mb: SECTION_SPACING }}
+							sx={{
+								boxShadow: CARD_SHADOW,
+								p: CARD_PADDING,
+								mb: SECTION_SPACING,
+							}}
 						>
 							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 								<LocationOn
@@ -431,7 +435,7 @@ export default function AdminDashboardPage() {
 								/>
 								Employees by Province
 							</Typography>
-						<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+							<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
 								<MuiBarChart data={provinceData}>
 									<CartesianGrid strokeDasharray="3 3" />
 									<XAxis
@@ -479,7 +483,7 @@ export default function AdminDashboardPage() {
 												/>
 												Absence Overview - {provinceData.province}
 											</Typography>
-										<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+											<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
 												{provinceData?.data && provinceData.data.length > 0 ? (
 													<MuiBarChart data={provinceData.data}>
 														<CartesianGrid strokeDasharray="3 3" />
@@ -537,8 +541,8 @@ export default function AdminDashboardPage() {
 											<Card
 												key={idx}
 												sx={{
-												boxShadow: CARD_SHADOW,
-												p: CARD_PADDING,
+													boxShadow: CARD_SHADOW,
+													p: CARD_PADDING,
 													mb: 3,
 												}}
 											>
@@ -556,7 +560,7 @@ export default function AdminDashboardPage() {
 													Distribution by Rank - {provinceData.province} (Total:{" "}
 													{provinceData.total})
 												</Typography>
-											<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+												<ResponsiveContainer width="100%" height={CHART_HEIGHT}>
 													<MuiBarChart data={provinceData.data}>
 														<CartesianGrid strokeDasharray="3 3" />
 														<XAxis
@@ -579,9 +583,7 @@ export default function AdminDashboardPage() {
 						{selectedProvince !== "all" &&
 							stats.employeeDistribution?.byBranchByProvince &&
 							stats.employeeDistribution?.byBranchByProvince.length > 0 && (
-								<Card
-									sx={{ boxShadow: CARD_SHADOW, p: CARD_PADDING }}
-								>
+								<Card sx={{ boxShadow: CARD_SHADOW, p: CARD_PADDING }}>
 									<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 										<BarChart
 											sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
@@ -647,9 +649,7 @@ export default function AdminDashboardPage() {
 					{/* Performance Metrics - Global and by Province */}
 					<Box sx={{ mb: 4 }}>
 						{/* Global Performance Metrics */}
-						<Card
-							sx={{ boxShadow: CARD_SHADOW, p: CARD_PADDING, mb: 3 }}
-						>
+						<Card sx={{ boxShadow: CARD_SHADOW, p: CARD_PADDING, mb: 3 }}>
 							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 								<TrendingUp
 									sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
