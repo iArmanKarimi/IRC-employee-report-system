@@ -141,20 +141,20 @@ export default function AdminDashboardPage() {
 					name: "No Data",
 					value: stats.employeesByStatus.no_performance || 0,
 				},
-			].filter((item) => item.value > 0)
+		  ].filter((item) => item.value > 0)
 		: [];
 
 	const genderData = stats.employeeDistribution
 		? [
 				{
 					name: "Male",
-					value: stats.employeeDistribution.maleCount || 0,
+					value: stats.employeeDistribution?.maleCount || 0,
 				},
 				{
 					name: "Female",
-					value: stats.employeeDistribution.femaleCount || 0,
+					value: stats.employeeDistribution?.femaleCount || 0,
 				},
-			]
+		  ]
 		: [];
 
 	return (
@@ -504,10 +504,10 @@ export default function AdminDashboardPage() {
 				<Box sx={{ mb: 4 }}>
 					{/* Rank Distribution by Province - Only when specific province selected */}
 					{selectedProvince !== "all" &&
-						stats.employeeDistribution.byRankByProvince &&
-						stats.employeeDistribution.byRankByProvince.length > 0 && (
-							<Box sx={{ mb: 4 }}>
-								{stats.employeeDistribution.byRankByProvince
+						stats.employeeDistribution?.byRankByProvince &&
+						stats.employeeDistribution?.byRankByProvince.length > 0 && (
+						<Box sx={{ mb: 4 }}>
+							{stats.employeeDistribution?.byRankByProvince
 									.filter(
 										(p: any) =>
 											selectedProvince === "all" ||
@@ -555,19 +555,19 @@ export default function AdminDashboardPage() {
 
 					{/* Branch Distribution - Only when specific province selected */}
 					{selectedProvince !== "all" &&
-						stats.employeeDistribution.byBranchByProvince &&
-						stats.employeeDistribution.byBranchByProvince.length > 0 && (
-							<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
-								<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-									<BarChart
-										sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
-									/>
-									Distribution by Branch (by Province)
-								</Typography>
-								{stats.employeeDistribution.byBranchByProvince &&
-									stats.employeeDistribution.byBranchByProvince.length > 0 && (
+						stats.employeeDistribution?.byBranchByProvince &&
+					stats.employeeDistribution?.byBranchByProvince.length > 0 && (
+						<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
+							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+								<BarChart
+									sx={{ mr: 1, verticalAlign: "middle", color: "#FFB3BA" }}
+								/>
+								Distribution by Branch (by Province)
+							</Typography>
+									{stats.employeeDistribution?.byBranchByProvince &&
+										stats.employeeDistribution?.byBranchByProvince.length > 0 && (
 										<Box>
-											{stats.employeeDistribution.byBranchByProvince
+											{stats.employeeDistribution?.byBranchByProvince
 												.filter(
 													(p: any) =>
 														selectedProvince === "all" ||
