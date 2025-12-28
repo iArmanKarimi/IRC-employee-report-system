@@ -30,13 +30,26 @@ interface DashboardStats {
 		name: string;
 		count: number;
 	}>;
-	absenceOverview: Array<{
-		name: string;
-		totalAbsenceHours: number;
-		totalLeaveHours: number;
-		totalOvertimeHours: number;
+	absenceOverviewByProvince: Array<{
+		province: string;
+		data: Array<{
+			name: string;
+			totalAbsenceHours: number;
+			totalLeaveHours: number;
+			totalOvertimeHours: number;
+		}>;
 	}>;
-	performanceMetrics: {
+	performanceMetricsByProvince: Array<{
+		province: string;
+		data: {
+			averageDailyPerformance: number;
+			totalOvertimeHours: number;
+			totalLeaveHours: number;
+			totalAbsenceHours: number;
+			employeeCount: number;
+		};
+	}>;
+	globalPerformanceMetrics: {
 		averageDailyPerformance: number;
 		totalOvertimeHours: number;
 		totalLeaveHours: number;
@@ -47,9 +60,13 @@ interface DashboardStats {
 			degree: string;
 			count: number;
 		}>;
-		byRank: Array<{
-			rank: string;
-			count: number;
+		byRankByProvince: Array<{
+			province: string;
+			total: number;
+			data: Array<{
+				rank: string;
+				count: number;
+			}>;
 		}>;
 		byBranchByProvince: Array<{
 			province: string;
@@ -62,20 +79,6 @@ interface DashboardStats {
 		maleCount: number;
 		femaleCount: number;
 	};
-	recentEmployees: Array<{
-		_id: string;
-		firstName: string;
-		lastName: string;
-		nationalID: string;
-		provinceId: string;
-		provinceName: string;
-		rank: string;
-		branch: string;
-		status: string;
-		dailyPerformance: number;
-		createdAt: Date;
-		performanceUpdatedAt: Date;
-	}>;
 }
 
 /**
@@ -107,8 +110,9 @@ router.get(
 					no_performance: 0,
 				},
 				employeesByProvince: [],
-				absenceOverview: [],
-				performanceMetrics: {
+				absenceOverviewByProvince: [],
+				performanceMetricsByProvince: [],
+				globalPerformanceMetrics: {
 					averageDailyPerformance: 0,
 					totalOvertimeHours: 0,
 					totalLeaveHours: 0,
@@ -116,20 +120,21 @@ router.get(
 				},
 				employeeDistribution: {
 					byEducation: [],
-					byRank: [],
+					byRankByProvince: [],
 					byBranchByProvince: [],
 					truckDriverCount: 0,
 					maleCount: 0,
 					femaleCount: 0,
 				},
-				recentEmployees: [],
 			};
 
 			// Process employees for statistics
 			const provinceMap = new Map<string, number>();
 			const educationMap = new Map<string, number>();
-			const rankMap = new Map<string, number>();
+			const rankByProvinceMap = new Map<string, Map<string, number>>();
 			const branchByProvinceMap = new Map<string, Map<string, number>>();
+			const absenceByProvinceMap = new Map<string, Map<string, { absence: number; leave: number; overtime: number }>>();
+			const performanceByProvinceMap = new Map<string, { totalPerf: number; count: number; totalOT: number; totalLeave: number; totalAbsence: number }>();
 			let totalPerformance = 0;
 			let performanceCount = 0;
 			const currentMonth = new Date().getMonth();
@@ -167,9 +172,14 @@ router.get(
 				const education = emp.additionalSpecifications?.educationalDegree || "Unknown";
 				educationMap.set(education, (educationMap.get(education) || 0) + 1);
 
-				// Rank distribution
+				// Rank distribution by province
 				const rank = emp.workPlace?.rank || "Unknown";
-				rankMap.set(rank, (rankMap.get(rank) || 0) + 1);
+				const provinceIdStr = (emp.provinceId as any)?._id?.toString() || emp.provinceId.toString();
+				if (!rankByProvinceMap.has(provinceIdStr)) {
+					rankByProvinceMap.set(provinceIdStr, new Map());
+				}
+				const rankMapForProvince = rankByProvinceMap.get(provinceIdStr)!;
+				rankMapForProvince.set(rank, (rankMapForProvince.get(rank) || 0) + 1);
 
 				// Branch distribution by province
 				const branch = emp.workPlace?.branch || "Unknown";
@@ -180,13 +190,30 @@ router.get(
 				const branchMapForProvince = branchByProvinceMap.get(provinceId)!;
 				branchMapForProvince.set(branch, (branchMapForProvince.get(branch) || 0) + 1);
 
-				// Performance metrics
+				// Performance metrics by province
 				if (emp.performance) {
 					totalPerformance += emp.performance.dailyPerformance || 0;
 					performanceCount++;
-					stats.performanceMetrics.totalOvertimeHours += emp.performance.overtime || 0;
-					stats.performanceMetrics.totalLeaveHours += emp.performance.dailyLeave || 0;
-					stats.performanceMetrics.totalAbsenceHours += emp.performance.absence || 0;
+					stats.globalPerformanceMetrics.totalOvertimeHours += emp.performance.overtime || 0;
+					stats.globalPerformanceMetrics.totalLeaveHours += emp.performance.dailyLeave || 0;
+					stats.globalPerformanceMetrics.totalAbsenceHours += emp.performance.absence || 0;
+
+					// Track per province
+					if (!performanceByProvinceMap.has(provinceIdStr)) {
+						performanceByProvinceMap.set(provinceIdStr, {
+							totalPerf: 0,
+							count: 0,
+							totalOT: 0,
+							totalLeave: 0,
+							totalAbsence: 0,
+						});
+					}
+					const provData = performanceByProvinceMap.get(provinceIdStr)!;
+					provData.totalPerf += emp.performance.dailyPerformance || 0;
+					provData.count++;
+					provData.totalOT += emp.performance.overtime || 0;
+					provData.totalLeave += emp.performance.dailyLeave || 0;
+					provData.totalAbsence += emp.performance.absence || 0;
 				}
 
 				// Gender distribution
@@ -216,9 +243,20 @@ router.get(
 				.map(([degree, count]) => ({ degree, count }))
 				.sort((a, b) => b.count - a.count);
 
-			stats.employeeDistribution.byRank = Array.from(rankMap.entries())
-				.map(([rank, count]) => ({ rank, count }))
-				.sort((a, b) => b.count - a.count);
+			// Convert rank by province map to array
+			stats.employeeDistribution.byRankByProvince = Array.from(rankByProvinceMap.entries())
+				.map(([provinceId, rankMap]) => {
+					const province = provinces.find((p) => p._id.toString() === provinceId);
+					const rankArray = Array.from(rankMap.entries())
+						.map(([rank, count]) => ({ rank, count }))
+						.sort((a, b) => b.count - a.count);
+					return {
+						province: province?.name || "Unknown",
+						total: rankArray.reduce((sum, r) => sum + r.count, 0),
+						data: rankArray,
+					};
+				})
+				.sort((a, b) => b.total - a.total);
 
 			// Convert branch by province map to array sorted by province
 			stats.employeeDistribution.byBranchByProvince = Array.from(branchByProvinceMap.entries())
@@ -235,56 +273,63 @@ router.get(
 
 			// Calculate average performance
 			if (performanceCount > 0) {
-				stats.performanceMetrics.averageDailyPerformance = Math.round((totalPerformance / performanceCount) * 100) / 100;
+				stats.globalPerformanceMetrics.averageDailyPerformance = Math.round((totalPerformance / performanceCount) * 100) / 100;
 			}
 
-			// Get employees with recently updated performances
-			const recentEmps = employees
-				.filter((emp) => emp.performance) // Only employees with performance data
-				.sort((a, b) => {
-					const dateA = new Date((a.performance as any)?.updatedAt || a.performance?.createdAt || 0).getTime();
-					const dateB = new Date((b.performance as any)?.updatedAt || b.performance?.createdAt || 0).getTime();
-					return dateB - dateA;
+			// Build performance metrics by province
+			stats.performanceMetricsByProvince = Array.from(performanceByProvinceMap.entries())
+				.map(([provinceId, data]) => {
+					const province = provinces.find((p) => p._id.toString() === provinceId);
+					return {
+						province: province?.name || "Unknown",
+						data: {
+							averageDailyPerformance: data.count > 0 ? Math.round((data.totalPerf / data.count) * 100) / 100 : 0,
+							totalOvertimeHours: data.totalOT,
+							totalLeaveHours: data.totalLeave,
+							totalAbsenceHours: data.totalAbsence,
+							employeeCount: data.count,
+						},
+					};
 				})
-				.slice(0, 20);
+				.sort((a, b) => b.data.employeeCount - a.data.employeeCount);
 
-			stats.recentEmployees = recentEmps.map((emp) => ({
-				_id: emp._id.toString(),
-				firstName: emp.basicInfo?.firstName || "",
-				lastName: emp.basicInfo?.lastName || "",
-				nationalID: emp.basicInfo?.nationalID || "",
-				provinceId: (emp.provinceId as any)?._id?.toString() || emp.provinceId.toString(),
-				provinceName: (emp.provinceId as any)?.name || "Unknown",
-				rank: emp.workPlace?.rank || "Unknown",
-				branch: emp.workPlace?.branch || "Unknown",
-				status: emp.performance?.status || "no_data",
-				dailyPerformance: emp.performance?.dailyPerformance || 0,
-				createdAt: emp.createdAt,
-				performanceUpdatedAt: (emp.performance as any)?.updatedAt || emp.performance?.createdAt || new Date(),
-			}));
-
-			// Build absence overview by branch
-			const branchAbsenceMap = new Map<
-				string,
-				{ absence: number; leave: number; overtime: number }
-			>();
+			// Build absence overview by branch and by province
 			employees.forEach((emp) => {
 				const branch = emp.workPlace?.branch || "Unknown";
-				const current = branchAbsenceMap.get(branch) || { absence: 0, leave: 0, overtime: 0 };
+				const provinceIdStr = (emp.provinceId as any)?._id?.toString() || emp.provinceId.toString();
+
+				// Track by province
+				if (!absenceByProvinceMap.has(provinceIdStr)) {
+					absenceByProvinceMap.set(provinceIdStr, new Map());
+				}
+				const provinceAbsenceMap = absenceByProvinceMap.get(provinceIdStr)!;
+				const current = provinceAbsenceMap.get(branch) || { absence: 0, leave: 0, overtime: 0 };
 				current.absence += emp.performance?.absence || 0;
 				current.leave += emp.performance?.dailyLeave || 0;
 				current.overtime += emp.performance?.overtime || 0;
-				branchAbsenceMap.set(branch, current);
+				provinceAbsenceMap.set(branch, current);
 			});
 
-			stats.absenceOverview = Array.from(branchAbsenceMap.entries())
-				.map(([branch, data]) => ({
-					name: branch,
-					totalAbsenceHours: data.absence,
-					totalLeaveHours: data.leave,
-					totalOvertimeHours: data.overtime,
-				}))
-				.sort((a, b) => b.totalAbsenceHours - a.totalAbsenceHours);
+			stats.absenceOverviewByProvince = Array.from(absenceByProvinceMap.entries())
+				.map(([provinceId, branchAbsenceMap]) => {
+					const province = provinces.find((p) => p._id.toString() === provinceId);
+					return {
+						province: province?.name || "Unknown",
+						data: Array.from(branchAbsenceMap.entries())
+							.map(([branch, data]) => ({
+								name: branch,
+								totalAbsenceHours: data.absence,
+								totalLeaveHours: data.leave,
+								totalOvertimeHours: data.overtime,
+							}))
+							.sort((a, b) => b.totalAbsenceHours - a.totalAbsenceHours),
+					};
+				})
+				.sort((a, b) => {
+					const totalA = a.data.reduce((sum, d) => sum + d.totalAbsenceHours, 0);
+					const totalB = b.data.reduce((sum, d) => sum + d.totalAbsenceHours, 0);
+					return totalB - totalA;
+				});
 
 			sendSuccess(res, stats);
 		} catch (err) {

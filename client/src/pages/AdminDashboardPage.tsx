@@ -315,88 +315,89 @@ export default function AdminDashboardPage() {
 					</Card>
 				)}
 
-				{/* Absence Overview - Full Width */}
-				{stats.absenceOverview && stats.absenceOverview.length > 0 && (
-					<Card
-						sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 4 }}
-					>
-						<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-							<BarChart
-								sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
-							/>
-							Absence Overview by Branch
-						</Typography>
-						<ResponsiveContainer width="100%" height={300}>
-							<MuiBarChart data={stats.absenceOverview}>
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis
-									dataKey="name"
-									angle={-45}
-									textAnchor="end"
-									height={80}
+{/* Absence Overview by Province - Full Width */}
+			{stats.absenceOverviewByProvince && stats.absenceOverviewByProvince.length > 0 && (
+				<Box sx={{ mb: 4 }}>
+					{stats.absenceOverviewByProvince.map((provinceData: any, idx: number) => (
+						<Card key={idx} sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 3 }}>
+							<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+								<BarChart
+									sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
 								/>
-								<YAxis />
-								<Tooltip />
-								<Legend />
-								<Bar
-									dataKey="totalAbsenceHours"
-									fill="#FF8042"
-									name="Absence Hours"
-								/>
-								<Bar
-									dataKey="totalLeaveHours"
-									fill="#FFBB28"
-									name="Leave Hours"
-								/>
-								<Bar
-									dataKey="totalOvertimeHours"
-									fill="#00C49F"
-									name="Overtime Hours"
-								/>
-							</MuiBarChart>
-						</ResponsiveContainer>
-					</Card>
+								Absence Overview - {provinceData.province}
+							</Typography>
+							<ResponsiveContainer width="100%" height={300}>
+								<MuiBarChart data={provinceData.data}>
+									<CartesianGrid strokeDasharray="3 3" />
+									<XAxis
+										dataKey="name"
+										angle={-45}
+										textAnchor="end"
+										height={80}
+									/>
+									<YAxis />
+									<Tooltip />
+									<Legend />
+									<Bar
+										dataKey="totalAbsenceHours"
+										fill="#FF8042"
+										name="Absence Hours"
+									/>
+									<Bar
+										dataKey="totalLeaveHours"
+										fill="#FFBB28"
+										name="Leave Hours"
+									/>
+									<Bar
+										dataKey="totalOvertimeHours"
+										fill="#00C49F"
+										name="Overtime Hours"
+									/>
+								</MuiBarChart>
+							</ResponsiveContainer>
+						</Card>
+					))}
+				</Box>
 				)}
 
-				{/* Rank & Branch Distribution Side by Side */}
-				<Box
-					sx={{
-						display: "grid",
-						gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-						gap: 3,
-						mb: 4,
-					}}
-				>
-					{/* Rank Distribution */}
-					{stats.employeeDistribution.byRank &&
-						stats.employeeDistribution.byRank.length > 0 && (
-							<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
-								<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-									<BarChart
-										sx={{ mr: 1, verticalAlign: "middle", color: "#82CA9D" }}
-									/>
-									Distribution by Rank
-								</Typography>
-								<ResponsiveContainer width="100%" height={300}>
-									<MuiBarChart data={stats.employeeDistribution.byRank}>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis
-											dataKey="rank"
-											angle={-45}
-											textAnchor="end"
-											height={80}
-										/>
-										<YAxis />
-										<Tooltip />
-										<Bar dataKey="count" fill="#82CA9D" />
-									</MuiBarChart>
-								</ResponsiveContainer>
-							</Card>
-						)}
+{/* Rank & Branch Distribution by Province */}
+			<Box sx={{ mb: 4 }}>
+				{/* Rank Distribution by Province */}
+				{stats.employeeDistribution.byRankByProvince &&
+					stats.employeeDistribution.byRankByProvince.length > 0 && (
+						<Box sx={{ mb: 4 }}>
+							{stats.employeeDistribution.byRankByProvince.map(
+								(provinceData: any, idx: number) => (
+									<Card key={idx} sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 3 }}>
+										<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+											<BarChart
+												sx={{ mr: 1, verticalAlign: "middle", color: "#82CA9D" }}
+											/>
+											Distribution by Rank - {provinceData.province} (Total: {provinceData.total})
+										</Typography>
+										<ResponsiveContainer width="100%" height={300}>
+											<MuiBarChart data={provinceData.data}>
+												<CartesianGrid strokeDasharray="3 3" />
+												<XAxis
+													dataKey="rank"
+													angle={-45}
+													textAnchor="end"
+													height={80}
+												/>
+												<YAxis />
+												<Tooltip />
+												<Bar dataKey="count" fill="#82CA9D" />
+											</MuiBarChart>
+										</ResponsiveContainer>
+									</Card>
+								)
+							)}
+						</Box>
+					)}
 
-					{/* Branch Distribution */}
-					{stats.employeeDistribution.byBranch &&
-						stats.employeeDistribution.byBranch.length > 0 && (
+				{/* Branch Distribution */}
+				{stats.employeeDistribution.byBranchByProvince &&
+					stats.employeeDistribution.byBranchByProvince.length > 0 && (
 							<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
 								<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 									<BarChart
@@ -448,13 +449,15 @@ export default function AdminDashboardPage() {
 						)}
 				</Box>
 
-				{/* Performance Metrics */}
-				<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 4 }}>
+{/* Performance Metrics - Global and by Province */}
+			<Box sx={{ mb: 4 }}>
+				{/* Global Performance Metrics */}
+				<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 3 }}>
 					<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 						<TrendingUp
 							sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
 						/>
-						Performance Metrics
+						Global Performance Metrics
 					</Typography>
 					<Box
 						sx={{
@@ -480,7 +483,7 @@ export default function AdminDashboardPage() {
 								variant="h6"
 								sx={{ fontWeight: 700, color: "#0088FE" }}
 							>
-								{stats.performanceMetrics.averageDailyPerformance.toFixed(2)}
+								{stats.globalPerformanceMetrics.averageDailyPerformance.toFixed(2)}
 							</Typography>
 						</Box>
 						<Box
@@ -500,7 +503,7 @@ export default function AdminDashboardPage() {
 								variant="h6"
 								sx={{ fontWeight: 700, color: "#00C49F" }}
 							>
-								{stats.performanceMetrics.totalOvertimeHours}
+								{stats.globalPerformanceMetrics.totalOvertimeHours}
 							</Typography>
 						</Box>
 						<Box
@@ -520,7 +523,7 @@ export default function AdminDashboardPage() {
 								variant="h6"
 								sx={{ fontWeight: 700, color: "#FFBB28" }}
 							>
-								{stats.performanceMetrics.totalLeaveHours}
+								{stats.globalPerformanceMetrics.totalLeaveHours}
 							</Typography>
 						</Box>
 						<Box
@@ -540,107 +543,118 @@ export default function AdminDashboardPage() {
 								variant="h6"
 								sx={{ fontWeight: 700, color: "#FF8042" }}
 							>
-								{stats.performanceMetrics.totalAbsenceHours}
+								{stats.globalPerformanceMetrics.totalAbsenceHours}
 							</Typography>
 						</Box>
 					</Box>
 				</Card>
 
-				{/* Recently Edited Employee Performances Table */}
-				{stats.recentEmployees && stats.recentEmployees.length > 0 && (
-					<Card sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2 }}>
-						<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-							📊 Recently Edited Employee Performances
-						</Typography>
-						<Box
-							sx={{
-								overflowX: "auto",
-								"& table": {
-									width: "100%",
-									borderCollapse: "collapse",
-									fontSize: "14px",
-								},
-								"& th": {
-									padding: "12px",
-									textAlign: "left",
-									fontWeight: 600,
-									backgroundColor: "#f5f5f5",
-									borderBottom: "2px solid #e0e0e0",
-								},
-								"& td": {
-									padding: "12px",
-									borderBottom: "1px solid #f0f0f0",
-								},
-								"& tbody tr:hover": {
-									backgroundColor: "#f5f5f5",
-								},
-							}}
-						>
-							<table>
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>National ID</th>
-										<th>Province</th>
-										<th>Rank</th>
-										<th>Branch</th>
-										<th>Status</th>
-										<th>Performance</th>
-										<th>Last Updated</th>
-									</tr>
-								</thead>
-								<tbody>
-									{stats.recentEmployees.map((emp: any, index: number) => (
-										<tr
-											key={emp._id}
-											style={{
-												backgroundColor: index % 2 === 0 ? "#fafafa" : "white",
-											}}
+				{/* Performance Metrics by Province */}
+				{stats.performanceMetricsByProvince && stats.performanceMetricsByProvince.length > 0 && (
+					<Box>
+						{stats.performanceMetricsByProvince.map((provinceData: any, idx: number) => (
+							<Card key={idx} sx={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", p: 2, mb: 3 }}>
+								<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+									<TrendingUp
+										sx={{ mr: 1, verticalAlign: "middle", color: "#8884d8" }}
+									/>
+									Performance Metrics - {provinceData.province} ({provinceData.data.employeeCount} employees)
+								</Typography>
+								<Box
+									sx={{
+										display: "grid",
+										gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+										gap: 2,
+									}}
+								>
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "space-between",
+											alignItems: "center",
+											padding: 2,
+											backgroundColor: "#f5f5f5",
+											borderRadius: 1,
+										}}
+									>
+										<Typography variant="body2" sx={{ fontWeight: 500 }}>
+											Avg Daily Performance:
+										</Typography>
+										<Typography
+											variant="h6"
+											sx={{ fontWeight: 700, color: "#0088FE" }}
 										>
-											<td>
-												{emp.firstName} {emp.lastName}
-											</td>
-											<td>{emp.nationalID}</td>
-											<td>{emp.provinceName}</td>
-											<td>{emp.rank}</td>
-											<td>{emp.branch}</td>
-											<td>
-												<span
-													style={{
-														padding: "4px 8px",
-														borderRadius: "4px",
-														backgroundColor:
-															emp.status === "active"
-																? "#e8f5e9"
-																: emp.status === "on_leave"
-																? "#fff3e0"
-																: "#ffebee",
-														color:
-															emp.status === "active"
-																? "#2e7d32"
-																: emp.status === "on_leave"
-																? "#e65100"
-																: "#c62828",
-														fontWeight: 500,
-													}}
-												>
-													{emp.status}
-												</span>
-											</td>
-											<td>{emp.dailyPerformance.toFixed(2)}</td>
-											<td>
-												{new Date(
-													emp.performanceUpdatedAt
-												).toLocaleDateString()}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</Box>
-					</Card>
+											{provinceData.data.averageDailyPerformance.toFixed(2)}
+										</Typography>
+									</Box>
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "space-between",
+											alignItems: "center",
+											padding: 2,
+											backgroundColor: "#f5f5f5",
+											borderRadius: 1,
+										}}
+									>
+										<Typography variant="body2" sx={{ fontWeight: 500 }}>
+											Total Overtime Hours:
+										</Typography>
+										<Typography
+											variant="h6"
+											sx={{ fontWeight: 700, color: "#00C49F" }}
+										>
+											{provinceData.data.totalOvertimeHours}
+										</Typography>
+									</Box>
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "space-between",
+											alignItems: "center",
+											padding: 2,
+											backgroundColor: "#f5f5f5",
+											borderRadius: 1,
+										}}
+									>
+										<Typography variant="body2" sx={{ fontWeight: 500 }}>
+											Total Leave Hours:
+										</Typography>
+										<Typography
+											variant="h6"
+											sx={{ fontWeight: 700, color: "#FFBB28" }}
+										>
+											{provinceData.data.totalLeaveHours}
+										</Typography>
+									</Box>
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "space-between",
+											alignItems: "center",
+											padding: 2,
+											backgroundColor: "#f5f5f5",
+											borderRadius: 1,
+										}}
+									>
+										<Typography variant="body2" sx={{ fontWeight: 500 }}>
+											Total Absence Hours:
+										</Typography>
+										<Typography
+											variant="h6"
+											sx={{ fontWeight: 700, color: "#FF8042" }}
+										>
+											{provinceData.data.totalAbsenceHours}
+										</Typography>
+									</Box>
+								</Box>
+							</Card>
+						))}
+					</Box>
 				)}
-			</Container>
-		</Box>
+			</Box>
+
+		</Container>
+	</Box>
 	);
 }
