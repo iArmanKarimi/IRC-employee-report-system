@@ -8,6 +8,22 @@ import { FormDialog } from "./FormDialog";
 import Box from "@mui/material/Box";
 import type { IEmployee, UpdateEmployeeInput } from "../../types/models";
 
+/**
+ * Safely format a date value for the date input field
+ * Returns empty string if the date is invalid
+ */
+function formatDateForInput(dateValue: any): string {
+	if (!dateValue) return "";
+	try {
+		const date = new Date(dateValue);
+		// Check if date is valid
+		if (isNaN(date.getTime())) return "";
+		return date.toISOString().split("T")[0];
+	} catch {
+		return "";
+	}
+}
+
 interface EditEmployeeDialogProps {
 	open: boolean;
 	employee: IEmployee;
@@ -187,13 +203,9 @@ export function EditEmployeeDialog({
 					<TextField
 						label="Date of Birth"
 						type="date"
-						value={
+						value={formatDateForInput(
 							formData.additionalSpecifications?.dateOfBirth
-								? new Date(formData.additionalSpecifications.dateOfBirth)
-										.toISOString()
-										.split("T")[0]
-								: ""
-						}
+						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.dateOfBirth",
@@ -237,13 +249,9 @@ export function EditEmployeeDialog({
 					<TextField
 						label="Job Start Date"
 						type="date"
-						value={
+						value={formatDateForInput(
 							formData.additionalSpecifications?.jobStartDate
-								? new Date(formData.additionalSpecifications.jobStartDate)
-										.toISOString()
-										.split("T")[0]
-								: ""
-						}
+						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.jobStartDate",
@@ -257,13 +265,9 @@ export function EditEmployeeDialog({
 					<TextField
 						label="Job End Date"
 						type="date"
-						value={
+						value={formatDateForInput(
 							formData.additionalSpecifications?.jobEndDate
-								? new Date(formData.additionalSpecifications.jobEndDate)
-										.toISOString()
-										.split("T")[0]
-								: ""
-						}
+						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.jobEndDate",
