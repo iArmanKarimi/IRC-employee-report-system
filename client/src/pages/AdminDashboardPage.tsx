@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
 	}
 
 	if (!stats) {
-		return <ErrorView message="No data available" />;
+		return <ErrorView message="داده‌ای در دسترس نیست" />;
 	}
 
 	const statCards: StatCard[] = [
@@ -675,7 +675,7 @@ export default function AdminDashboardPage() {
 									}}
 								>
 									<Typography variant="body2" sx={{ fontWeight: 500 }}>
-										Avg Daily Performance:
+										میانگین عملکرد روزانه:
 									</Typography>
 									<Typography
 										variant="h6"
@@ -697,7 +697,7 @@ export default function AdminDashboardPage() {
 									}}
 								>
 									<Typography variant="body2" sx={{ fontWeight: 500 }}>
-										Total Overtime Hours:
+										کل ساعات اضافه کاری:
 									</Typography>
 									<Typography
 										variant="h6"
@@ -717,7 +717,7 @@ export default function AdminDashboardPage() {
 									}}
 								>
 									<Typography variant="body2" sx={{ fontWeight: 500 }}>
-										Total Leave Hours:
+										کل ساعات مرخصی:
 									</Typography>
 									<Typography
 										variant="h6"
@@ -737,7 +737,7 @@ export default function AdminDashboardPage() {
 									}}
 								>
 									<Typography variant="body2" sx={{ fontWeight: 500 }}>
-										Total Absence Hours:
+										کل ساعات غیبت:
 									</Typography>
 									<Typography
 										variant="h6"
@@ -808,7 +808,7 @@ export default function AdminDashboardPage() {
 															variant="body2"
 															sx={{ fontWeight: 500 }}
 														>
-															Avg Daily Performance:
+															میانگین عملکرد روزانه:
 														</Typography>
 														<Typography
 															variant="h6"
@@ -833,7 +833,7 @@ export default function AdminDashboardPage() {
 															variant="body2"
 															sx={{ fontWeight: 500 }}
 														>
-															Total Overtime Hours:
+															کل ساعات اضافه کاری:
 														</Typography>
 														<Typography
 															variant="h6"
@@ -856,7 +856,7 @@ export default function AdminDashboardPage() {
 															variant="body2"
 															sx={{ fontWeight: 500 }}
 														>
-															Total Leave Hours:
+															کل ساعات مرخصی:
 														</Typography>
 														<Typography
 															variant="h6"
@@ -879,7 +879,7 @@ export default function AdminDashboardPage() {
 															variant="body2"
 															sx={{ fontWeight: 500 }}
 														>
-															Total Absence Hours:
+															کل ساعات غیبت:
 														</Typography>
 														<Typography
 															variant="h6"

@@ -95,7 +95,7 @@ export function PerformanceManager({
 						}}
 					>
 						<Typography variant="h6" sx={{ m: 0 }}>
-							Performance Records
+							سوابق عملکرد
 						</Typography>
 						<Button
 							variant="contained"
@@ -104,12 +104,12 @@ export function PerformanceManager({
 							onClick={handleAddClick}
 							sx={{ whiteSpace: "nowrap" }}
 						>
-							Add Performance
+							افزودن عملکرد
 						</Button>
 					</Box>
 					{performances.length === 0 ? (
 						<Typography color="text.secondary">
-							No performance records yet.
+							هنوز سابقه عملکردی ثبت نشده است.
 						</Typography>
 					) : (
 						<Stack spacing={1.5}>

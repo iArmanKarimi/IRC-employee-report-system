@@ -24,10 +24,10 @@ type NavBarProps = {
 };
 
 export default function NavBar({
-	title = "IRC Staff System",
+	title = "سیستم مدیریت کارکنان IRC",
 	showLogout = true,
 	backTo,
-	backLabel = "Back",
+	backLabel = "بازگشت",
 }: NavBarProps) {
 	const navigate = useNavigate();
 	const location = useLocation();

@@ -253,9 +253,9 @@ export default function ProvinceEmployeesPage() {
 			window.URL.revokeObjectURL(url);
 
 			setToastMessage(
-				`✅ Successfully exported ${
+				`✅ خروجی ${
 					pagination?.total || employees.length
-				} employee(s)`
+				} کارمند با موفقیت انجام شد`
 			);
 			setToastSeverity("success");
 			setToastOpen(true);
@@ -343,7 +343,7 @@ export default function ProvinceEmployeesPage() {
 								color: "inherit",
 							}}
 						>
-							Performance Summary
+							خلاصه عملکرد
 						</Typography>
 						<Divider sx={{ mb: 2, opacity: 0.5 }} />
 						<Stack spacing={1.5}>
@@ -355,7 +355,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Status
+									وضعیت
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.status?.replace("_", " ").toUpperCase()}
@@ -369,7 +369,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Daily Performance
+									عملکرد روزانه
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.dailyPerformance}
@@ -383,7 +383,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Shift Duration
+									مدت شیفت
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.shiftDuration}h
@@ -397,7 +397,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Overtime
+									اضافه کاری
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.overtime}h
@@ -411,7 +411,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Daily Leave
+									مرخصی روزانه
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.dailyLeave}
@@ -425,7 +425,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Sick Leave
+									مرخصی استعلاجی
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.sickLeave}
@@ -439,7 +439,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Absence
+									غیبت
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.absence}
@@ -453,7 +453,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Travel Assignment
+									ماموریت سفر
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.travelAssignment}d
@@ -467,7 +467,7 @@ export default function ProvinceEmployeesPage() {
 								}}
 							>
 								<Typography variant="caption" sx={{ flex: 1 }}>
-									Shift Count/Location
+									تعداد شیفت/مکان
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
 									{perf.shiftCountPerLocation}
@@ -476,7 +476,7 @@ export default function ProvinceEmployeesPage() {
 						</Stack>
 					</Box>
 				) : (
-					<Typography variant="caption">No performance data</Typography>
+					<Typography variant="caption">بدون داده عملکرد</Typography>
 				);
 				return (
 					<Tooltip
@@ -543,8 +543,8 @@ export default function ProvinceEmployeesPage() {
 			>
 				{settings?.performanceLocked && (
 					<Alert severity="warning" icon={<LockIcon />}>
-						Performance editing is currently locked. Employees cannot modify
-						their performance records.
+						ویرایش عملکرد در حال حاضر قفل شده است. کارمندان نمی‌توانند سوابق
+						عملکرد خود را تغییر دهند.
 					</Alert>
 				)}
 

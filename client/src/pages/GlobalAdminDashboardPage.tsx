@@ -373,7 +373,7 @@ export default function GlobalAdminDashboardPage() {
 								</Box>
 								<CardContent sx={{ flexGrow: 1, width: "100%", py: 1, px: 1 }}>
 									<Typography variant="body2" component="div" noWrap>
-										{province.name ?? "Unnamed"}
+										{province.name ?? "بدون نام"}
 									</Typography>
 								</CardContent>
 							</CardActionArea>

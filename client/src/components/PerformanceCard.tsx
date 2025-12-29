@@ -28,7 +28,7 @@ export function PerformanceCard({
 					sx={{ display: "flex", alignItems: "center", width: "100%", gap: 2 }}
 				>
 					<Typography sx={{ flex: 1, fontWeight: "medium" }}>
-						Performance Record
+						سابقه عملکرد
 					</Typography>
 					<Box
 						sx={{ display: "flex", gap: 1 }}
@@ -47,7 +47,7 @@ export function PerformanceCard({
 				<Stack spacing={1.5}>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Daily Performance:
+							عملکرد روزانه:
 						</Typography>
 						<Typography variant="body2">
 							{performance.dailyPerformance}
@@ -55,7 +55,7 @@ export function PerformanceCard({
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Shift Count per Location:
+							تعداد شیفت در هر مکان:
 						</Typography>
 						<Typography variant="body2">
 							{performance.shiftCountPerLocation}
@@ -63,60 +63,49 @@ export function PerformanceCard({
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Shift Duration:
+							مدت شیفت:
 						</Typography>
 						<Typography variant="body2">
-							{performance.shiftDuration} hours
+							{performance.shiftDuration} ساعت
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Overtime:
+							اضافه کاری:
 						</Typography>
-						<Typography variant="body2">
-							{performance.overtime} hours
-						</Typography>
+						<Typography variant="body2">{performance.overtime} ساعت</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Daily Leave:
+							مرخصی روزانه:
 						</Typography>
 						<Typography variant="body2">{performance.dailyLeave}</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Sick Leave:
+							مرخصی استعلاجی:
 						</Typography>
 						<Typography variant="body2">{performance.sickLeave}</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
-							Absence:
+							غیبت:
 						</Typography>
 						<Typography variant="body2">{performance.absence}</Typography>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
 						<Typography variant="body2" color="text.secondary">
 							{" "}
-							Travel Assignment:
+							ماموریت سفر:
 						</Typography>
 						<Typography variant="body2">
-							{performance.travelAssignment} days
-						</Typography>
-					</Box>
-					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-						<Typography variant="body2" color="text.secondary">
-							{" "}
-							Travel Assignment:
-						</Typography>
-						<Typography variant="body2">
-							{performance.travelAssignment} days
+							{performance.travelAssignment} روز
 						</Typography>
 					</Box>
 					{performance.notes && (
 						<Box sx={{ mt: 1 }}>
 							<Typography variant="body2" color="text.secondary" gutterBottom>
-								Notes:
+								یادداشت‌ها:
 							</Typography>
 							<Typography variant="body2">{performance.notes}</Typography>
 						</Box>

@@ -29,13 +29,13 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 	return (
 		<Accordion defaultExpanded={index === 0}>
 			<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-				<Typography fontWeight="bold">{`Performance #${index + 1}`}</Typography>
+				<Typography fontWeight="bold">{`عملکرد #${index + 1}`}</Typography>
 			</AccordionSummary>
 			<AccordionDetails>
 				<Stack spacing={2.5} sx={{ mt: 1 }}>
 					<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
 						<TextField
-							label="Daily Performance"
+							label="عملکرد روزانه"
 							type="number"
 							required
 							inputProps={{ min: 0 }}
@@ -46,7 +46,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							}
 						/>
 						<TextField
-							label="Shift Count per Location"
+							label="تعداد شیفت در هر مکان"
 							type="number"
 							required
 							inputProps={{ min: 0 }}
@@ -62,21 +62,21 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 							required
 						>
-							<InputLabel>Shift Duration</InputLabel>
+							<InputLabel>مدت شیفت</InputLabel>
 							<Select
 								value={performance.shiftDuration}
-								label="Shift Duration"
+								label="مدت شیفت"
 								onChange={(e) =>
 									onChange("shiftDuration", Number(e.target.value))
 								}
 							>
-								<MenuItem value={8}>8 hours</MenuItem>
-								<MenuItem value={16}>16 hours</MenuItem>
-								<MenuItem value={24}>24 hours</MenuItem>
+								<MenuItem value={8}>8 ساعت</MenuItem>
+								<MenuItem value={16}>16 ساعت</MenuItem>
+								<MenuItem value={24}>24 ساعت</MenuItem>
 							</Select>
 						</FormControl>
 						<TextField
-							label="Overtime"
+							label="اضافه کاری"
 							type="number"
 							inputProps={{ min: 0 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
@@ -86,7 +86,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 					</Box>
 					<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
 						<TextField
-							label="Daily Leave"
+							label="مرخصی روزانه"
 							type="number"
 							inputProps={{ min: 0 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
@@ -94,7 +94,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							onChange={(e) => onChange("dailyLeave", Number(e.target.value))}
 						/>
 						<TextField
-							label="Sick Leave"
+							label="مرخصی استعلاجی"
 							type="number"
 							inputProps={{ min: 0 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
@@ -104,7 +104,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 					</Box>
 					<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
 						<TextField
-							label="Absence"
+							label="غیبت"
 							type="number"
 							inputProps={{ min: 0 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
@@ -112,7 +112,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							onChange={(e) => onChange("absence", Number(e.target.value))}
 						/>
 						<TextField
-							label="Travel Assignment (days)"
+							label="ماموریت سفر (روز)"
 							type="number"
 							inputProps={{ min: 0, max: 31 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
@@ -123,19 +123,19 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 						/>
 					</Box>
 					<FormControl fullWidth>
-						<InputLabel>Status</InputLabel>
+						<InputLabel>وضعیت</InputLabel>
 						<Select
 							value={performance.status || "active"}
-							label="Status"
+							label="وضعیت"
 							onChange={(e) => onChange("status", e.target.value)}
 						>
-							<MenuItem value="active">Active</MenuItem>
-							<MenuItem value="inactive">Inactive</MenuItem>
-							<MenuItem value="on_leave">On Leave</MenuItem>
+							<MenuItem value="active">فعال</MenuItem>
+							<MenuItem value="inactive">غیرفعال</MenuItem>
+							<MenuItem value="on_leave">در مرخصی</MenuItem>
 						</Select>
 					</FormControl>
 					<TextField
-						label="Notes"
+						label="یادداشت‌ها"
 						multiline
 						rows={2}
 						value={performance.notes || ""}

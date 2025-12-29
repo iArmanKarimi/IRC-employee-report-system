@@ -94,7 +94,7 @@ export default function NewEmployeeFormPage() {
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		if (!provinceId) {
-			setError("Province ID is missing");
+			setError("شناسه استان موجود نیست");
 			return;
 		}
 		setLoading(true);

@@ -123,16 +123,14 @@ export default function EmployeePage() {
 			if (!res.success || !res.data) {
 				setSaveError(
 					res.error ||
-						errorMsg +
-							". Please try again or contact support if the issue persists."
+						"به‌روزرسانی عملکرد با خطا مواجه شد. لطفا دوباره تلاش کنید یا در صورت ادامه مشکل با پشتیبانی تماس بگیرید."
 				);
 				return;
 			}
 			await refetch();
 		} catch (err) {
 			setSaveError(
-				errorMsg +
-					". Please try again or contact support if the issue persists."
+				"به‌روزرسانی عملکرد با خطا مواجه شد. لطفا دوباره تلاش کنید یا در صورت ادامه مشکل با پشتیبانی تماس بگیرید."
 			);
 		} finally {
 			setSaving(false);

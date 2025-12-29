@@ -53,13 +53,13 @@ export function PerformanceDialog({
 			<Stack spacing={2}>
 				{performanceLocked && (
 					<Alert severity="error" icon={<LockIcon />}>
-						Performance editing is currently locked by a global administrator.
-						You cannot make changes at this time.
+						ویرایش عملکرد در حال حاضر توسط مدیر کل قفل شده است. شما نمی‌توانید
+						در این زمان تغییراتی ایجاد کنید.
 					</Alert>
 				)}
 				<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<TextField
-						label="Daily Performance"
+						label="عملکرد روزانه"
 						type="number"
 						required
 						inputProps={{ min: 0 }}
@@ -70,7 +70,7 @@ export function PerformanceDialog({
 						}
 					/>
 					<TextField
-						label="Shift Count per Location"
+						label="تعداد شیفت در هر مکان"
 						type="number"
 						required
 						inputProps={{ min: 0 }}
@@ -86,20 +86,20 @@ export function PerformanceDialog({
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 						required
 					>
-						<InputLabel>Shift Duration</InputLabel>
+						<InputLabel>مدت شیفت</InputLabel>
 						<Select
 							value={formData.shiftDuration}
-							label="Shift Duration"
+							label="مدت شیفت"
 							onChange={(e) =>
 								handleFieldChange("shiftDuration", Number(e.target.value))
 							}
 						>
-							<MenuItem value={8}>8 hours</MenuItem>
-							<MenuItem value={12}>12 hours</MenuItem>
+							<MenuItem value={8}>8 ساعت</MenuItem>
+							<MenuItem value={12}>12 ساعت</MenuItem>
 						</Select>
 					</FormControl>
 					<TextField
-						label="Overtime (hours)"
+						label="اضافه کاری (ساعت)"
 						type="number"
 						inputProps={{ min: 0 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
@@ -111,7 +111,7 @@ export function PerformanceDialog({
 				</Box>
 				<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<TextField
-						label="Daily Leave"
+						label="مرخصی روزانه"
 						type="number"
 						inputProps={{ min: 0 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
@@ -121,7 +121,7 @@ export function PerformanceDialog({
 						}
 					/>
 					<TextField
-						label="Sick Leave"
+						label="مرخصی استعلاجی"
 						type="number"
 						inputProps={{ min: 0 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
@@ -133,7 +133,7 @@ export function PerformanceDialog({
 				</Box>
 				<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<TextField
-						label="Absence"
+						label="غیبت"
 						type="number"
 						inputProps={{ min: 0 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
@@ -143,7 +143,7 @@ export function PerformanceDialog({
 						}
 					/>
 					<TextField
-						label="Travel Assignment (days)"
+						label="ماموریت سفر (روز)"
 						type="number"
 						inputProps={{ min: 0, max: 31 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
@@ -154,7 +154,7 @@ export function PerformanceDialog({
 					/>
 				</Box>
 				<TextField
-					label="Notes"
+					label="یادداشت‌ها"
 					multiline
 					rows={3}
 					value={formData.notes}
