@@ -24,7 +24,7 @@ type NavBarProps = {
 };
 
 export default function NavBar({
-	title = "سیستم مدیریت کارکنان IRC",
+	title = "سیستم مدیریت کارکنان جمعیت هلال احمر ایران",
 	showLogout = true,
 	backTo,
 	backLabel = "بازگشت",

@@ -87,7 +87,7 @@ export default function LoginFormPage() {
 						align="center"
 						sx={{ mb: 3 }}
 					>
-						سیستم مدیریت کارکنان IRC
+						سیستم مدیریت کارکنان جمعیت هلال احمر ایران
 					</Typography>
 
 					<form onSubmit={handleSubmit}>
