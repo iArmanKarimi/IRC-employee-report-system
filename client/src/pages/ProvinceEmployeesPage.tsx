@@ -273,6 +273,20 @@ export default function ProvinceEmployeesPage() {
 	// DataGrid columns definition
 	const columns: GridColDef[] = [
 		{
+			field: "index",
+			headerName: "#",
+			width: 70,
+			align: "center",
+			headerAlign: "center",
+			sortable: false,
+			renderCell: (params) => {
+				const rowIndex = filteredEmployees.findIndex(
+					(emp) => emp._id === params.row._id
+				);
+				return rowIndex + 1 + page * limit;
+			},
+		},
+		{
 			field: "fullName",
 			headerName: "نام کامل",
 			flex: 1,
