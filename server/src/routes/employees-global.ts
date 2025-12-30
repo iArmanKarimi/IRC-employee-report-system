@@ -27,46 +27,46 @@ const formatDate = (date: Date | string | undefined): string => {
 // Helper function to prepare Excel export data
 const prepareEmployeesExcel = async (employees: any[]) => {
 	const workbook = new ExcelJS.Workbook();
-	const worksheet = workbook.addWorksheet("Employees");
+	const worksheet = workbook.addWorksheet("کارمندان");
 
 	// Create a single complete sheet with all employee data (no _id, no meta fields)
 	const completeData = employees.map((emp) => ({
-		// Basic Info
-		"First Name": emp.basicInfo?.firstName || "-",
-		"Last Name": emp.basicInfo?.lastName || "-",
-		"National ID": emp.basicInfo?.nationalID || "-",
-		Gender: emp.basicInfo?.male ? "Male" : "Female",
-		Married: emp.basicInfo?.married ? "Yes" : "No",
-		"Children Count": emp.basicInfo?.childrenCount ?? "-",
+		// Basic Info - اطلاعات پایه
+		"نام": emp.basicInfo?.firstName || "-",
+		"نام خانوادگی": emp.basicInfo?.lastName || "-",
+		"کد ملی": emp.basicInfo?.nationalID || "-",
+		"جنسیت": emp.basicInfo?.male ? "مرد" : "زن",
+		"متأهل": emp.basicInfo?.married ? "بله" : "خیر",
+		"تعداد فرزندان": emp.basicInfo?.childrenCount ?? "-",
 
-		// Work Place
-		Branch: emp.workPlace?.branch || "-",
-		Rank: emp.workPlace?.rank || "-",
-		"Licensed Workplace": emp.workPlace?.licensedWorkplace || "-",
+		// Work Place - اطلاعات محل کار
+		"شعبه": emp.workPlace?.branch || "-",
+		"رتبه / سمت": emp.workPlace?.rank || "-",
+		"محل کار مجاز": emp.workPlace?.licensedWorkplace || "-",
 
-		// Additional Specifications
-		"Educational Degree": emp.additionalSpecifications?.educationalDegree || "-",
-		"Date of Birth": formatDate(emp.additionalSpecifications?.dateOfBirth),
-		"Contact Number": emp.additionalSpecifications?.contactNumber || "-",
-		"Job Start Date": formatDate(emp.additionalSpecifications?.jobStartDate),
-		"Job End Date": emp.additionalSpecifications?.jobEndDate
+		// Additional Specifications - مشخصات اضافی
+		"مدرک تحصیلی": emp.additionalSpecifications?.educationalDegree || "-",
+		"تاریخ تولد": formatDate(emp.additionalSpecifications?.dateOfBirth),
+		"شماره تماس": emp.additionalSpecifications?.contactNumber || "-",
+		"تاریخ شروع کار": formatDate(emp.additionalSpecifications?.jobStartDate),
+		"تاریخ پایان کار": emp.additionalSpecifications?.jobEndDate
 			? formatDate(emp.additionalSpecifications.jobEndDate)
 			: "-",
-		"Truck Driver": emp.additionalSpecifications?.truckDriver ? "Yes" : "No",
+		"راننده کامیون": emp.additionalSpecifications?.truckDriver ? "بله" : "خیر",
 
-		// Performance
-		"Daily Performance": emp.performance?.dailyPerformance ?? "-",
-		"Shift Count Per Location": emp.performance?.shiftCountPerLocation ?? "-",
-		"Shift Duration": emp.performance?.shiftDuration
-			? `${emp.performance.shiftDuration} hours`
+		// Performance - عملکرد
+		"عملکرد روزانه": emp.performance?.dailyPerformance ?? "-",
+		"تعداد شیفت در هر محل": emp.performance?.shiftCountPerLocation ?? "-",
+		"مدت شیفت": emp.performance?.shiftDuration
+			? `${emp.performance.shiftDuration} ساعت`
 			: "-",
-		Overtime: emp.performance?.overtime ?? "-",
-		"Daily Leave": emp.performance?.dailyLeave ?? "-",
-		"Sick Leave": emp.performance?.sickLeave ?? "-",
-		Absence: emp.performance?.absence ?? "-",
-		"Travel Assignment": emp.performance?.travelAssignment ?? "-",
-		Status: emp.performance?.status?.toUpperCase() ?? "-",
-		Notes: emp.performance?.notes || "-",
+		"اضافه‌کاری": emp.performance?.overtime ?? "-",
+		"مرخصی روزانه": emp.performance?.dailyLeave ?? "-",
+		"مرخصی استعلاجی": emp.performance?.sickLeave ?? "-",
+		"غیبت": emp.performance?.absence ?? "-",
+		"ماموریت سفر": emp.performance?.travelAssignment ?? "-",
+		"وضعیت": emp.performance?.status === "active" ? "فعال" : emp.performance?.status === "inactive" ? "غیرفعال" : emp.performance?.status === "on_leave" ? "در مرخصی" : emp.performance?.status?.toUpperCase() ?? "-",
+		"یادداشت‌ها": emp.performance?.notes || "-",
 	}));
 
 	if (completeData.length === 0) {
