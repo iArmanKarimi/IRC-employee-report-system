@@ -9,6 +9,7 @@ interface PersianDateInputProps
 	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 	label: string;
 	required?: boolean;
+	applyConstraints?: boolean; // Whether to apply min/max constraints (for birth date, job start date)
 }
 
 /**
@@ -20,6 +21,7 @@ export function PersianDateInput({
 	onChange,
 	label,
 	required,
+	applyConstraints = true,
 	sx,
 	...props
 }: PersianDateInputProps) {
@@ -59,28 +61,34 @@ export function PersianDateInput({
 		let updatedMonth = month;
 		let updatedDay = day;
 
-		if (part === "day") {
+		if (part === "day" && applyConstraints) {
 			const dayNum = parseInt(newValue, 10);
 			if (dayNum === 0) constrainedValue = "1";
 			else if (dayNum > 31) constrainedValue = "31";
 			setDay(constrainedValue);
 			updatedDay = constrainedValue;
+		} else if (part === "day") {
+			setDay(newValue);
+			updatedDay = newValue;
 		}
 
-		if (part === "month") {
+		if (part === "month" && applyConstraints) {
 			const monthNum = parseInt(newValue, 10);
 			if (monthNum === 0) constrainedValue = "1";
 			else if (monthNum > 12) constrainedValue = "12";
 			setMonth(constrainedValue);
 			updatedMonth = constrainedValue;
+		} else if (part === "month") {
+			setMonth(newValue);
+			updatedMonth = newValue;
 		}
 
-		if (part === "year" && newValue.length === 4) {
+		if (part === "year" && newValue.length === 4 && applyConstraints) {
 			const yearNum = parseInt(newValue, 10);
 			const currentYear = getCurrentPersianYear();
 			const maxYear = currentYear - 18;
 
-			if (yearNum < 1300) constrainedValue = "1300";
+			if (yearNum === 0 || yearNum < 1300) constrainedValue = "1300";
 			else if (yearNum > maxYear) constrainedValue = maxYear.toString();
 
 			setYear(constrainedValue);

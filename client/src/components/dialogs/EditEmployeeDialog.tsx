@@ -298,6 +298,7 @@ export function EditEmployeeDialog({
 							)
 						}
 						sx={{ width: "100%" }}
+						applyConstraints={false}
 					/>
 					<TextField
 						label="وضعیت"

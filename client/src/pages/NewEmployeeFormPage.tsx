@@ -349,6 +349,7 @@ export default function NewEmployeeFormPage() {
 											onChange={(e) =>
 												updateAdditionalSpecs("jobEndDate", e.target.value)
 											}
+											applyConstraints={false}
 										/>
 									</Box>
 								</Stack>
