@@ -19,12 +19,20 @@ type UseEmployeesResult = {
  * @param provinceId - The province ID
  * @param page - Current page number
  * @param limit - Items per page
+ * @param filters - Optional filters for search and filtering
  * @returns Employees data, pagination info, loading state, error, and refetch function
  */
 export function useEmployees(
 	provinceId: string | undefined,
 	page: number = 1,
-	limit: number = 20
+	limit: number = 20,
+	filters?: {
+		search?: string;
+		gender?: string;
+		maritalStatus?: string;
+		status?: string;
+		truckDriver?: boolean;
+	}
 ): UseEmployeesResult {
 	const [employees, setEmployees] = useState<Employee[]>([]);
 	const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -42,7 +50,7 @@ export function useEmployees(
 		setError(null);
 		try {
 			const response: PaginatedResponse<Employee> =
-				await provinceApi.listEmployees(provinceId, page, limit);
+				await provinceApi.listEmployees(provinceId, page, limit, filters);
 			setEmployees(response.data ?? []);
 			setPagination(response.pagination);
 		} catch (err) {
@@ -59,7 +67,7 @@ export function useEmployees(
 	useEffect(() => {
 		fetchEmployees();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [provinceId, page, limit]);
+	}, [provinceId, page, limit, JSON.stringify(filters)]);
 
 	return { employees, pagination, loading, error, refetch: fetchEmployees };
 }

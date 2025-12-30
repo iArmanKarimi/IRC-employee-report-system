@@ -60,20 +60,21 @@ export default function ProvinceEmployeesPage() {
 	const [toastSeverity, setToastSeverity] = useState<
 		"success" | "error" | "warning"
 	>("success");
-	// Determine if we should fetch all employees (when filters are active)
-	const hasActiveFilters =
-		searchTerm ||
-		performanceMetric ||
-		performanceValue !== null ||
-		toggleFilters.maritalStatus ||
-		toggleFilters.gender ||
-		toggleFilters.status ||
-		toggleFilters.truckDriverOnly;
+
+	// Build server filters
+	const serverFilters = {
+		search: searchTerm || undefined,
+		gender: toggleFilters.gender || undefined,
+		maritalStatus: toggleFilters.maritalStatus || undefined,
+		status: toggleFilters.status || undefined,
+		truckDriver: toggleFilters.truckDriverOnly || undefined,
+	};
 
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
-		hasActiveFilters ? 1 : page + 1,
-		hasActiveFilters ? 10000 : limit
+		page + 1,
+		limit,
+		serverFilters
 	);
 
 	// Helper function to update page in both state and URL
@@ -93,9 +94,7 @@ export default function ProvinceEmployeesPage() {
 
 	// Reset to page 0 when filters or search changes
 	useEffect(() => {
-		if (hasActiveFilters) {
-			updatePage(0);
-		}
+		updatePage(0);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		searchTerm,
@@ -130,102 +129,61 @@ export default function ProvinceEmployeesPage() {
 		{ value: "province", label: "استان" },
 	];
 
-	const matchesSearchField = (
-		employee: IEmployee,
-		term: string,
-		field: string
-	) => {
-		if (!term) return true;
-		const normalized = term.toLowerCase();
+	// Apply client-side filters for performance metrics and search field (not supported by server)
+	const filteredEmployees = employees.filter((employee) => {
+		// Search field filtering (client-side only when specific field is selected)
+		if (searchField !== "all" && searchTerm) {
+			const matchesSearchField = (() => {
+				const term = searchTerm.toLowerCase();
+				const fieldValue = (value?: string | null) =>
+					value ? value.toString().toLowerCase() : "";
 
-		const fieldValue = (value?: string | null) =>
-			value ? value.toString().toLowerCase() : "";
+				switch (searchField) {
+					case "name":
+						return formatEmployeeName(employee).toLowerCase().includes(term);
+					case "nationalId":
+						return fieldValue(employee.basicInfo?.nationalID).includes(term);
+					case "contactNumber":
+						return fieldValue(
+							employee.additionalSpecifications?.contactNumber
+						).includes(term);
+					case "branch":
+						return fieldValue(employee.workPlace?.branch).includes(term);
+					case "rank":
+						return fieldValue(employee.workPlace?.rank).includes(term);
+					case "licensedWorkplace":
+						return fieldValue(employee.workPlace?.licensedWorkplace).includes(term);
+					case "educationalDegree":
+						return fieldValue(
+							employee.additionalSpecifications?.educationalDegree
+						).includes(term);
+					case "province": {
+						const provinceLabel =
+							typeof employee.provinceId === "object"
+								? employee.provinceId?.name
+								: employee.provinceId;
+						return fieldValue(provinceLabel).includes(term);
+					}
+					default:
+						return true;
+				}
+			})();
 
-		switch (field) {
-			case "name":
-				return formatEmployeeName(employee).toLowerCase().includes(normalized);
-			case "nationalId":
-				return fieldValue(employee.basicInfo?.nationalID).includes(normalized);
-			case "contactNumber":
-				return fieldValue(
-					employee.additionalSpecifications?.contactNumber
-				).includes(normalized);
-			case "branch":
-				return fieldValue(employee.workPlace?.branch).includes(normalized);
-			case "rank":
-				return fieldValue(employee.workPlace?.rank).includes(normalized);
-			case "licensedWorkplace":
-				return fieldValue(employee.workPlace?.licensedWorkplace).includes(
-					normalized
-				);
-			case "educationalDegree":
-				return fieldValue(
-					employee.additionalSpecifications?.educationalDegree
-				).includes(normalized);
-			case "province": {
-				const provinceLabel =
-					typeof employee.provinceId === "object"
-						? employee.provinceId?.name
-						: employee.provinceId;
-				return fieldValue(provinceLabel).includes(normalized);
-			}
-			default: {
-				const searchable = [
-					formatEmployeeName(employee),
-					employee.basicInfo?.nationalID,
-					employee.additionalSpecifications?.contactNumber,
-					employee.workPlace?.branch,
-					employee.workPlace?.rank,
-					employee.workPlace?.licensedWorkplace,
-					employee.additionalSpecifications?.educationalDegree,
-					typeof employee.provinceId === "object"
-						? employee.provinceId?.name
-						: employee.provinceId,
-				]
-					.filter(Boolean)
-					.map((v) => v!.toString().toLowerCase());
-				return searchable.some((value) => value.includes(normalized));
+			if (!matchesSearchField) {
+				return false;
 			}
 		}
-	};
 
-	// Filter employees based on search, status, and performance filters
-	const filteredEmployees = employees.filter((employee) => {
-		const matchesSearch = matchesSearchField(
-			employee,
-			searchTerm.trim(),
-			searchField
-		);
-
-		// Toggle filters
-		const matchesMaritalStatus =
-			toggleFilters.maritalStatus === "" ||
-			(toggleFilters.maritalStatus === "married" &&
-				employee.basicInfo?.married) ||
-			(toggleFilters.maritalStatus === "single" &&
-				!employee.basicInfo?.married);
-
-		const matchesGender =
-			toggleFilters.gender === "" ||
-			(toggleFilters.gender === "male" && employee.basicInfo?.male) ||
-			(toggleFilters.gender === "female" && !employee.basicInfo?.male);
-
-		const matchesToggleStatus =
-			toggleFilters.status === "" ||
-			employee.performance?.status === toggleFilters.status;
-
-		const matchesTruckDriver =
-			!toggleFilters.truckDriverOnly ||
-			!!employee.additionalSpecifications?.truckDriver;
-
-		let matchesMetric = true;
+		// Performance metric filtering (client-side only)
 		if (performanceMetric && performanceValue !== null) {
 			if (performanceMetric === "childrenCount") {
 				const childrenCount = employee.basicInfo?.childrenCount;
 				if (childrenCount !== undefined && childrenCount !== null) {
-					matchesMetric = Number(childrenCount) === performanceValue;
+					if (Number(childrenCount) !== performanceValue) {
+						return false;
+					}
 				} else {
-					matchesMetric = false;
+					return false;
 				}
 			} else if (employee.performance) {
 				const perfData = employee.performance as unknown as Record<
@@ -234,26 +192,18 @@ export default function ProvinceEmployeesPage() {
 				>;
 				const metricValue = perfData[performanceMetric];
 				if (metricValue !== undefined && metricValue !== null) {
-					matchesMetric = Number(metricValue) === performanceValue;
+					if (Number(metricValue) !== performanceValue) {
+						return false;
+					}
 				} else {
-					matchesMetric = false;
+					return false;
 				}
 			} else {
-				matchesMetric = false;
+				return false;
 			}
 		}
 
-		if (!matchesTruckDriver) {
-			return false;
-		}
-
-		return (
-			matchesSearch &&
-			matchesMaritalStatus &&
-			matchesGender &&
-			matchesToggleStatus &&
-			matchesMetric
-		);
+		return true;
 	});
 
 	// Extract province name from first employee if available
@@ -324,7 +274,7 @@ export default function ProvinceEmployeesPage() {
 			headerAlign: "center",
 			sortable: false,
 			renderCell: (params) => {
-				const rowIndex = paginatedFilteredEmployees.findIndex(
+				const rowIndex = filteredEmployees.findIndex(
 					(emp) => emp._id === params.row._id
 				);
 				return rowIndex + 1 + page * limit;
@@ -580,16 +530,6 @@ export default function ProvinceEmployeesPage() {
 		},
 	];
 
-	// Calculate pagination for filtered results when filters are active
-	const totalFilteredPages = hasActiveFilters
-		? Math.ceil(filteredEmployees.length / limit)
-		: pagination?.pages || 1;
-
-	// Get the current page of filtered results
-	const paginatedFilteredEmployees = hasActiveFilters
-		? filteredEmployees.slice(page * limit, (page + 1) * limit)
-		: filteredEmployees;
-
 	if (loading) {
 		return <LoadingView title="کارمندان استان" />;
 	}
@@ -708,16 +648,16 @@ export default function ProvinceEmployeesPage() {
 
 				{!loading && employees.length === 0 ? (
 					<EmptyState message="هیچ کارمندی یافت نشد." />
-				) : paginatedFilteredEmployees.length === 0 && !loading ? (
+				) : filteredEmployees.length === 0 && !loading ? (
 					<EmptyState message="هیچ کارمندی با معیارهای جستجو یا فیلتر شما مطابقت ندارد." />
 				) : (
 					<Stack spacing={1.5}>
 						<DataGrid
-							rows={paginatedFilteredEmployees}
+							rows={filteredEmployees}
 							columns={columns}
 							getRowId={(row) => row._id}
 							paginationModel={{ pageSize: limit, page: 0 }}
-							rowCount={paginatedFilteredEmployees.length}
+							rowCount={filteredEmployees.length}
 							pageSizeOptions={[20]}
 							loading={loading}
 							disableColumnMenu
@@ -762,7 +702,7 @@ export default function ProvinceEmployeesPage() {
 							sx={{ pt: 1 }}
 						>
 							<Pagination
-								count={totalFilteredPages}
+							count={pagination?.pages || 1}
 								page={page + 1}
 								onChange={(_, value) => updatePage(value - 1)}
 								color="primary"

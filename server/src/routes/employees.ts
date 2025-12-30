@@ -80,7 +80,7 @@ const getEmployeeInProvinceOrThrow = async (
 	return employee;
 };
 
-// GET /provinces/:provinceId/employees - List employees of a province with pagination
+// GET /provinces/:provinceId/employees - List employees of a province with pagination and filtering
 router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res: Response, next: NextFunction) => {
 	try {
 		const { provinceId } = req.params;
@@ -89,11 +89,53 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 		// Get pagination parameters from query
 		const { page, limit, skip } = getPaginationParams(req, 20, 100);
 
-		// Get total count for pagination
-		const total = await Employee.countDocuments({ provinceId });
+		// Build filter query
+		const query: any = { provinceId };
+		
+		// Search filter
+		if (req.query.search) {
+			const searchTerm = String(req.query.search).trim();
+			query.$or = [
+				{ 'basicInfo.name': { $regex: searchTerm, $options: 'i' } },
+				{ 'basicInfo.lastName': { $regex: searchTerm, $options: 'i' } },
+				{ 'basicInfo.nationalID': { $regex: searchTerm, $options: 'i' } },
+				{ 'additionalSpecifications.contactNumber': { $regex: searchTerm, $options: 'i' } },
+				{ 'workPlace.branch': { $regex: searchTerm, $options: 'i' } },
+				{ 'workPlace.rank': { $regex: searchTerm, $options: 'i' } },
+				{ 'workPlace.licensedWorkplace': { $regex: searchTerm, $options: 'i' } },
+				{ 'additionalSpecifications.educationalDegree': { $regex: searchTerm, $options: 'i' } }
+			];
+		}
 
-		// Get paginated results
-		const employees = await Employee.find({ provinceId })
+		// Gender filter
+		if (req.query.gender === 'male') {
+			query['basicInfo.male'] = true;
+		} else if (req.query.gender === 'female') {
+			query['basicInfo.male'] = false;
+		}
+
+		// Marital status filter
+		if (req.query.maritalStatus === 'married') {
+			query['basicInfo.married'] = true;
+		} else if (req.query.maritalStatus === 'single') {
+			query['basicInfo.married'] = false;
+		}
+
+		// Status filter
+		if (req.query.status) {
+			query['performance.status'] = req.query.status;
+		}
+
+		// Truck driver filter
+		if (req.query.truckDriver === 'true') {
+			query['additionalSpecifications.truckDriver'] = true;
+		}
+
+		// Get total count for pagination with filters
+		const total = await Employee.countDocuments(query);
+
+		// Get paginated results with filters
+		const employees = await Employee.find(query)
 			.populate('provinceId')
 			.skip(skip)
 			.limit(limit)
@@ -102,7 +144,7 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 		const pages = Math.ceil(total / limit);
 		const links = buildPaginationLinks(`/provinces/${provinceId}/employees`, page, limit, pages);
 
-		logger.debug("Employees listed", { provinceId, page, limit, count: employees.length, total });
+		logger.debug("Employees listed", { provinceId, page, limit, count: employees.length, total, filters: req.query });
 
 		return res.status(200).json({
 			success: true,

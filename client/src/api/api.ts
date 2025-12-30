@@ -52,10 +52,24 @@ export const authApi = {
 export const provinceApi = {
 	list: () => api.get<ApiResponse<Province[]>>(API_ENDPOINTS.PROVINCES).then(unwrap),
 	get: (provinceId: string) => api.get<ApiResponse<Province>>(API_ENDPOINTS.provinceById(provinceId)).then(unwrap),
-	listEmployees: (provinceId: string, page?: number, limit?: number) =>
+	listEmployees: (provinceId: string, page?: number, limit?: number, filters?: {
+		search?: string;
+		gender?: string;
+		maritalStatus?: string;
+		status?: string;
+		truckDriver?: boolean;
+	}) =>
 		api
 			.get<PaginatedResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), {
-				params: { page, limit }
+				params: { 
+					page, 
+					limit,
+					...(filters?.search && { search: filters.search }),
+					...(filters?.gender && { gender: filters.gender }),
+					...(filters?.maritalStatus && { maritalStatus: filters.maritalStatus }),
+					...(filters?.status && { status: filters.status }),
+					...(filters?.truckDriver && { truckDriver: 'true' })
+				}
 			})
 			.then(unwrap),
 	createEmployee: (provinceId: string, payload: CreateEmployeeInput) =>
