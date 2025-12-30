@@ -6,11 +6,12 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { FormDialog } from "./FormDialog";
 import { PersianDateInput } from "../PersianDateInput";
+import { toPersianDate, toGregorianDate } from "../../utils/dateUtils";
 import Box from "@mui/material/Box";
 import type { IEmployee, UpdateEmployeeInput } from "../../types/models";
 
 /**
- * Safely format a date value for the date input field
+ * Safely format a date value for the date input field (Persian format)
  * Returns empty string if the date is invalid
  */
 function formatDateForInput(dateValue: any): string {
@@ -19,7 +20,8 @@ function formatDateForInput(dateValue: any): string {
 		const date = new Date(dateValue);
 		// Check if date is valid
 		if (isNaN(date.getTime())) return "";
-		return date.toISOString().split("T")[0];
+		// Convert Gregorian to Persian date
+		return toPersianDate(date, "compact");
 	} catch {
 		return "";
 	}
@@ -75,7 +77,31 @@ export function EditEmployeeDialog({
 	};
 
 	const handleSubmit = () => {
-		onSave(formData);
+		// Convert Persian dates to Gregorian for backend
+		const submissionData = { ...formData };
+		if (submissionData.additionalSpecifications) {
+			const additionalSpecs = { ...submissionData.additionalSpecifications };
+			if (additionalSpecs.dateOfBirth) {
+				const gregorianDate = toGregorianDate(
+					additionalSpecs.dateOfBirth as string
+				);
+				if (gregorianDate) additionalSpecs.dateOfBirth = gregorianDate;
+			}
+			if (additionalSpecs.jobStartDate) {
+				const gregorianDate = toGregorianDate(
+					additionalSpecs.jobStartDate as string
+				);
+				if (gregorianDate) additionalSpecs.jobStartDate = gregorianDate;
+			}
+			if (additionalSpecs.jobEndDate) {
+				const gregorianDate = toGregorianDate(
+					additionalSpecs.jobEndDate as string
+				);
+				if (gregorianDate) additionalSpecs.jobEndDate = gregorianDate;
+			}
+			submissionData.additionalSpecifications = additionalSpecs;
+		}
+		onSave(submissionData);
 	};
 
 	return (
@@ -202,20 +228,18 @@ export function EditEmployeeDialog({
 						fullWidth
 						required
 					/>
-					<TextField
+					<PersianDateInput
 						label="تاریخ تولد"
-						type="date"
 						value={formatDateForInput(
 							formData.additionalSpecifications?.dateOfBirth
 						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.dateOfBirth",
-								new Date(e.target.value)
+								e.target.value
 							)
 						}
-						fullWidth
-						InputLabelProps={{ shrink: true }}
+						sx={{ width: "100%" }}
 						required
 					/>
 					<TextField
@@ -248,36 +272,32 @@ export function EditEmployeeDialog({
 						}
 						label="راننده کامیون"
 					/>
-					<TextField
+					<PersianDateInput
 						label="تاریخ شروع کار"
-						type="date"
 						value={formatDateForInput(
 							formData.additionalSpecifications?.jobStartDate
 						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.jobStartDate",
-								new Date(e.target.value)
+								e.target.value
 							)
 						}
-						fullWidth
-						InputLabelProps={{ shrink: true }}
+						sx={{ width: "100%" }}
 						required
 					/>
-					<TextField
+					<PersianDateInput
 						label="تاریخ پایان کار"
-						type="date"
 						value={formatDateForInput(
 							formData.additionalSpecifications?.jobEndDate
 						)}
 						onChange={(e) =>
 							handleFieldChange(
 								"additionalSpecifications.jobEndDate",
-								e.target.value ? new Date(e.target.value) : undefined
+								e.target.value || undefined
 							)
 						}
-						fullWidth
-						InputLabelProps={{ shrink: true }}
+						sx={{ width: "100%" }}
 					/>
 					<TextField
 						label="وضعیت"

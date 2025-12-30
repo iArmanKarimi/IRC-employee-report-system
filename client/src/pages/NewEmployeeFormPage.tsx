@@ -18,6 +18,7 @@ import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { PersianDateInput } from "../components/PersianDateInput";
+import { toGregorianDate } from "../utils/dateUtils";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import type {
 	CreateEmployeeInput,
@@ -26,10 +27,20 @@ import type {
 	IAdditionalSpecifications,
 } from "../types/models";
 
+// Form uses string for dates (Persian format), will be converted to Date before submission
+type FormAdditionalSpecifications = Omit<
+	IAdditionalSpecifications,
+	"dateOfBirth" | "jobStartDate" | "jobEndDate"
+> & {
+	dateOfBirth: string;
+	jobStartDate: string;
+	jobEndDate?: string;
+};
+
 type EmployeeFormData = {
 	basicInfo: IBasicInfo;
 	workPlace: IWorkPlace;
-	additionalSpecifications: IAdditionalSpecifications;
+	additionalSpecifications: FormAdditionalSpecifications;
 };
 
 export default function NewEmployeeFormPage() {
@@ -101,11 +112,37 @@ export default function NewEmployeeFormPage() {
 		setLoading(true);
 		setError(null);
 		try {
+			// Convert Persian dates to Gregorian for backend
+			const additionalSpecs: IAdditionalSpecifications = {
+				...form.additionalSpecifications,
+				dateOfBirth: new Date(), // Will be replaced below
+				jobStartDate: new Date(), // Will be replaced below
+			};
+
+			if (form.additionalSpecifications.dateOfBirth) {
+				const gregorianDate = toGregorianDate(
+					form.additionalSpecifications.dateOfBirth
+				);
+				if (gregorianDate) additionalSpecs.dateOfBirth = gregorianDate;
+			}
+			if (form.additionalSpecifications.jobStartDate) {
+				const gregorianDate = toGregorianDate(
+					form.additionalSpecifications.jobStartDate
+				);
+				if (gregorianDate) additionalSpecs.jobStartDate = gregorianDate;
+			}
+			if (form.additionalSpecifications.jobEndDate) {
+				const gregorianDate = toGregorianDate(
+					form.additionalSpecifications.jobEndDate
+				);
+				if (gregorianDate) additionalSpecs.jobEndDate = gregorianDate;
+			}
+
 			const payload: CreateEmployeeInput = {
 				provinceId,
 				basicInfo: form.basicInfo,
 				workPlace: form.workPlace,
-				additionalSpecifications: form.additionalSpecifications,
+				additionalSpecifications: additionalSpecs,
 			};
 			await provinceApi.createEmployee(provinceId, payload);
 			navigate(ROUTES.PROVINCE_EMPLOYEES.replace(":provinceId", provinceId), {

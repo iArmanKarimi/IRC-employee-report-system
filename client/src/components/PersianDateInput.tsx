@@ -10,7 +10,7 @@ interface PersianDateInputProps extends Omit<TextFieldProps, "type"> {
 
 /**
  * Persian Date Input Component
- * Text input for entering dates in YYYY-MM-DD format (Gregorian)
+ * Text input for entering dates in YYYY-MM-DD format (Shamsi/Jalali)
  */
 export function PersianDateInput({
 	value,
@@ -27,8 +27,8 @@ export function PersianDateInput({
 			required={required}
 			value={value}
 			onChange={onChange}
-			placeholder="مثال: 2025-12-30"
-			helperText="فرمت تاریخ: سال-ماه-روز (میلادی) مثال: 2025-12-30"
+			placeholder="مثال: 1404-10-10"
+			helperText="فرمت تاریخ: سال-ماه-روز (شمسی) مثال: 1404-10-10"
 			FormHelperTextProps={{
 				sx: { textAlign: "right", fontSize: "0.75rem" },
 			}}
