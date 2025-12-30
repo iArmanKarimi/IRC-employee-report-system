@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -37,7 +37,9 @@ import { provinceApi } from "../api/api";
 
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
-	const [page, setPage] = useState(0);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+	const [page, setPage] = useState(pageFromUrl - 1);
 	const limit = 20;
 	const [searchTerm, setSearchTerm] = useState("");
 	const [searchField, setSearchField] = useState("all");
@@ -64,9 +66,25 @@ export default function ProvinceEmployeesPage() {
 		limit
 	);
 
+	// Helper function to update page in both state and URL
+	const updatePage = (newPage: number) => {
+		setPage(newPage);
+		setSearchParams({ page: (newPage + 1).toString() });
+	};
+
+	// Sync page state with URL on mount
+	useEffect(() => {
+		const urlPage = pageFromUrl - 1;
+		if (urlPage !== page) {
+			setPage(urlPage);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [pageFromUrl]);
+
 	// Reset to page 0 when filters or search changes
 	useEffect(() => {
-		setPage(0);
+		updatePage(0);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		searchTerm,
 		searchField,
@@ -677,7 +695,7 @@ export default function ProvinceEmployeesPage() {
 							columns={columns}
 							getRowId={(row) => row._id}
 							paginationModel={{ pageSize: limit, page }}
-							onPaginationModelChange={(newModel) => setPage(newModel.page)}
+						onPaginationModelChange={(newModel) => updatePage(newModel.page)}
 							rowCount={filteredEmployees.length}
 							pageSizeOptions={[20]}
 							loading={loading}
@@ -725,7 +743,7 @@ export default function ProvinceEmployeesPage() {
 							<Pagination
 								count={pagination?.pages || 1}
 								page={page + 1}
-								onChange={(_, value) => setPage(value - 1)}
+							onChange={(_, value) => updatePage(value - 1)}
 								color="primary"
 								size="medium"
 								showFirstButton
