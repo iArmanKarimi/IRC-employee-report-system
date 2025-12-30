@@ -131,12 +131,24 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 			query['additionalSpecifications.truckDriver'] = true;
 		}
 
+		// Sorting
+		const sortByParam = typeof req.query.sortBy === 'string' ? req.query.sortBy : undefined;
+		const sortOrderParam = req.query.sortOrder === 'asc' ? 1 : -1;
+		const allowedSortFields: Record<string, Record<string, 1 | -1>> = {
+			fullName: { 'basicInfo.lastName': sortOrderParam, 'basicInfo.firstName': sortOrderParam },
+			nationalID: { 'basicInfo.nationalID': sortOrderParam },
+			status: { 'performance.status': sortOrderParam },
+			createdAt: { createdAt: sortOrderParam },
+		};
+		const sort = allowedSortFields[sortByParam || 'createdAt'] || { createdAt: -1 };
+
 		// Get total count for pagination with filters
 		const total = await Employee.countDocuments(query);
 
-		// Get paginated results with filters
+		// Get paginated results with filters and sorting
 		const employees = await Employee.find(query)
 			.populate('provinceId')
+			.sort(sort)
 			.skip(skip)
 			.limit(limit)
 			.lean();

@@ -58,6 +58,8 @@ export const provinceApi = {
 		maritalStatus?: string;
 		status?: string;
 		truckDriver?: boolean;
+		sortBy?: string;
+		sortOrder?: 'asc' | 'desc';
 	}) =>
 		api
 			.get<PaginatedResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), {
@@ -68,7 +70,9 @@ export const provinceApi = {
 					...(filters?.gender && { gender: filters.gender }),
 					...(filters?.maritalStatus && { maritalStatus: filters.maritalStatus }),
 					...(filters?.status && { status: filters.status }),
-					...(filters?.truckDriver && { truckDriver: 'true' })
+					...(filters?.truckDriver && { truckDriver: 'true' }),
+					...(filters?.sortBy && { sortBy: filters.sortBy }),
+					...(filters?.sortOrder && { sortOrder: filters.sortOrder })
 				}
 			})
 			.then(unwrap),

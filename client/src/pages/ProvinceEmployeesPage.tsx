@@ -18,6 +18,7 @@ import {
 	DataGrid,
 	type GridColDef,
 	type GridRenderCellParams,
+	type GridSortModel,
 } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
 import { ROUTES } from "../const/endpoints";
@@ -45,6 +46,7 @@ export default function ProvinceEmployeesPage() {
 	const [searchField, setSearchField] = useState("all");
 	const [performanceMetric, setPerformanceMetric] = useState("");
 	const [performanceValue, setPerformanceValue] = useState<number | null>(null);
+	const [sortModel, setSortModel] = useState<GridSortModel>([]);
 	const [toggleFilters, setToggleFilters] = useState({
 		maritalStatus: "",
 		gender: "",
@@ -62,12 +64,27 @@ export default function ProvinceEmployeesPage() {
 	>("success");
 
 	// Build server filters
+	const currentSort = sortModel[0];
+	const sortByFromGrid =
+		currentSort?.field === "fullName"
+			? "fullName"
+			: currentSort?.field === "nationalID"
+			? "nationalID"
+			: currentSort?.field === "status"
+			? "status"
+			: undefined;
+	const sortOrderFromGrid = currentSort?.sort === "asc" || currentSort?.sort === "desc"
+		? currentSort.sort
+		: undefined;
+
 	const serverFilters = {
 		search: searchTerm || undefined,
 		gender: toggleFilters.gender || undefined,
 		maritalStatus: toggleFilters.maritalStatus || undefined,
 		status: toggleFilters.status || undefined,
 		truckDriver: toggleFilters.truckDriverOnly || undefined,
+		sortBy: sortByFromGrid,
+		sortOrder: sortOrderFromGrid,
 	};
 
 	const { employees, pagination, loading, error, refetch } = useEmployees(
@@ -105,6 +122,8 @@ export default function ProvinceEmployeesPage() {
 		toggleFilters.gender,
 		toggleFilters.status,
 		toggleFilters.truckDriverOnly,
+		sortByFromGrid,
+		sortOrderFromGrid,
 	]);
 
 	// Auto-close toast after 4 seconds
@@ -264,6 +283,12 @@ export default function ProvinceEmployeesPage() {
 		} finally {
 			setExporting(false);
 		}
+	};
+
+	const handleSortModelChange = (model: GridSortModel) => {
+		const nextModel = model.slice(0, 1); // single-column sorting
+		setSortModel(nextModel);
+		updatePage(0);
 	};
 
 	// DataGrid columns definition
@@ -660,6 +685,9 @@ export default function ProvinceEmployeesPage() {
 							getRowId={(row) => row._id}
 							paginationModel={{ pageSize: limit, page: 0 }}
 							rowCount={filteredEmployees.length}
+							sortingMode="server"
+							sortModel={sortModel}
+							onSortModelChange={handleSortModelChange}
 							pageSizeOptions={[20]}
 							loading={loading}
 							disableColumnMenu

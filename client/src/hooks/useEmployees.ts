@@ -32,6 +32,8 @@ export function useEmployees(
 		maritalStatus?: string;
 		status?: string;
 		truckDriver?: boolean;
+		sortBy?: string;
+		sortOrder?: 'asc' | 'desc';
 	}
 ): UseEmployeesResult {
 	const [employees, setEmployees] = useState<Employee[]>([]);
