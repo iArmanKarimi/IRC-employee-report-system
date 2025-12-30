@@ -298,6 +298,7 @@ export function EditEmployeeDialog({
 							)
 						}
 						sx={{ width: "100%" }}
+						maxYearOffset={0}
 					/>
 					<TextField
 						label="وضعیت"

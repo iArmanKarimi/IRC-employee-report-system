@@ -10,6 +10,7 @@ interface PersianDateInputProps
 	label: string;
 	required?: boolean;
 	applyConstraints?: boolean; // Whether to apply min/max constraints (for birth date, job start date)
+	maxYearOffset?: number; // Offset from current year for max year constraint (default 18 for age restriction, 0 for current year)
 }
 
 /**
@@ -22,6 +23,7 @@ export function PersianDateInput({
 	label,
 	required,
 	applyConstraints = true,
+	maxYearOffset = 18,
 	sx,
 	...props
 }: PersianDateInputProps) {
@@ -86,7 +88,7 @@ export function PersianDateInput({
 		if (part === "year" && newValue.length === 4 && applyConstraints) {
 			const yearNum = parseInt(newValue, 10);
 			const currentYear = getCurrentPersianYear();
-			const maxYear = currentYear - 18;
+			const maxYear = currentYear - maxYearOffset;
 
 			if (yearNum < 1300) constrainedValue = "1300";
 			else if (yearNum > maxYear) constrainedValue = maxYear.toString();

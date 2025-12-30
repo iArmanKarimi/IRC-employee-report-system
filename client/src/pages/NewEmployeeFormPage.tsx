@@ -349,6 +349,7 @@ export default function NewEmployeeFormPage() {
 											onChange={(e) =>
 												updateAdditionalSpecs("jobEndDate", e.target.value)
 											}
+											maxYearOffset={0}
 										/>
 									</Box>
 								</Stack>
