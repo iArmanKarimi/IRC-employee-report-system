@@ -16,21 +16,34 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 
+/**
+ * Props for SearchFilterBar component
+ */
 interface SearchFilterBarProps {
+	/** Callback when search term changes */
 	onSearchChange: (searchTerm: string) => void;
+	/** Callback when search field selection changes */
 	onSearchFieldChange?: (field: string) => void;
+	/** Callback when performance filter changes */
 	onPerformanceFilterChange?: (metric: string, value: number | null) => void;
+	/** Callback when toggle filters change */
 	onToggleFiltersChange?: (filters: {
 		maritalStatus: string;
 		gender: string;
 		status: string;
 		truckDriverOnly: boolean;
 	}) => void;
+	/** Current search value */
 	searchValue?: string;
+	/** Current search field value */
 	searchFieldValue?: string;
+	/** Options for search field dropdown */
 	searchFieldOptions?: { value: string; label: string }[];
+	/** Current performance metric selection */
 	performanceMetric?: string;
+	/** Current performance value */
 	performanceValue?: number;
+	/** Current toggle filter values */
 	toggleFilters?: {
 		maritalStatus: string;
 		gender: string;
@@ -39,6 +52,26 @@ interface SearchFilterBarProps {
 	};
 }
 
+/**
+ * SearchFilterBar Component
+ *
+ * Comprehensive search and filter bar for employee lists.
+ * Supports multiple filter types:
+ * - Text search with field selection
+ * - Performance metric filtering
+ * - Toggle filters (marital status, gender, employment status, truck driver)
+ *
+ * All filter changes are communicated via callbacks for controlled behavior.
+ *
+ * @example
+ * <SearchFilterBar
+ *   onSearchChange={setSearchTerm}
+ *   onSearchFieldChange={setSearchField}
+ *   onToggleFiltersChange={setToggleFilters}
+ *   searchValue={searchTerm}
+ *   toggleFilters={toggleFilters}
+ * />
+ */
 export function SearchFilterBar({
 	onSearchChange,
 	onSearchFieldChange,

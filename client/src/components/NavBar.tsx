@@ -17,12 +17,34 @@ import { ROUTES } from "../const/endpoints";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 
 type NavBarProps = {
+	/** Custom title for the navbar */
 	title?: string;
+	/** Whether to show logout button (default: true) */
 	showLogout?: boolean;
+	/** Path to navigate to when back button is clicked */
 	backTo?: string;
+	/** Label for back button (default: "بازگشت") */
 	backLabel?: string;
 };
 
+/**
+ * NavBar Component
+ *
+ * Application-wide navigation bar with responsive design.
+ * Features:
+ * - Customizable title
+ * - Back button navigation
+ * - Logout functionality
+ * - Dashboard/Provinces navigation for global admins
+ * - Mobile-optimized with icon buttons
+ *
+ * @example
+ * <NavBar
+ *   title="صفحه کارمندان"
+ *   backTo="/provinces"
+ *   backLabel="بازگشت به استان‌ها"
+ * />
+ */
 export default function NavBar({
 	title = "سامانه مدیریت کارمندان جمعیت هلال احمر ایران",
 	showLogout = true,

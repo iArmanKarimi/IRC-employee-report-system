@@ -6,14 +6,23 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 
 type ConfirmDialogProps = {
+	/** Whether the dialog is visible */
 	open: boolean;
+	/** Callback when dialog is closed without confirming */
 	onClose: () => void;
+	/** Callback when user confirms the action */
 	onConfirm: () => void;
+	/** Dialog title */
 	title: string;
+	/** Confirmation message/question */
 	message: string;
+	/** Whether an operation is in progress */
 	loading?: boolean;
+	/** Custom label for confirm button (default: "تأیید") */
 	confirmLabel?: string;
+	/** Custom label for cancel button (default: "لغو") */
 	cancelLabel?: string;
+	/** Color of confirm button (default: "error") */
 	confirmColor?:
 		| "inherit"
 		| "primary"
@@ -25,8 +34,20 @@ type ConfirmDialogProps = {
 };
 
 /**
- * Reusable confirmation dialog
- * Used for destructive actions like delete operations
+ * Reusable confirmation dialog component
+ *
+ * Provides a standard UI for confirming destructive or important actions.
+ * Automatically handles loading states and disables buttons during operations.
+ *
+ * @example
+ * <ConfirmDialog
+ *   open={deleteDialogOpen}
+ *   title="تایید حذف"
+ *   message="آیا مطمئن هستید؟"
+ *   loading={deleting}
+ *   onClose={() => setDeleteDialogOpen(false)}
+ *   onConfirm={handleDelete}
+ * />
  */
 export function ConfirmDialog({
 	open,

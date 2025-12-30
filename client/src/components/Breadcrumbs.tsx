@@ -7,11 +7,33 @@ import Box from "@mui/material/Box";
 import { ROUTES } from "../const/endpoints";
 
 type BreadcrumbsProps = {
+	/** Name of the current province for display */
 	provinceName?: string;
+	/** Name of the current employee for display */
 	employeeName?: string;
+	/** Whether to show link to provinces list (for global admins) */
 	showProvincesLink?: boolean;
 };
 
+/**
+ * Breadcrumbs Component
+ *
+ * Displays hierarchical navigation breadcrumbs based on current route.
+ * Automatically builds breadcrumb trail from URL parameters and props.
+ *
+ * Breadcrumb hierarchy:
+ * 1. Provinces (استان‌ها) - Only for global admins when showProvincesLink is true
+ * 2. Province/Employees (کارمندان or province name)
+ * 3. New Employee (کارمند جدید) - On creation page
+ * 4. Employee Name - On detail page
+ *
+ * @example
+ * <Breadcrumbs
+ *   provinceName="تهران"
+ *   employeeName="علی رضایی"
+ *   showProvincesLink={isGlobalAdmin}
+ * />
+ */
 export default function Breadcrumbs({
 	provinceName,
 	employeeName,

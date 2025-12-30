@@ -42,6 +42,7 @@ export function useEmployees(
 	const [error, setError] = useState<string | null>(null);
 
 	const fetchEmployees = async () => {
+		// Validate that provinceId is present
 		if (!provinceId) {
 			setError("شناسه استان موجود نیست");
 			setLoading(false);
@@ -51,6 +52,7 @@ export function useEmployees(
 		setLoading(true);
 		setError(null);
 		try {
+			// Fetch employees with server-side filtering, sorting, and pagination
 			const response: PaginatedResponse<Employee> =
 				await provinceApi.listEmployees(provinceId, page, limit, filters);
 			setEmployees(response.data ?? []);
@@ -69,6 +71,7 @@ export function useEmployees(
 	useEffect(() => {
 		fetchEmployees();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// Note: We stringify filters to detect changes in nested object properties
 	}, [provinceId, page, limit, JSON.stringify(filters)]);
 
 	return { employees, pagination, loading, error, refetch: fetchEmployees };

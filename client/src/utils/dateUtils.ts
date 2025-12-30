@@ -16,9 +16,11 @@ export function toPersianDate(
 		const d = typeof date === 'string' ? new Date(date) : date;
 		if (isNaN(d.getTime())) return '-';
 
+		// Convert Gregorian date to Jalali (Persian) calendar
 		const jalali = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
 
 		if (format === 'text') {
+			// Persian month names for text format
 			const monthNames = [
 				'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
 				'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
@@ -26,6 +28,7 @@ export function toPersianDate(
 			return `${jalali.jd} ${monthNames[jalali.jm - 1]} ${jalali.jy}`;
 		}
 
+		// Format with separator ('/' for full, '-' for compact)
 		const separator = format === 'compact' ? '-' : '/';
 		const month = jalali.jm.toString().padStart(2, '0');
 		const day = jalali.jd.toString().padStart(2, '0');
@@ -50,6 +53,7 @@ export function toGregorianDate(persianDate: string): Date | null {
 		const parts = persianDate.split(/[/-]/).map(p => parseInt(p, 10));
 		if (parts.length !== 3 || parts.some(isNaN)) return null;
 
+		// Convert Persian (Jalali) to Gregorian calendar
 		const [jy, jm, jd] = parts;
 		const gregorian = jalaali.toGregorian(jy, jm, jd);
 

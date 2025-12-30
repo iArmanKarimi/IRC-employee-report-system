@@ -41,6 +41,24 @@ import { getTodayPersian } from "../utils/dateUtils";
 import type { IEmployee } from "../types/models";
 import { provinceApi } from "../api/api";
 
+/**
+ * ProvinceEmployeesPage Component
+ *
+ * Main page for viewing and managing employees within a province.
+ * Features:
+ * - Server-side pagination, filtering, and sorting
+ * - DataGrid with sortable columns
+ * - Search and filter bar with multiple criteria
+ * - Client-side performance metric filtering
+ * - Excel export functionality
+ * - Integration with global performance lock
+ *
+ * URL Parameters:
+ * - provinceId: The province identifier
+ *
+ * Query Parameters:
+ * - page: Current page number (1-indexed)
+ */
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const navigate = useNavigate();
@@ -69,7 +87,8 @@ export default function ProvinceEmployeesPage() {
 		"success" | "error" | "warning"
 	>("success");
 
-	// Build server filters
+	// Build server-side filters from current state
+	// Server supports: search, gender, maritalStatus, status, truckDriver, sorting
 	const currentSort = sortModel[0];
 	const sortByFromGrid =
 		currentSort?.field === "fullName"
@@ -101,7 +120,10 @@ export default function ProvinceEmployeesPage() {
 		serverFilters
 	);
 
-	// Helper function to update page in both state and URL
+	/**
+	 * Update page number in both state and URL query parameters
+	 * Keeps URL in sync with pagination state for shareable links
+	 */
 	const updatePage = (newPage: number) => {
 		setPage(newPage);
 		setSearchParams({ page: (newPage + 1).toString() });

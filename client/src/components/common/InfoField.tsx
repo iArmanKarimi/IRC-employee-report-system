@@ -10,13 +10,25 @@ type InfoFieldValue =
 	| (string | number)[];
 
 type InfoFieldProps = {
+	/** Label text to display */
 	label: string;
+	/** Value to display (supports multiple types with automatic formatting) */
 	value: InfoFieldValue;
 };
 
 /**
  * Reusable info field component for displaying labeled data
- * Handles various value types and formats them appropriately
+ *
+ * Automatically handles various value types:
+ * - null/undefined/empty string → displays "-"
+ * - boolean → displays "بله" or "خیر"
+ * - array → joins with " و "
+ * - other types → converts to string
+ *
+ * @example
+ * <InfoField label="نام" value={employee.name} />
+ * <InfoField label="فعال" value={employee.isActive} />
+ * <InfoField label="شهرها" value={["تهران", "اصفهان"]} />
  */
 export function InfoField({ label, value }: InfoFieldProps) {
 	let displayValue: string;

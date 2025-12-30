@@ -5,17 +5,50 @@ import { getCurrentPersianYear } from "../utils/dateUtils";
 
 interface PersianDateInputProps
 	extends Omit<TextFieldProps, "type" | "onChange" | "value"> {
+	/** Date value in YYYY-MM-DD format */
 	value: string;
+	/** Callback when date changes */
 	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	/** Label for the date input group */
 	label: string;
+	/** Whether the field is required */
 	required?: boolean;
-	applyConstraints?: boolean; // Whether to apply min/max constraints (for birth date, job start date)
-	maxYearOffset?: number; // Offset from current year for max year constraint (default 18 for age restriction, 0 for current year)
+	/** Whether to apply min/max constraints (default: true) */
+	applyConstraints?: boolean;
+	/** Offset from current year for max year constraint (default: 18 for age restriction, 0 for current year) */
+	maxYearOffset?: number;
 }
 
 /**
- * Persian Date Input Component
- * Three separate inputs for year, month, and day in Shamsi/Jalali format
+ * PersianDateInput Component
+ *
+ * Three separate inputs for year, month, and day in Persian (Shamsi/Jalali) calendar format.
+ * Provides automatic validation and constraints:
+ * - Day: 1-31
+ * - Month: 1-12
+ * - Year: 1300 to (current year - maxYearOffset)
+ *
+ * The component stores date in YYYY-MM-DD format compatible with server expectations.
+ * Use applyConstraints=false to disable validation (e.g., for job end dates).
+ *
+ * @example
+ * // Birth date with 18 year minimum age
+ * <PersianDateInput
+ *   label="تاریخ تولد"
+ *   value={birthDate}
+ *   onChange={(e) => setBirthDate(e.target.value)}
+ *   maxYearOffset={18}
+ *   required
+ * />
+ *
+ * @example
+ * // Job end date without constraints
+ * <PersianDateInput
+ *   label="تاریخ پایان کار"
+ *   value={endDate}
+ *   onChange={(e) => setEndDate(e.target.value)}
+ *   applyConstraints={false}
+ * />
  */
 export function PersianDateInput({
 	value,

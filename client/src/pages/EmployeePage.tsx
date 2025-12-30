@@ -34,6 +34,22 @@ import { formatEmployeeName, translateStatus } from "../utils/formatters";
 import { toPersianDate } from "../utils/dateUtils";
 import type { IPerformance } from "../types/models";
 
+/**
+ * EmployeePage Component
+ *
+ * Detailed view and editing page for a single employee.
+ * Features:
+ * - Display complete employee information
+ * - Edit employee basic info and additional specifications
+ * - Manage performance records (view, add, edit, delete)
+ * - Delete employee with confirmation
+ * - Integration with global performance lock
+ * - Automatic initialization of default performance data for new employees
+ *
+ * URL Parameters:
+ * - provinceId: The province identifier
+ * - employeeId: The employee identifier
+ */
 export default function EmployeePage() {
 	const { provinceId, employeeId } = useParams<{
 		provinceId: string;

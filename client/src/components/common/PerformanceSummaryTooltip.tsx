@@ -6,16 +6,20 @@ import { translateStatus } from "../../utils/formatters";
 import type { IPerformance } from "../../types/models";
 
 type PerformanceSummaryTooltipProps = {
+	/** Performance data to display in the tooltip */
 	performance: IPerformance;
 };
 
 type MetricRowProps = {
+	/** Metric label in Persian */
 	label: string;
+	/** Metric value (number or string) */
 	value: string | number;
 };
 
 /**
- * Reusable metric row component for performance summary
+ * Metric row component for consistent display of performance metrics
+ * Internal component used by PerformanceSummaryTooltip
  */
 function MetricRow({ label, value }: MetricRowProps) {
 	return (
@@ -38,7 +42,26 @@ function MetricRow({ label, value }: MetricRowProps) {
 
 /**
  * Performance Summary Tooltip Content
- * Used in employee list tooltips to display performance metrics
+ *
+ * Displays comprehensive performance metrics in a formatted tooltip.
+ * Used in employee list DataGrid to show detailed performance information
+ * when hovering over performance status chips.
+ *
+ * Displays 9 key metrics:
+ * - Status (وضعیت)
+ * - Daily Performance (عملکرد روزانه)
+ * - Shift Duration (مدت شیفت)
+ * - Overtime (اضافه کاری)
+ * - Daily Leave (مرخصی روزانه)
+ * - Sick Leave (مرخصی استعلاجی)
+ * - Absence (غیبت)
+ * - Travel Assignment (ماموریت سفر)
+ * - Shift Count Per Location (تعداد شیفت/مکان)
+ *
+ * @example
+ * <Tooltip title={<PerformanceSummaryTooltip performance={employee.performance} />}>
+ *   <Chip label={ترجمه‌شده} />
+ * </Tooltip>
  */
 export function PerformanceSummaryTooltip({
 	performance,

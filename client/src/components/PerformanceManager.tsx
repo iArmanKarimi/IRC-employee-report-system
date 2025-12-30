@@ -12,14 +12,37 @@ import { ConfirmDialog } from "./dialogs/ConfirmDialog";
 import type { IPerformance } from "../types/models";
 
 type PerformanceManagerProps = {
+	/** Array of performance records to display */
 	performances: IPerformance[];
+	/** Whether a save operation is in progress */
 	saving: boolean;
+	/** Whether performance editing is locked globally */
 	performanceLocked?: boolean;
+	/** Callback when adding a new performance record */
 	onAdd: (performance: IPerformance) => Promise<void>;
+	/** Callback when editing an existing performance record */
 	onEdit: (index: number, performance: IPerformance) => Promise<void>;
+	/** Callback when deleting a performance record */
 	onDelete: (index: number) => Promise<void>;
 };
 
+/**
+ * PerformanceManager Component
+ *
+ * Manages the display and CRUD operations for employee performance records.
+ * Provides a UI for viewing, adding, editing, and deleting performance data.
+ * Integrates with the global performance lock feature.
+ *
+ * @example
+ * <PerformanceManager
+ *   performances={employee.performance}
+ *   saving={saving}
+ *   performanceLocked={settings?.performanceLocked}
+ *   onAdd={handleAddPerformance}
+ *   onEdit={handleEditPerformance}
+ *   onDelete={handleDeletePerformance}
+ * />
+ */
 export function PerformanceManager({
 	performances,
 	saving,
@@ -36,6 +59,9 @@ export function PerformanceManager({
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
 
+	/**
+	 * Open dialog to add a new performance record with default values
+	 */
 	const handleAddClick = () => {
 		setPerformanceData({
 			dailyPerformance: 0,
@@ -53,12 +79,20 @@ export function PerformanceManager({
 		setDialogOpen(true);
 	};
 
+	/**
+	 * Open dialog to edit an existing performance record
+	 * @param index - Index of the performance record to edit
+	 */
 	const handleEditClick = (index: number) => {
 		setPerformanceData({ ...performances[index] });
 		setEditingIndex(index);
 		setDialogOpen(true);
 	};
 
+	/**
+	 * Save performance data (calls onAdd for new or onEdit for existing)
+	 * @param data - Performance data to save
+	 */
 	const handleSave = async (data: IPerformance) => {
 		if (editingIndex !== null) {
 			await onEdit(editingIndex, data);
@@ -68,11 +102,18 @@ export function PerformanceManager({
 		setDialogOpen(false);
 	};
 
+	/**
+	 * Open confirmation dialog for deleting a performance record
+	 * @param index - Index of the performance record to delete
+	 */
 	const handleDeleteClick = (index: number) => {
 		setDeletingIndex(index);
 		setDeleteDialogOpen(true);
 	};
 
+	/**
+	 * Confirm and execute deletion of a performance record
+	 */
 	const handleDeleteConfirm = async () => {
 		if (deletingIndex !== null) {
 			await onDelete(deletingIndex);

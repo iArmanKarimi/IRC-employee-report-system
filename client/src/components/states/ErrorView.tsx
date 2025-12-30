@@ -6,14 +6,24 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import NavBar from "../NavBar";
 
 type ErrorViewProps = {
+	/** Custom title for navbar (default: "خطا") */
 	title?: string;
+	/** Error message to display */
 	message: string;
+	/** Optional retry callback to show retry button */
 	onRetry?: () => void;
+	/** Optional additional content below the error */
 	children?: React.ReactNode;
 };
 
 /**
  * Standardized error view with navbar, error message, and optional retry button
+ *
+ * Provides consistent error UI across the application.
+ * Displays an error alert with optional retry button and additional content.
+ *
+ * @example
+ * if (error) return <ErrorView message={error} onRetry={refetch} />;
  */
 export function ErrorView({
 	title = "خطا",

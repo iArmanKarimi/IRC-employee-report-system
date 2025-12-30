@@ -23,6 +23,7 @@ export function useEmployee(
 	const [error, setError] = useState<string | null>(null);
 
 	const fetchEmployee = async () => {
+		// Validate that both required IDs are present
 		if (!provinceId || !employeeId) {
 			setError("شناسه‌های مورد نیاز موجود نیست");
 			setLoading(false);
@@ -33,6 +34,7 @@ export function useEmployee(
 		setError(null);
 		try {
 			const res = await provinceApi.getEmployee(provinceId, employeeId);
+			// Check for API-level errors
 			if (!res.success || !res.data) {
 				setError(res.error || "کارمند یافت نشد");
 				setEmployee(null);
