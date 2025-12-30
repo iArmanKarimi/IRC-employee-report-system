@@ -26,7 +26,7 @@ import { useEmployee } from "../hooks/useEmployee";
 import { useApiMutation } from "../hooks/useApiMutation";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { useGlobalSettings } from "../hooks/useGlobalSettings";
-import { formatEmployeeName } from "../utils/formatters";
+import { formatEmployeeName, translateStatus } from "../utils/formatters";
 import { toPersianDate } from "../utils/dateUtils";
 import type { IPerformance } from "../types/models";
 
@@ -334,13 +334,7 @@ export default function EmployeePage() {
 									</Typography>
 									<Box sx={{ mt: 0.5 }}>
 										<Chip
-											label={
-												employee.performance?.status
-													? employee.performance.status
-															.replace("_", " ")
-															.toUpperCase()
-													: "N/A"
-											}
+											label={translateStatus(employee.performance?.status)}
 											color={
 												employee.performance?.status === "active"
 													? "success"

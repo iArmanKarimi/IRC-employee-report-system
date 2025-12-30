@@ -18,3 +18,18 @@ export function formatEmployeeName(emp: Employee): string {
 
 	return emp._id;
 }
+
+/**
+ * Translate employment status to Persian
+ */
+export function translateStatus(status: string | undefined): string {
+	if (!status) return "-";
+
+	const statusMap: Record<string, string> = {
+		"active": "فعال",
+		"inactive": "غیرفعال",
+		"on_leave": "در مرخصی"
+	};
+
+	return statusMap[status] || status;
+}

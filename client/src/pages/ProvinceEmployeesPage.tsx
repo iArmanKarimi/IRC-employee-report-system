@@ -30,7 +30,7 @@ import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
-import { formatEmployeeName } from "../utils/formatters";
+import { formatEmployeeName, translateStatus } from "../utils/formatters";
 import { getTodayPersian } from "../utils/dateUtils";
 import type { IEmployee } from "../types/models";
 import { provinceApi } from "../api/api";
@@ -317,7 +317,7 @@ export default function ProvinceEmployeesPage() {
 				const employee = params.row;
 				return employee.performance ? (
 					<Chip
-						label={employee.performance.status?.replace("_", " ").toUpperCase()}
+						label={translateStatus(employee.performance.status)}
 						color={
 							employee.performance.status === "active"
 								? "success"
@@ -373,7 +373,7 @@ export default function ProvinceEmployeesPage() {
 									وضعیت
 								</Typography>
 								<Typography variant="caption" sx={{ fontWeight: 600 }}>
-									{perf.status?.replace("_", " ").toUpperCase()}
+									{translateStatus(perf.status)}
 								</Typography>
 							</Box>
 							<Box
