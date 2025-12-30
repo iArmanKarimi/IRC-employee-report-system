@@ -31,6 +31,7 @@ import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName } from "../utils/formatters";
+import { getTodayPersian } from "../utils/dateUtils";
 import type { IEmployee } from "../types/models";
 import { provinceApi } from "../api/api";
 
@@ -243,9 +244,9 @@ export default function ProvinceEmployeesPage() {
 			link.href = url;
 			link.setAttribute(
 				"download",
-				`employees_${provinceName || "province"}_${
-					new Date().toISOString().split("T")[0]
-				}.xlsx`
+				`employees_${provinceName || "province"}_${getTodayPersian(
+					"compact"
+				)}.xlsx`
 			);
 			document.body.appendChild(link);
 			link.click();

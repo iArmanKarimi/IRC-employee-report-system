@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { Response } from "express";
+import { toPersianDate } from "./dateUtils";
 
 // Type for the flattened Excel row
 export type ExcelEmployeeRow = Record<string, string | number | boolean | undefined>;
@@ -26,12 +27,10 @@ export const mapEmployeeToExcelRow = (emp: any): ExcelEmployeeRow => {
 
 		// Additional Specifications - مشخصات اضافی
 		"مدرک تحصیلی": emp.additionalSpecifications?.educationalDegree || "-",
-		"تاریخ تولد": (emp.additionalSpecifications?.dateOfBirth),
+		"تاریخ تولد": toPersianDate(emp.additionalSpecifications?.dateOfBirth, 'full'),
 		"شماره تماس": emp.additionalSpecifications?.contactNumber || "-",
-		"تاریخ شروع کار": (emp.additionalSpecifications?.jobStartDate),
-		"تاریخ پایان کار": emp.additionalSpecifications?.jobEndDate
-			? (emp.additionalSpecifications.jobEndDate)
-			: "-",
+		"تاریخ شروع کار": toPersianDate(emp.additionalSpecifications?.jobStartDate, 'full'),
+		"تاریخ پایان کار": toPersianDate(emp.additionalSpecifications?.jobEndDate, 'full'),
 		"راننده کامیون": emp.additionalSpecifications?.truckDriver ? "بله" : "خیر",
 		// Performance - عملکرد
 		"عملکرد روزانه": emp.performance?.dailyPerformance ?? "-",
@@ -93,7 +92,7 @@ export const prepareEmployeesExcel = async (employees: any[]): Promise<ExcelJS.W
  * Sends an Excel file as a download response
  */
 export const sendExcelFile = async (res: Response, workbook: ExcelJS.Workbook, baseFilename: string): Promise<void> => {
-	const fileName = `${baseFilename}_${new Date().toISOString().split("T")[0]}.xlsx`;
+	const fileName = `${baseFilename}_${toPersianDate(new Date(), 'compact')}.xlsx`;
 	res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 	res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
 

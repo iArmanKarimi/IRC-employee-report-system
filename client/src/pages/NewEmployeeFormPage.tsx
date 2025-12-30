@@ -17,6 +17,7 @@ import { provinceApi } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
+import { PersianDateInput } from "../components/PersianDateInput";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import type {
 	CreateEmployeeInput,
@@ -271,11 +272,9 @@ export default function NewEmployeeFormPage() {
 												)
 											}
 										/>
-										<TextField
+										<PersianDateInput
 											label="تاریخ تولد"
-											type="date"
 											required
-											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.dateOfBirth}
 											onChange={(e) =>
@@ -294,11 +293,9 @@ export default function NewEmployeeFormPage() {
 												updateAdditionalSpecs("contactNumber", e.target.value)
 											}
 										/>
-										<TextField
+										<PersianDateInput
 											label="تاریخ شروع کار"
-											type="date"
 											required
-											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.jobStartDate}
 											onChange={(e) =>
@@ -307,10 +304,8 @@ export default function NewEmployeeFormPage() {
 										/>
 									</Box>
 									<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-										<TextField
+										<PersianDateInput
 											label="تاریخ پایان کار"
-											type="date"
-											InputLabelProps={{ shrink: true }}
 											sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 											value={form.additionalSpecifications.jobEndDate || ""}
 											onChange={(e) =>

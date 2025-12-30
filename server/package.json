@@ -26,6 +26,7 @@
 		"express": "^5.1.0",
 		"express-rate-limit": "^8.2.1",
 		"express-session": "^1.18.2",
+		"jalaali-js": "^1.2.8",
 		"jsonwebtoken": "^9.0.2",
 		"mongoose": "^8.3.3"
 	},

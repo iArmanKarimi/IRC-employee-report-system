@@ -27,6 +27,7 @@ import { useApiMutation } from "../hooks/useApiMutation";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { formatEmployeeName } from "../utils/formatters";
+import { toPersianDate } from "../utils/dateUtils";
 import type { IPerformance } from "../types/models";
 
 export default function EmployeePage() {
@@ -294,9 +295,10 @@ export default function EmployeePage() {
 								/>
 								<InfoField
 									label="تاریخ تولد"
-									value={new Date(
-										employee.additionalSpecifications.dateOfBirth
-									).toLocaleDateString()}
+									value={toPersianDate(
+										employee.additionalSpecifications.dateOfBirth,
+										"full"
+									)}
 								/>
 								<InfoField
 									label="شماره تماس"
@@ -312,16 +314,18 @@ export default function EmployeePage() {
 								/>
 								<InfoField
 									label="تاریخ شروع کار"
-									value={new Date(
-										employee.additionalSpecifications.jobStartDate
-									).toLocaleDateString()}
+									value={toPersianDate(
+										employee.additionalSpecifications.jobStartDate,
+										"full"
+									)}
 								/>
 								{employee.additionalSpecifications.jobEndDate && (
 									<InfoField
 										label="تاریخ پایان کار"
-										value={new Date(
-											employee.additionalSpecifications.jobEndDate
-										).toLocaleDateString()}
+										value={toPersianDate(
+											employee.additionalSpecifications.jobEndDate,
+											"full"
+										)}
 									/>
 								)}
 								<Box>

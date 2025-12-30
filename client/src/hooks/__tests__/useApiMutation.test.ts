@@ -1,8 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
+import jalaali from 'jalaali-js';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useApiMutation } from '../useApiMutation';
 
 describe('useApiMutation', () => {
+	it('should convert Gregorian date to Persian (Jalali) date', () => {
+		// Example: 2025-12-30 (Gregorian) => 1404-10-9 (Jalali)
+		const gregorian = { gy: 2025, gm: 12, gd: 30 };
+		const jalaliDate = jalaali.toJalaali(gregorian.gy, gregorian.gm, gregorian.gd);
+		expect(jalaliDate.jy).toBe(1404);
+		expect(jalaliDate.jm).toBe(10);
+		expect(jalaliDate.jd).toBe(9);
+	});
 	it('should initialize with correct default values', () => {
 		const mockMutationFn = vi.fn();
 		const { result } = renderHook(() => useApiMutation(mockMutationFn));
