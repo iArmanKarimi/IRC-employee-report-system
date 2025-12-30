@@ -1,14 +1,5 @@
 import React from "react";
-import {
-	Box,
-	TextField,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
-	Stack,
-	Alert,
-} from "@mui/material";
+import { Box, TextField, Stack, Alert } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import type { IPerformance } from "../types/models";
 
@@ -112,18 +103,6 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					onChange={(e) => onChange("travelAssignment", Number(e.target.value))}
 				/>
 			</Box>
-			<FormControl fullWidth>
-				<InputLabel>وضعیت</InputLabel>
-				<Select
-					value={performance.status}
-					label="وضعیت"
-					onChange={(e) => onChange("status", e.target.value)}
-				>
-					<MenuItem value="active">فعال</MenuItem>
-					<MenuItem value="inactive">غیرفعال</MenuItem>
-					<MenuItem value="on_leave">در مرخصی</MenuItem>
-				</Select>
-			</FormControl>
 
 			<TextField
 				label="یادداشت‌ها"

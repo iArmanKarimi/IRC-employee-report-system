@@ -10,6 +10,10 @@ import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -328,25 +332,6 @@ export default function EmployeePage() {
 										)}
 									/>
 								)}
-								<Box>
-									<Typography variant="caption" color="text.secondary">
-										وضعیت
-									</Typography>
-									<Box sx={{ mt: 0.5 }}>
-										<Chip
-											label={translateStatus(employee.performance?.status)}
-											color={
-												employee.performance?.status === "active"
-													? "success"
-													: employee.performance?.status === "inactive"
-													? "error"
-													: "warning"
-											}
-											size="small"
-											variant="outlined"
-										/>
-									</Box>
-								</Box>
 							</Box>
 						</CardContent>
 					</Card>
@@ -360,26 +345,50 @@ export default function EmployeePage() {
 									justifyContent: "space-between",
 									alignItems: "center",
 									mb: 2,
+									gap: 2,
+									flexWrap: "wrap",
 								}}
 							>
 								<Typography variant="h6">عملکرد ماه جاری</Typography>
-								<Button
-									variant="contained"
-									color="primary"
-									onClick={handleSavePerformance}
-									disabled={
-										saving || !hasUnsavedChanges || settings?.performanceLocked
-									}
-									size="small"
-								>
-									{saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
-								</Button>
+								<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+									<FormControl sx={{ minWidth: 150 }} size="small">
+										<InputLabel>وضعیت</InputLabel>
+										<Select
+											value={localPerformance?.status || "active"}
+											label="وضعیت"
+											onChange={(e) =>
+												handlePerformanceChange("status", e.target.value)
+											}
+											disabled={settings?.performanceLocked}
+										>
+											<MenuItem value="active">فعال</MenuItem>
+											<MenuItem value="inactive">غیرفعال</MenuItem>
+											<MenuItem value="on_leave">در مرخصی</MenuItem>
+										</Select>
+									</FormControl>
+									<Button
+										variant="contained"
+										color="primary"
+										onClick={handleSavePerformance}
+										disabled={
+											saving ||
+											!hasUnsavedChanges ||
+											settings?.performanceLocked
+										}
+										size="small"
+									>
+										{saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
+									</Button>
+								</Box>
 							</Box>
 							{localPerformance ? (
 								<PerformanceDisplay
 									performance={localPerformance}
 									onChange={handlePerformanceChange}
-									locked={settings?.performanceLocked}
+									locked={
+										settings?.performanceLocked ||
+										localPerformance.status !== "active"
+									}
 								/>
 							) : (
 								<Typography color="text.secondary">
