@@ -186,6 +186,7 @@ export default function NewEmployeeFormPage() {
 											onChange={(e) =>
 												updateBasicInfo("childrenCount", Number(e.target.value))
 											}
+											disabled={!form.basicInfo.married}
 										/>
 									</Box>
 									<Box sx={{ display: "flex", gap: 2 }}>

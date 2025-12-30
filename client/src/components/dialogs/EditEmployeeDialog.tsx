@@ -153,6 +153,7 @@ export function EditEmployeeDialog({
 							)
 						}
 						fullWidth
+						disabled={!formData.basicInfo?.married}
 					/>
 				</Stack>
 
