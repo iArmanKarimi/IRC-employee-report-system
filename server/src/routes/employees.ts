@@ -91,7 +91,7 @@ router.get("/", requireAnyRole, async (req: Request<{ provinceId: string }>, res
 
 		// Build filter query
 		const query: any = { provinceId };
-		
+
 		// Search filter
 		if (req.query.search) {
 			const searchTerm = String(req.query.search).trim();

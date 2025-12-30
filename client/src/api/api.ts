@@ -61,8 +61,8 @@ export const provinceApi = {
 	}) =>
 		api
 			.get<PaginatedResponse<Employee>>(API_ENDPOINTS.provinceEmployees(provinceId), {
-				params: { 
-					page, 
+				params: {
+					page,
 					limit,
 					...(filters?.search && { search: filters.search }),
 					...(filters?.gender && { gender: filters.gender }),

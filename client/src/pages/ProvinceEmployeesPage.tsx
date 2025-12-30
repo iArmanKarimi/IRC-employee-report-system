@@ -152,7 +152,9 @@ export default function ProvinceEmployeesPage() {
 					case "rank":
 						return fieldValue(employee.workPlace?.rank).includes(term);
 					case "licensedWorkplace":
-						return fieldValue(employee.workPlace?.licensedWorkplace).includes(term);
+						return fieldValue(employee.workPlace?.licensedWorkplace).includes(
+							term
+						);
 					case "educationalDegree":
 						return fieldValue(
 							employee.additionalSpecifications?.educationalDegree
@@ -702,7 +704,7 @@ export default function ProvinceEmployeesPage() {
 							sx={{ pt: 1 }}
 						>
 							<Pagination
-							count={pagination?.pages || 1}
+								count={pagination?.pages || 1}
 								page={page + 1}
 								onChange={(_, value) => updatePage(value - 1)}
 								color="primary"
