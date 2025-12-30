@@ -88,7 +88,7 @@ export function PersianDateInput({
 			const currentYear = getCurrentPersianYear();
 			const maxYear = currentYear - 18;
 
-			if (yearNum === 0 || yearNum < 1300) constrainedValue = "1300";
+			if (yearNum < 1300) constrainedValue = "1300";
 			else if (yearNum > maxYear) constrainedValue = maxYear.toString();
 
 			setYear(constrainedValue);
