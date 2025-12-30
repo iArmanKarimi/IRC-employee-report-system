@@ -36,21 +36,16 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					label="عملکرد روزانه"
 					type="number"
 					required
-					inputProps={{ min: 0 }}
-					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
-					value={performance.dailyPerformance}
-					onChange={(e) => onChange("dailyPerformance", Number(e.target.value))}
-				/>
-				<TextField
-					label="تعداد شیفت در هر مکان"
-					type="number"
-					required
-					inputProps={{ min: 0 }}
-					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
-					value={performance.shiftCountPerLocation}
-					onChange={(e) =>
-						onChange("shiftCountPerLocation", Number(e.target.value))
-					}
+				inputProps={{ min: 0, max: 31 }}
+				sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
+				value={performance.dailyPerformance}
+				onChange={(e) => onChange("dailyPerformance", Number(e.target.value))}
+			/>
+			<TextField
+				label="تعداد شیفت در هر مکان"
+				type="number"
+				required
+				inputProps={{ min: 0, max: 31 }}
 				/>
 			</Box>
 
@@ -84,19 +79,15 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 				<TextField
 					label="مرخصی روزانه"
 					type="number"
-					inputProps={{ min: 0 }}
-					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
-					value={performance.dailyLeave}
-					onChange={(e) => onChange("dailyLeave", Number(e.target.value))}
-				/>
-				<TextField
-					label="مرخصی استعلاجی"
-					type="number"
-					inputProps={{ min: 0 }}
-					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
-					value={performance.sickLeave}
-					onChange={(e) => onChange("sickLeave", Number(e.target.value))}
-				/>
+				inputProps={{ min: 0, max: 31 }}
+				sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
+				value={performance.dailyLeave}
+				onChange={(e) => onChange("dailyLeave", Number(e.target.value))}
+			/>
+			<TextField
+				label="مرخصی استعلاجی"
+				type="number"
+				inputProps={{ min: 0, max: 31 }}
 			</Box>
 
 			<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>

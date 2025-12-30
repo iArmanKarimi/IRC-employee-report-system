@@ -62,7 +62,7 @@ export function PerformanceDialog({
 						label="عملکرد روزانه"
 						type="number"
 						required
-						inputProps={{ min: 0 }}
+						inputProps={{ min: 0, max: 31 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 						value={formData.dailyPerformance}
 						onChange={(e) =>
@@ -73,7 +73,7 @@ export function PerformanceDialog({
 						label="تعداد شیفت در هر مکان"
 						type="number"
 						required
-						inputProps={{ min: 0 }}
+						inputProps={{ min: 0, max: 31 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 						value={formData.shiftCountPerLocation}
 						onChange={(e) =>
@@ -113,7 +113,7 @@ export function PerformanceDialog({
 					<TextField
 						label="مرخصی روزانه"
 						type="number"
-						inputProps={{ min: 0 }}
+						inputProps={{ min: 0, max: 31 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 						value={formData.dailyLeave}
 						onChange={(e) =>
@@ -123,7 +123,7 @@ export function PerformanceDialog({
 					<TextField
 						label="مرخصی استعلاجی"
 						type="number"
-						inputProps={{ min: 0 }}
+						inputProps={{ min: 0, max: 31 }}
 						sx={{ flex: "1 1 calc(50% - 8px)", minWidth: 200 }}
 						value={formData.sickLeave}
 						onChange={(e) =>

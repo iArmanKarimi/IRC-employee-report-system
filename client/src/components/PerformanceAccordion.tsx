@@ -38,7 +38,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							label="عملکرد روزانه"
 							type="number"
 							required
-							inputProps={{ min: 0 }}
+							inputProps={{ min: 0, max: 31 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 							value={performance.dailyPerformance}
 							onChange={(e) =>
@@ -49,7 +49,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 							label="تعداد شیفت در هر مکان"
 							type="number"
 							required
-							inputProps={{ min: 0 }}
+							inputProps={{ min: 0, max: 31 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 							value={performance.shiftCountPerLocation}
 							onChange={(e) =>
@@ -88,7 +88,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 						<TextField
 							label="مرخصی روزانه"
 							type="number"
-							inputProps={{ min: 0 }}
+							inputProps={{ min: 0, max: 31 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 							value={performance.dailyLeave}
 							onChange={(e) => onChange("dailyLeave", Number(e.target.value))}
@@ -96,7 +96,7 @@ const PerformanceAccordion: React.FC<PerformanceAccordionProps> = ({
 						<TextField
 							label="مرخصی استعلاجی"
 							type="number"
-							inputProps={{ min: 0 }}
+							inputProps={{ min: 0, max: 31 }}
 							sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 							value={performance.sickLeave}
 							onChange={(e) => onChange("sickLeave", Number(e.target.value))}
