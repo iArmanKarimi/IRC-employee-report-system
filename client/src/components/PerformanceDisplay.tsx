@@ -1,5 +1,14 @@
 import React from "react";
-import { Box, TextField, Stack, Alert } from "@mui/material";
+import {
+	Box,
+	TextField,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
+	Stack,
+	Alert,
+} from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import type { IPerformance } from "../types/models";
 
@@ -31,12 +40,19 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.dailyPerformance}
 					onChange={(e) => onChange("dailyPerformance", Number(e.target.value))}
+					disabled={locked}
 				/>
 				<TextField
 					label="تعداد شیفت در هر مکان"
 					type="number"
 					required
 					inputProps={{ min: 0, max: 31 }}
+					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
+					value={performance.shiftCountPerLocation}
+					onChange={(e) =>
+						onChange("shiftCountPerLocation", Number(e.target.value))
+					}
+					disabled={locked}
 				/>
 			</Box>
 
@@ -44,6 +60,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 				<FormControl
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					required
+					disabled={locked}
 				>
 					<InputLabel>مدت شیفت</InputLabel>
 					<Select
@@ -63,6 +80,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.overtime}
 					onChange={(e) => onChange("overtime", Number(e.target.value))}
+					disabled={locked}
 				/>
 			</Box>
 
@@ -74,6 +92,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.dailyLeave}
 					onChange={(e) => onChange("dailyLeave", Number(e.target.value))}
+					disabled={locked}
 				/>
 				<TextField
 					label="مرخصی استعلاجی"
@@ -82,7 +101,8 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.sickLeave}
 					onChange={(e) => onChange("sickLeave", Number(e.target.value))}
-				/>{" "}
+					disabled={locked}
+				/>
 			</Box>
 
 			<Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
@@ -93,6 +113,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.absence}
 					onChange={(e) => onChange("absence", Number(e.target.value))}
+					disabled={locked}
 				/>
 				<TextField
 					label="ماموریت سفر"
@@ -101,6 +122,7 @@ const PerformanceDisplay: React.FC<PerformanceDisplayProps> = ({
 					sx={{ flex: "1 1 calc(50% - 12px)", minWidth: 200 }}
 					value={performance.travelAssignment}
 					onChange={(e) => onChange("travelAssignment", Number(e.target.value))}
+					disabled={locked}
 				/>
 			</Box>
 
