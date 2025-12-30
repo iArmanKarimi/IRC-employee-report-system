@@ -12,8 +12,7 @@ const GlobalSettingsSchema = new Schema<IGlobalSettings>({
 	lockedAt: { type: Date },
 });
 
-// Ensure only one document exists
-GlobalSettingsSchema.index({ _id: 1 }, { unique: true });
+// Note: Only one GlobalSettings document should exist (enforced at application level)
 
 export const GlobalSettings =
 	models.GlobalSettings ||

@@ -24,7 +24,7 @@ const EmployeeSchema = new Schema<IEmployee>({
 
 // Indexes for better query performance
 EmployeeSchema.index({ provinceId: 1 });
-EmployeeSchema.index({ 'basicInfo.nationalID': 1 });
+// Note: basicInfo.nationalID index is handled by unique: true in BasicInfoSchema
 EmployeeSchema.index({ createdAt: -1 });
 
 export const Employee = models.Employee || model<IEmployee>('Employee', EmployeeSchema);

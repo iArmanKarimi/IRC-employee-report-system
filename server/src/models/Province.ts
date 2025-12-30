@@ -14,7 +14,7 @@ const ProvinceSchema = new Schema<IProvince>({
 });
 
 // Indexes for better query performance
-ProvinceSchema.index({ name: 1 });
+// Note: name index is handled by unique: true
 ProvinceSchema.index({ admin: 1 });
 
 export const Province = models.Province || model<IProvince>("Province", ProvinceSchema);

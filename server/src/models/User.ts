@@ -26,7 +26,7 @@ const UserSchema = new Schema<IUser>({
 });
 
 // Indexes for better query performance
-UserSchema.index({ username: 1 });
+// Note: username index is handled by unique: true
 UserSchema.index({ role: 1 });
 UserSchema.index({ provinceId: 1 });
 
