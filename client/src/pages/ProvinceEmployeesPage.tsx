@@ -60,10 +60,20 @@ export default function ProvinceEmployeesPage() {
 	const [toastSeverity, setToastSeverity] = useState<
 		"success" | "error" | "warning"
 	>("success");
+	// Determine if we should fetch all employees (when filters are active)
+	const hasActiveFilters =
+		searchTerm ||
+		performanceMetric ||
+		performanceValue !== null ||
+		toggleFilters.maritalStatus ||
+		toggleFilters.gender ||
+		toggleFilters.status ||
+		toggleFilters.truckDriverOnly;
+
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
-		page + 1,
-		limit
+		hasActiveFilters ? 1 : page + 1,
+		hasActiveFilters ? 10000 : limit
 	);
 
 	// Helper function to update page in both state and URL
@@ -83,7 +93,9 @@ export default function ProvinceEmployeesPage() {
 
 	// Reset to page 0 when filters or search changes
 	useEffect(() => {
-		updatePage(0);
+		if (hasActiveFilters) {
+			updatePage(0);
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		searchTerm,
@@ -312,7 +324,7 @@ export default function ProvinceEmployeesPage() {
 			headerAlign: "center",
 			sortable: false,
 			renderCell: (params) => {
-				const rowIndex = filteredEmployees.findIndex(
+				const rowIndex = paginatedFilteredEmployees.findIndex(
 					(emp) => emp._id === params.row._id
 				);
 				return rowIndex + 1 + page * limit;
@@ -568,6 +580,16 @@ export default function ProvinceEmployeesPage() {
 		},
 	];
 
+	// Calculate pagination for filtered results when filters are active
+	const totalFilteredPages = hasActiveFilters
+		? Math.ceil(filteredEmployees.length / limit)
+		: pagination?.pages || 1;
+
+	// Get the current page of filtered results
+	const paginatedFilteredEmployees = hasActiveFilters
+		? filteredEmployees.slice(page * limit, (page + 1) * limit)
+		: filteredEmployees;
+
 	if (loading) {
 		return <LoadingView title="کارمندان استان" />;
 	}
@@ -686,17 +708,16 @@ export default function ProvinceEmployeesPage() {
 
 				{!loading && employees.length === 0 ? (
 					<EmptyState message="هیچ کارمندی یافت نشد." />
-				) : filteredEmployees.length === 0 && !loading ? (
+				) : paginatedFilteredEmployees.length === 0 && !loading ? (
 					<EmptyState message="هیچ کارمندی با معیارهای جستجو یا فیلتر شما مطابقت ندارد." />
 				) : (
 					<Stack spacing={1.5}>
 						<DataGrid
-							rows={filteredEmployees}
+							rows={paginatedFilteredEmployees}
 							columns={columns}
 							getRowId={(row) => row._id}
-							paginationModel={{ pageSize: limit, page }}
-							onPaginationModelChange={(newModel) => updatePage(newModel.page)}
-							rowCount={filteredEmployees.length}
+							paginationModel={{ pageSize: limit, page: 0 }}
+							rowCount={paginatedFilteredEmployees.length}
 							pageSizeOptions={[20]}
 							loading={loading}
 							disableColumnMenu
@@ -741,7 +762,7 @@ export default function ProvinceEmployeesPage() {
 							sx={{ pt: 1 }}
 						>
 							<Pagination
-								count={pagination?.pages || 1}
+								count={totalFilteredPages}
 								page={page + 1}
 								onChange={(_, value) => updatePage(value - 1)}
 								color="primary"
