@@ -87,7 +87,7 @@ export default function LoginFormPage() {
 						align="center"
 						sx={{ mb: 3 }}
 					>
-						سیستم مدیریت کارمندان جمعیت هلال احمر ایران
+						سامانه مدیریت کارمندان جمعیت هلال احمر ایران
 					</Typography>
 
 					<form onSubmit={handleSubmit}>

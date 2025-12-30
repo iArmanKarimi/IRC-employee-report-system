@@ -24,7 +24,7 @@ type NavBarProps = {
 };
 
 export default function NavBar({
-	title = "سیستم مدیریت کارمندان جمعیت هلال احمر ایران",
+	title = "سامانه مدیریت کارمندان جمعیت هلال احمر ایران",
 	showLogout = true,
 	backTo,
 	backLabel = "بازگشت",
