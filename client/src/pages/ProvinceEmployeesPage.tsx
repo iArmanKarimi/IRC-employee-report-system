@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-	useParams,
-	Link,
-	useSearchParams,
-	useNavigate,
-} from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -31,12 +26,14 @@ import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { SearchFilterBar } from "../components/SearchFilterBar";
 import { useEmployees } from "../hooks/useEmployees";
+import { useEmployeeFilters } from "../hooks/useEmployeeFilters";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { useGlobalSettings } from "../hooks/useGlobalSettings";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EmptyState } from "../components/states/EmptyState";
 import { formatEmployeeName, translateStatus } from "../utils/formatters";
+import { applyClientFilters } from "../utils/employeeFilters";
 import { getTodayPersian } from "../utils/dateUtils";
 import type { IEmployee } from "../types/models";
 import { provinceApi } from "../api/api";
@@ -62,24 +59,30 @@ import { provinceApi } from "../api/api";
 export default function ProvinceEmployeesPage() {
 	const { provinceId } = useParams<{ provinceId: string }>();
 	const navigate = useNavigate();
-	const [searchParams, setSearchParams] = useSearchParams();
-	const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
-	const [page, setPage] = useState(pageFromUrl - 1);
-	const limit = 20;
-	const [searchTerm, setSearchTerm] = useState("");
-	const [searchField, setSearchField] = useState("all");
-	const [performanceMetric, setPerformanceMetric] = useState("");
-	const [performanceValue, setPerformanceValue] = useState<number | null>(null);
-	const [sortModel, setSortModel] = useState<GridSortModel>([]);
-	const [toggleFilters, setToggleFilters] = useState({
-		maritalStatus: "",
-		gender: "",
-		status: "",
-		truckDriverOnly: false,
-	});
 	const { isGlobalAdmin } = useIsGlobalAdmin();
 	const { settings } = useGlobalSettings();
 	const theme = useTheme();
+
+	// Extract filtering and pagination logic to custom hook
+	const {
+		page,
+		limit,
+		updatePage,
+		searchTerm,
+		setSearchTerm,
+		searchField,
+		setSearchField,
+		performanceMetric,
+		setPerformanceMetric,
+		performanceValue,
+		setPerformanceValue,
+		sortModel,
+		setSortModel,
+		toggleFilters,
+		setToggleFilters,
+		serverFilters,
+	} = useEmployeeFilters();
+
 	const [exporting, setExporting] = useState(false);
 	const [toastOpen, setToastOpen] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
@@ -87,73 +90,12 @@ export default function ProvinceEmployeesPage() {
 		"success" | "error" | "warning"
 	>("success");
 
-	// Build server-side filters from current state
-	// Server supports: search, gender, maritalStatus, status, truckDriver, sorting
-	const currentSort = sortModel[0];
-	const sortByFromGrid =
-		currentSort?.field === "fullName"
-			? "fullName"
-			: currentSort?.field === "nationalID"
-			? "nationalID"
-			: currentSort?.field === "status"
-			? "status"
-			: undefined;
-	const sortOrderFromGrid =
-		currentSort?.sort === "asc" || currentSort?.sort === "desc"
-			? currentSort.sort
-			: undefined;
-
-	const serverFilters = {
-		search: searchTerm || undefined,
-		gender: toggleFilters.gender || undefined,
-		maritalStatus: toggleFilters.maritalStatus || undefined,
-		status: toggleFilters.status || undefined,
-		truckDriver: toggleFilters.truckDriverOnly || undefined,
-		sortBy: sortByFromGrid,
-		sortOrder: sortOrderFromGrid,
-	};
-
 	const { employees, pagination, loading, error, refetch } = useEmployees(
 		provinceId,
 		page + 1,
 		limit,
 		serverFilters
 	);
-
-	/**
-	 * Update page number in both state and URL query parameters
-	 * Keeps URL in sync with pagination state for shareable links
-	 */
-	const updatePage = (newPage: number) => {
-		setPage(newPage);
-		setSearchParams({ page: (newPage + 1).toString() });
-	};
-
-	// Sync page state with URL on mount
-	useEffect(() => {
-		const urlPage = pageFromUrl - 1;
-		if (urlPage !== page) {
-			setPage(urlPage);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [pageFromUrl]);
-
-	// Reset to page 0 when filters or search changes
-	useEffect(() => {
-		updatePage(0);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [
-		searchTerm,
-		searchField,
-		performanceMetric,
-		performanceValue,
-		toggleFilters.maritalStatus,
-		toggleFilters.gender,
-		toggleFilters.status,
-		toggleFilters.truckDriverOnly,
-		sortByFromGrid,
-		sortOrderFromGrid,
-	]);
 
 	// Auto-close toast after 4 seconds
 	useEffect(() => {
@@ -178,83 +120,13 @@ export default function ProvinceEmployeesPage() {
 	];
 
 	// Apply client-side filters for performance metrics and search field (not supported by server)
-	const filteredEmployees = employees.filter((employee) => {
-		// Search field filtering (client-side only when specific field is selected)
-		if (searchField !== "all" && searchTerm) {
-			const matchesSearchField = (() => {
-				const term = searchTerm.toLowerCase();
-				const fieldValue = (value?: string | null) =>
-					value ? value.toString().toLowerCase() : "";
-
-				switch (searchField) {
-					case "name":
-						return formatEmployeeName(employee).toLowerCase().includes(term);
-					case "nationalId":
-						return fieldValue(employee.basicInfo?.nationalID).includes(term);
-					case "contactNumber":
-						return fieldValue(
-							employee.additionalSpecifications?.contactNumber
-						).includes(term);
-					case "branch":
-						return fieldValue(employee.workPlace?.branch).includes(term);
-					case "rank":
-						return fieldValue(employee.workPlace?.rank).includes(term);
-					case "licensedWorkplace":
-						return fieldValue(employee.workPlace?.licensedWorkplace).includes(
-							term
-						);
-					case "educationalDegree":
-						return fieldValue(
-							employee.additionalSpecifications?.educationalDegree
-						).includes(term);
-					case "province": {
-						const provinceLabel =
-							typeof employee.provinceId === "object"
-								? employee.provinceId?.name
-								: employee.provinceId;
-						return fieldValue(provinceLabel).includes(term);
-					}
-					default:
-						return true;
-				}
-			})();
-
-			if (!matchesSearchField) {
-				return false;
-			}
-		}
-
-		// Performance metric filtering (client-side only)
-		if (performanceMetric && performanceValue !== null) {
-			if (performanceMetric === "childrenCount") {
-				const childrenCount = employee.basicInfo?.childrenCount;
-				if (childrenCount !== undefined && childrenCount !== null) {
-					if (Number(childrenCount) !== performanceValue) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			} else if (employee.performance) {
-				const perfData = employee.performance as unknown as Record<
-					string,
-					number
-				>;
-				const metricValue = perfData[performanceMetric];
-				if (metricValue !== undefined && metricValue !== null) {
-					if (Number(metricValue) !== performanceValue) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
-
-		return true;
-	});
+	const filteredEmployees = applyClientFilters(
+		employees,
+		searchField,
+		searchTerm,
+		performanceMetric,
+		performanceValue
+	);
 
 	// Extract province name from first employee if available
 	const provinceName =

@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
-import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
-import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
@@ -21,18 +17,18 @@ import { provinceApi, type UpdateEmployeeInput } from "../api/api";
 import { ROUTES } from "../const/endpoints";
 import NavBar from "../components/NavBar";
 import Breadcrumbs from "../components/Breadcrumbs";
+import { EmployeeInfoCard } from "../components/EmployeeInfoCard";
 import { LoadingView } from "../components/states/LoadingView";
 import { ErrorView } from "../components/states/ErrorView";
 import { EditEmployeeDialog } from "../components/dialogs/EditEmployeeDialog";
 import PerformanceDisplay from "../components/PerformanceDisplay";
 import { ConfirmDialog } from "../components/dialogs/ConfirmDialog";
 import { useEmployee } from "../hooks/useEmployee";
+import { usePerformanceManager } from "../hooks/usePerformanceManager";
 import { useApiMutation } from "../hooks/useApiMutation";
 import { useIsGlobalAdmin } from "../hooks/useAuth";
 import { useGlobalSettings } from "../hooks/useGlobalSettings";
-import { formatEmployeeName, translateStatus } from "../utils/formatters";
-import { toPersianDate } from "../utils/dateUtils";
-import type { IPerformance } from "../types/models";
+import { formatEmployeeName } from "../utils/formatters";
 
 /**
  * EmployeePage Component
@@ -62,6 +58,22 @@ export default function EmployeePage() {
 		provinceId,
 		employeeId
 	);
+
+	// Extract performance management logic to custom hook
+	const {
+		localPerformance,
+		hasUnsavedChanges,
+		saving: performanceSaving,
+		saveError: performanceSaveError,
+		handleChange: handlePerformanceChange,
+		handleSave: handleSavePerformance,
+	} = usePerformanceManager(
+		provinceId,
+		employeeId,
+		employee?.performance,
+		refetch
+	);
+
 	const { mutate: deleteEmployee, loading: deleting } = useApiMutation(
 		async () => {
 			if (!provinceId || !employeeId) throw new Error("Missing identifiers");
@@ -71,35 +83,7 @@ export default function EmployeePage() {
 
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
-	const [saving, setSaving] = useState(false);
-	const [saveError, setSaveError] = useState<string | null>(null);
-	const [localPerformance, setLocalPerformance] = useState<IPerformance | null>(
-		null
-	);
-	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
-	// Sync local performance state with employee data
-	useEffect(() => {
-		if (employee?.performance) {
-			setLocalPerformance(employee.performance);
-			setHasUnsavedChanges(false);
-		} else if (employee) {
-			// Initialize default performance if employee exists but has no performance data
-			setLocalPerformance({
-				status: "active",
-				dailyPerformance: 0,
-				shiftDuration: 8,
-				overtime: 0,
-				dailyLeave: 0,
-				sickLeave: 0,
-				absence: 0,
-				travelAssignment: 0,
-				shiftCountPerLocation: 0,
-				notes: "",
-			});
-			setHasUnsavedChanges(false);
-		}
-	}, [employee]);
+	const [editSaving, setEditSaving] = useState(false);
 
 	const handleEditOpen = () => {
 		setEditDialogOpen(true);
@@ -118,8 +102,7 @@ export default function EmployeePage() {
 	const handleSaveEdit = async (data: UpdateEmployeeInput) => {
 		if (!provinceId || !employeeId) return;
 
-		setSaving(true);
-		setSaveError(null);
+		setEditSaving(true);
 		try {
 			const res = await provinceApi.updateEmployee(
 				provinceId,
@@ -127,68 +110,16 @@ export default function EmployeePage() {
 				data
 			);
 			if (!res.success || !res.data) {
-				setSaveError(
-					res.error ||
-						"به‌روزرسانی کارمند با خطا مواجه شد. لطفا ورودی خود را بررسی کنید و دوباره تلاش کنید."
-				);
+				console.error("Failed to update employee:", res.error);
 				return;
 			}
 			await refetch();
 			setEditDialogOpen(false);
 		} catch (err) {
-			setSaveError(
-				"به‌روزرسانی کارمند با خطا مواجه شد. لطفا ورودی خود را بررسی کنید و دوباره تلاش کنید."
-			);
+			console.error("Failed to update employee:", err);
 		} finally {
-			setSaving(false);
+			setEditSaving(false);
 		}
-	};
-
-	// Helper to update performance record
-	async function updatePerformance(
-		updatedPerformance: IPerformance,
-		errorMsg: string
-	) {
-		if (!provinceId || !employeeId) return;
-		setSaving(true);
-		setSaveError(null);
-		try {
-			const res = await provinceApi.updateEmployee(provinceId, employeeId, {
-				performance: updatedPerformance,
-			});
-			if (!res.success || !res.data) {
-				setSaveError(
-					res.error ||
-						"به‌روزرسانی عملکرد با خطا مواجه شد. لطفا دوباره تلاش کنید یا در صورت ادامه مشکل با پشتیبانی تماس بگیرید."
-				);
-				return;
-			}
-			await refetch();
-		} catch (err) {
-			setSaveError(
-				"به‌روزرسانی عملکرد با خطا مواجه شد. لطفا دوباره تلاش کنید یا در صورت ادامه مشکل با پشتیبانی تماس بگیرید."
-			);
-		} finally {
-			setSaving(false);
-		}
-	}
-
-	const handlePerformanceChange = (key: keyof IPerformance, value: any) => {
-		if (!localPerformance) return;
-		setLocalPerformance((prev) => {
-			if (!prev) return prev;
-			return { ...prev, [key]: value };
-		});
-		setHasUnsavedChanges(true);
-	};
-
-	const handleSavePerformance = async () => {
-		if (!localPerformance) return;
-		await updatePerformance(
-			localPerformance,
-			"به‌روزرسانی سابقه عملکرد با خطا مواجه شد"
-		);
-		setHasUnsavedChanges(false);
 	};
 
 	if (loading) {
@@ -257,177 +188,75 @@ export default function EmployeePage() {
 					</Button>
 				</Box>
 
-				{saveError && (
+				{performanceSaveError && (
 					<Alert severity="error" sx={{ mb: 3 }}>
-						{saveError}
+						{performanceSaveError}
 					</Alert>
 				)}
 
 				<Stack spacing={3}>
-					{/* Basic Info & WorkPlace - Side by side on desktop */}
-					<Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-						<Card sx={{ flex: "1 1 400px" }}>
-							<CardContent sx={{ pb: "24px !important" }}>
-								<Typography variant="h6" gutterBottom sx={{ mb: 1.5 }}>
-									اطلاعات اولیه
-								</Typography>
-								<Divider sx={{ mb: 2.5 }} />
-								<Stack spacing={2}>
-									<InfoField label="نام" value={employee.basicInfo.firstName} />
-									<InfoField
-										label="نام خانوادگی"
-										value={employee.basicInfo.lastName}
-									/>
-									<InfoField
-										label="کد ملی"
-										value={employee.basicInfo.nationalID}
-									/>
-									<InfoField
-										label="جنسیت"
-										value={employee.basicInfo.male ? "مذکر" : "مونث"}
-									/>
-									<InfoField
-										label="متاهل"
-										value={employee.basicInfo.married ? "بله" : "خیر"}
-									/>
-									<InfoField
-										label="تعداد فرزندان"
-										value={employee.basicInfo.childrenCount}
-									/>
-								</Stack>
-							</CardContent>
-						</Card>
+					{/* Employee Information Card */}
+					<EmployeeInfoCard employee={employee} />
 
-						<Card sx={{ flex: "1 1 400px" }}>
-							<CardContent sx={{ pb: "24px !important" }}>
-								<Typography variant="h6" gutterBottom sx={{ mb: 1.5 }}>
-									اطلاعات محل کار
-								</Typography>
-								<Divider sx={{ mb: 2.5 }} />
-								<Stack spacing={2}>
-									<InfoField label="شعبه" value={employee.workPlace.branch} />
-									<InfoField label="رتبه" value={employee.workPlace.rank} />
-									<InfoField
-										label="محل کار مجاز"
-										value={employee.workPlace.licensedWorkplace}
-									/>
-								</Stack>
-							</CardContent>
-						</Card>
-					</Box>
-
-					{/* Additional Specifications */}
-					<Card>
-						<CardContent sx={{ pb: "24px !important" }}>
-							<Typography variant="h6" gutterBottom sx={{ mb: 1.5 }}>
-								مشخصات اضافی
-							</Typography>
-							<Divider sx={{ mb: 2.5 }} />
-							<Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-								<InfoField
-									label="مدرک تحصیلی"
-									value={employee.additionalSpecifications.educationalDegree}
-								/>
-								<InfoField
-									label="تاریخ تولد"
-									value={toPersianDate(
-										employee.additionalSpecifications.dateOfBirth,
-										"full"
-									)}
-								/>
-								<InfoField
-									label="شماره تماس"
-									value={employee.additionalSpecifications.contactNumber}
-								/>
-								<InfoField
-									label="راننده کامیون"
-									value={
-										employee.additionalSpecifications.truckDriver
-											? "بله"
-											: "خیر"
-									}
-								/>
-								<InfoField
-									label="تاریخ شروع کار"
-									value={toPersianDate(
-										employee.additionalSpecifications.jobStartDate,
-										"full"
-									)}
-								/>
-								{employee.additionalSpecifications.jobEndDate && (
-									<InfoField
-										label="تاریخ پایان کار"
-										value={toPersianDate(
-											employee.additionalSpecifications.jobEndDate,
-											"full"
-										)}
-									/>
-								)}
-							</Box>
-						</CardContent>
-					</Card>
-
-					{/* Performance Record */}
-					<Card>
-						<CardContent>
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-between",
-									alignItems: "center",
-									mb: 2,
-									gap: 2,
-									flexWrap: "wrap",
-								}}
-							>
-								<Typography variant="h6">عملکرد ماه جاری</Typography>
-								<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-									<FormControl sx={{ minWidth: 150 }} size="small">
-										<InputLabel>وضعیت</InputLabel>
-										<Select
-											value={localPerformance?.status || "active"}
-											label="وضعیت"
-											onChange={(e) =>
-												handlePerformanceChange("status", e.target.value)
-											}
-											disabled={settings?.performanceLocked}
-										>
-											<MenuItem value="active">فعال</MenuItem>
-											<MenuItem value="inactive">غیرفعال</MenuItem>
-											<MenuItem value="on_leave">در مرخصی</MenuItem>
-										</Select>
-									</FormControl>
-									<Button
-										variant="contained"
-										color="primary"
-										onClick={handleSavePerformance}
-										disabled={
-											saving ||
-											!hasUnsavedChanges ||
-											settings?.performanceLocked
+					{/* Performance Section */}
+					<Box>
+						<Box
+							sx={{
+								display: "flex",
+								justifyContent: "space-between",
+								alignItems: "center",
+								mb: 2,
+								gap: 2,
+								flexWrap: "wrap",
+							}}
+						>
+							<Typography variant="h6">عملکرد ماه جاری</Typography>
+							<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+								<FormControl sx={{ minWidth: 150 }} size="small">
+									<InputLabel>وضعیت</InputLabel>
+									<Select
+										value={localPerformance?.status || "active"}
+										label="وضعیت"
+										onChange={(e) =>
+											handlePerformanceChange("status", e.target.value)
 										}
-										size="small"
+										disabled={settings?.performanceLocked}
 									>
-										{saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
-									</Button>
-								</Box>
-							</Box>
-							{localPerformance ? (
-								<PerformanceDisplay
-									performance={localPerformance}
-									onChange={handlePerformanceChange}
-									locked={
-										settings?.performanceLocked ||
-										localPerformance.status !== "active"
+										<MenuItem value="active">فعال</MenuItem>
+										<MenuItem value="inactive">غیرفعال</MenuItem>
+										<MenuItem value="on_leave">در مرخصی</MenuItem>
+									</Select>
+								</FormControl>
+								<Button
+									variant="contained"
+									color="primary"
+									onClick={handleSavePerformance}
+									disabled={
+										performanceSaving ||
+										!hasUnsavedChanges ||
+										settings?.performanceLocked
 									}
-								/>
-							) : (
-								<Typography color="text.secondary">
-									داده عملکردی برای این کارمند در دسترس نیست.
-								</Typography>
-							)}
-						</CardContent>
-					</Card>
+									size="small"
+								>
+									{performanceSaving ? "در حال ذخیره..." : "ذخیره تغییرات"}
+								</Button>
+							</Box>
+						</Box>
+						{localPerformance ? (
+							<PerformanceDisplay
+								performance={localPerformance}
+								onChange={handlePerformanceChange}
+								locked={
+									settings?.performanceLocked ||
+									localPerformance.status !== "active"
+								}
+							/>
+						) : (
+							<Typography color="text.secondary">
+								داده عملکردی برای این کارمند در دسترس نیست.
+							</Typography>
+						)}
+					</Box>
 				</Stack>
 
 				<Box sx={{ mt: 3 }}>
@@ -452,7 +281,7 @@ export default function EmployeePage() {
 				<EditEmployeeDialog
 					open={editDialogOpen}
 					employee={employee}
-					saving={saving}
+					saving={editSaving}
 					onClose={() => setEditDialogOpen(false)}
 					onSave={handleSaveEdit}
 				/>
@@ -467,40 +296,5 @@ export default function EmployeePage() {
 				/>
 			</Container>
 		</>
-	);
-}
-
-// Helper component for displaying employee info fields
-type InfoFieldValue =
-	| string
-	| number
-	| boolean
-	| null
-	| undefined
-	| (string | number)[];
-function InfoField({ label, value }: { label: string; value: InfoFieldValue }) {
-	const displayValue = () => {
-		if (value === null || value === undefined || value === "") {
-			return "موجود نیست";
-		}
-		if (typeof value === "boolean") {
-			return value ? "بله" : "خیر";
-		}
-		if (value instanceof Date) {
-			return value.toLocaleDateString();
-		}
-		if (Array.isArray(value)) {
-			return value.join(", ") || "موجود نیست";
-		}
-		return String(value);
-	};
-
-	return (
-		<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-			<Typography variant="body2" color="text.secondary">
-				{label}:
-			</Typography>
-			<Typography variant="body2">{displayValue()}</Typography>
-		</Box>
 	);
 }
